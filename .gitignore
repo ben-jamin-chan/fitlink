@@ -94,6 +94,10 @@ expo-env.d.ts
 
 # dotenv environment variables file
 .env
+*.env.local
+*.env.production
+GoogleService-Info.plist
+google-services.json
 
 # dataconnect generated files
 .dataconnect
