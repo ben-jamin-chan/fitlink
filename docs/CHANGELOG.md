@@ -26,6 +26,30 @@
 
 ---
 
+## [Phase 1.1] — 2026-05-03
+
+### Completed
+- Path alias configured (`@/` → project root)
+- Task 04: TypeScript types created (user, match, message, subscription)
+- Task 05: Theme system created (colors, spacing, typography, theme re-export)
+
+### Files Created / Modified
+- `tsconfig.json`: added baseUrl and paths for `@/` alias
+- `babel.config.js`: added module-resolver plugin and reanimated plugin
+- `types/user.ts`, `types/match.ts`, `types/message.ts`, `types/subscription.ts`
+- `constants/colors.ts`, `constants/spacing.ts`, `constants/typography.ts`, `constants/theme.ts`
+
+### Schema Changes
+- No Firestore schema changes; TypeScript interfaces now mirror the existing ARCHITECT.md schema.
+
+### Known Issues / Deferred
+- `npx expo start` currently fails before Metro boots with Expo CLI `ERR_SOCKET_BAD_PORT` under Node.js v23.11.0; `npx tsc --noEmit` passes.
+- Pre-existing scaffold hardcoded color values remain in `App.tsx` and `app.json`; they were not changed because Tasks 04–05 explicitly scoped edits away from earlier files.
+
+### Next Up
+- Task 06: Firebase config setup
+- Task 07: i18n setup
+
 ## [Phase 0.1] — April 2026
 
 ### Completed
