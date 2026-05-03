@@ -250,6 +250,9 @@ _As a new user, I want to complete my profile through a guided process so I can 
 - Set default stats: likes=0, passes=0, matches=0
 - Set createdAt, lastActive timestamps
 - Set language preference from device locale or user selection
+- Set `paused: false` (profile visible in discovery by default)
+- Set `banned: false`
+- Do not set `expoPushToken` here — this is populated by the notification registration hook on first app open
 
 **Acceptance Criteria:**
 - [ ] User can complete entire onboarding in under 5 minutes
@@ -1008,9 +1011,9 @@ export const onNewMessage = functions
     
     // Get recipient's push token
     const userDoc = await admin.firestore().doc(`users/${recipientId}`).get();
-    const pushToken = userDoc.data().pushToken;
+    const expoPushToken = userDoc.data().expoPushToken;
     
-    if (!pushToken) return;
+    if (!expoPushToken) return;
     
     // Get sender's name
     const senderDoc = await admin.firestore().doc(`users/${message.senderId}`).get();
@@ -1399,7 +1402,7 @@ _As a user, I want to control my app settings and privacy preferences so I have 
 
 **5. Premium Section** 
 
-**If Free User:**`
+**If Free User:**
 - Card with gradient background
 - "Upgrade to Premium" headline
 - Benefits list (icons + text):
@@ -1493,8 +1496,7 @@ const requestPushPermission = async () => {
   
   // Save to Firestore
   await updateDoc(doc(db, 'users', userId), {
-    pushToken: token,
-    pushEnabled: true,
+    expoPushToken: token,   // matches Firestore schema field name
   });
   
   return true;
@@ -3094,7 +3096,108 @@ _As a user in SEA, I want the app to respect my cultural values and preferences 
 
 ### 7.1 Firestore Schema
 
-**(Full schema already detailed in Epic 2, 3, 4 requirements above)**
+The canonical schema lives in `ARCHITECT.md`. This section reproduces it here for PRD completeness.
+
+#### `/users/{userId}`
+```typescript
+{
+  uid: string;
+  firstName: string;
+  dateOfBirth: Timestamp;
+  age: number;                     // calculated server-side in onUserCreated — never trust client
+  gender: 'male' | 'female' | 'non-binary';
+  location: { city: string; country: string; coordinates: GeoPoint };
+  photos: string[];                // Cloud Storage URLs, index 0 = primary photo
+  bio: string;                     // 50–500 chars
+  height: number;                  // cm
+  religion?: string;
+  activities: string[];
+  fitnessLevel: 'beginner' | 'intermediate' | 'advanced' | 'athlete';
+  workoutFrequency: string;
+  dietaryPreference: string;
+  fitnessGoals: string[];
+  smoking: 'yes' | 'no' | 'occasionally';
+  drinking: 'yes' | 'no' | 'socially';
+  lookingFor: Array<'friends' | 'workout_partners' | 'dating'>;
+  preferences: {
+    ageRange: { min: number; max: number };
+    distanceKm: number;
+    genders: string[];
+  };
+  stats: { likes: number; passes: number; matches: number };
+  subscription: { tier: 'free' | 'premium'; expiresAt?: Timestamp };
+  verified: boolean;
+  paused: boolean;                 // true = hidden from discovery (user-toggled in Settings)
+  banned: boolean;                 // true = platform ban, all activity blocked
+  expoPushToken?: string;          // saved on first notification permission grant
+  language: string;
+  createdAt: Timestamp;
+  lastActive: Timestamp;
+}
+```
+
+#### `/swipes/{userId}/likes/{targetUserId}`
+```typescript
+{
+  swiperId: string;
+  targetId: string;
+  isSuperLike: boolean;
+  createdAt: Timestamp;
+}
+```
+
+#### `/swipes/{userId}/passes/{targetUserId}`
+```typescript
+{
+  swiperId: string;
+  targetId: string;
+  createdAt: Timestamp;
+}
+```
+
+> **Schema note:** Swipes use a subcollection structure. Never flatten to a top-level `/swipes/{swipeId}` collection — the `onSwipeCreated` Cloud Function trigger depends on this path.
+
+#### `/users/{userId}/dailyLikes` (document)
+```typescript
+{
+  count: number;
+  resetAt: Timestamp;    // midnight in user's local timezone
+}
+```
+
+#### `/matches/{matchId}`
+```typescript
+{
+  users: [string, string];         // both userIds, sorted alphabetically
+  createdAt: Timestamp;
+  lastMessage?: string;
+  lastMessageAt?: Timestamp;
+  [userId + '_unread']: number;    // dynamic key per user
+}
+```
+
+#### `/matches/{matchId}/messages/{messageId}`
+```typescript
+{
+  senderId: string;
+  text: string;
+  type: 'text' | 'image' | 'voice';
+  readBy: string[];
+  createdAt: Timestamp;
+}
+```
+
+#### `/reports/{reportId}`
+```typescript
+{
+  reporterId: string;
+  reportedUserId: string;
+  reason: string;
+  details?: string;
+  createdAt: Timestamp;
+  status: 'pending' | 'reviewed' | 'actioned';
+}
+```
 
 ### 7.2 Cloud Functions
 
@@ -3241,11 +3344,13 @@ _As a user in SEA, I want the app to respect my cultural values and preferences 
 - **Premium**: Paid subscription tier
 
 ### 10.2 References
-- Fitafy research document (provided)
-- TeamUp research document (provided)
-- Firebase documentation
-- Stripe documentation
-- React Native documentation
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Stripe Documentation](https://stripe.com/docs)
+- [React Native / Expo Documentation](https://docs.expo.dev)
+- [React Navigation Documentation](https://reactnavigation.org/docs/getting-started)
+- [Zustand Documentation](https://docs.pmnd.rs/zustand/getting-started/introduction)
+- [Strava API Documentation](https://developers.strava.com/docs/reference)
+- Malaysia PDPA Guidelines: https://www.pdp.gov.my
 
 ---
 
