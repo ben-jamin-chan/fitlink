@@ -1,0 +1,249 @@
+{
+  "_note": "Tamil translations — placeholder values, to be replaced by translator",
+  "common": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "save": "Save",
+    "cancel": "Cancel",
+    "done": "Done",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "close": "Close",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or"
+  },
+  "auth": {
+    "landing": {
+      "tagline": "Find Your Fitness Match",
+      "continuePhone": "Continue with Phone",
+      "continueEmail": "Continue with Email",
+      "continueGoogle": "Continue with Google",
+      "continueApple": "Continue with Apple",
+      "terms": "By continuing, you agree to our Terms of Service and Privacy Policy"
+    },
+    "phone": {
+      "title": "Enter Your Number",
+      "subtitle": "We'll send you a verification code",
+      "placeholder": "Phone number",
+      "send": "Send Code",
+      "countryCode": "Country code"
+    },
+    "otp": {
+      "title": "Enter the Code",
+      "subtitle": "Code sent to {{phone}}",
+      "resend": "Resend Code",
+      "resendIn": "Resend in {{seconds}}s",
+      "verify": "Verify"
+    },
+    "email": {
+      "title": "Log In",
+      "emailPlaceholder": "Email address",
+      "passwordPlaceholder": "Password",
+      "login": "Log In",
+      "noAccount": "Don't have an account?",
+      "signup": "Sign Up"
+    },
+    "signup": {
+      "title": "Create Account",
+      "emailPlaceholder": "Email address",
+      "passwordPlaceholder": "Password (min 8 characters)",
+      "confirmPlaceholder": "Confirm password",
+      "create": "Create Account",
+      "hasAccount": "Already have an account?",
+      "login": "Log In"
+    },
+    "biometric": {
+      "enable": "Enable Face ID / Touch ID?",
+      "enableSubtitle": "Log in faster next time",
+      "enableButton": "Enable",
+      "skipButton": "Not now"
+    }
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "completeProfile": "Complete Profile",
+    "step1": {
+      "title": "About You",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Your first name",
+      "dateOfBirth": "Date of birth",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "nonBinary": "Non-binary",
+      "location": "Your city"
+    },
+    "step2": {
+      "title": "Your Photos",
+      "subtitle": "Add at least 2 photos",
+      "primary": "Primary",
+      "addPhoto": "Add Photo",
+      "guidelines": "Clear face photos work best"
+    },
+    "step3": {
+      "title": "Fitness Profile",
+      "activities": "Your Activities",
+      "activitiesHelper": "Select 1–10 activities",
+      "fitnessLevel": "Fitness Level",
+      "workoutFrequency": "Workout Frequency",
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "athlete": "Athlete"
+    },
+    "step4": {
+      "title": "Lifestyle",
+      "diet": "Dietary Preference",
+      "goals": "Fitness Goals",
+      "goalsHelper": "Select up to 5",
+      "smoking": "Smoking",
+      "drinking": "Drinking"
+    },
+    "step5": {
+      "title": "About You",
+      "bio": "Your bio",
+      "bioPlaceholder": "Tell others about yourself and your fitness journey...",
+      "bioCounter": "{{count}} characters remaining",
+      "height": "Height",
+      "heightLabel": "{{value}} cm",
+      "religion": "Religion (optional)"
+    },
+    "step6": {
+      "title": "Your Preferences",
+      "lookingFor": "Looking For",
+      "ageRange": "Age Range",
+      "ageRangeLabel": "{{min}}–{{max}} years",
+      "distance": "Distance",
+      "distanceLabel": "{{value}} km",
+      "genderPreference": "Interested In"
+    }
+  },
+  "discovery": {
+    "emptyState": {
+      "title": "No More Profiles",
+      "subtitle": "Check back later or expand your preferences",
+      "refresh": "Refresh"
+    },
+    "limitReached": {
+      "title": "You're Out of Likes",
+      "subtitle": "Upgrade to Premium for unlimited likes",
+      "upgrade": "Upgrade Now",
+      "later": "Maybe Later"
+    },
+    "labels": {
+      "like": "LIKE",
+      "nope": "NOPE",
+      "super": "SUPER"
+    },
+    "actions": {
+      "rewind": "Rewind",
+      "pass": "Pass",
+      "superLike": "Super Like",
+      "like": "Like",
+      "info": "View Profile"
+    }
+  },
+  "matches": {
+    "tabs": {
+      "matches": "Matches",
+      "messages": "Messages"
+    },
+    "emptyMatches": {
+      "title": "No Matches Yet",
+      "subtitle": "Keep swiping to find your fitness match!"
+    },
+    "emptyMessages": {
+      "title": "No Messages Yet",
+      "subtitle": "Start a conversation with one of your matches"
+    },
+    "newBadge": "NEW",
+    "unmatch": "Unmatch",
+    "report": "Report",
+    "viewProfile": "View Profile",
+    "celebration": {
+      "title": "It's a Match!",
+      "subtitle": "You and {{name}} liked each other",
+      "sendMessage": "Send Message",
+      "keepSwiping": "Keep Swiping"
+    }
+  },
+  "chat": {
+    "inputPlaceholder": "Type a message...",
+    "sentPhoto": "Sent a photo 📷",
+    "read": "Read",
+    "icebreaker": "You both love {{activity}} — say hi!"
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "verified": "Verified",
+    "active": "Active now",
+    "activeRecently": "Active recently",
+    "stats": {
+      "likes": "Likes",
+      "matches": "Matches"
+    },
+    "sections": {
+      "fitnessProfile": "Fitness Profile",
+      "lifestyle": "Lifestyle",
+      "about": "About",
+      "inCommon": "In Common"
+    }
+  },
+  "settings": {
+    "sections": {
+      "account": "Account",
+      "discovery": "Discovery",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "subscription": "Subscription",
+      "support": "Support",
+      "legal": "Legal",
+      "dangerZone": "Danger Zone"
+    },
+    "editProfile": "Edit Profile",
+    "changePhone": "Change Phone Number",
+    "pauseProfile": "Pause Profile",
+    "pauseProfileSubtitle": "Hide your profile from discovery",
+    "logout": "Log Out",
+    "deleteAccount": "Delete Account",
+    "deleteAccountConfirm": "Are you sure? This cannot be undone.",
+    "upgradePremium": "Upgrade to Premium",
+    "faq": "FAQ",
+    "contactUs": "Contact Us",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
+  "errors": {
+    "required": "This field is required",
+    "network": "Network error. Please try again.",
+    "generic": "Something went wrong. Please try again.",
+    "auth": {
+      "invalidPhone": "Please enter a valid phone number",
+      "invalidOtp": "Incorrect code. Please try again.",
+      "tooManyAttempts": "Too many attempts. Please wait {{minutes}} minutes.",
+      "invalidEmail": "Please enter a valid email address",
+      "weakPassword": "Password must be at least 8 characters with 1 uppercase and 1 number",
+      "passwordMismatch": "Passwords do not match",
+      "userNotFound": "No account found with this email",
+      "wrongPassword": "Incorrect password",
+      "emailInUse": "An account with this email already exists",
+      "underage": "You must be 18 or older to use this app"
+    },
+    "photo": {
+      "permission": "Please allow photo access to add photos",
+      "uploadFailed": "Photo upload failed. Please try again.",
+      "tooLarge": "Photo is too large. Please choose a smaller image."
+    },
+    "profile": {
+      "bioTooShort": "Bio must be at least 50 characters",
+      "bioTooLong": "Bio cannot exceed 500 characters",
+      "minPhotos": "Please add at least 2 photos",
+      "minActivities": "Please select at least 1 activity"
+    }
+  }
+}
