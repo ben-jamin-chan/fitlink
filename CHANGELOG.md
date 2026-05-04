@@ -97,7 +97,7 @@
   2. Section 5.5 FR-2.3.1: Swipe path in example code is already correct (`/swipes/{userId}/likes/{targetUserId}`) — ARCHITECT.md was the one that was wrong (now fixed)
   3. Section 10.2: Remove references to "Fitafy research document (provided)" and "TeamUp research document (provided)" — these files don't exist
   4. Add `paused`, `banned`, `expoPushToken` fields to wherever user schema appears in PRD
-- **App name not yet decided** — `[APP_NAME]` placeholder used throughout all docs. Do a global find-and-replace when name is locked.
+- **App name not yet decided** — `[APP_NAME]` placeholder used throughout all docs. Do a global find-and-replace when name is locked.kjdkjasdnbaksjdbaksfhbaskdfnjbasdhjkadknasdbk
 - **AGENTS.md** is created by Task 03 in TASKS.md — it does not exist until then. -->
 
 ### Next Up
