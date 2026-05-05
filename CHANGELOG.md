@@ -24,6 +24,27 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 1.3] — 2026-05-05
+### Completed
+- Task 08: Navigation shell complete — RootNavigator, AuthNavigator, MainTabNavigator
+- App.tsx rewritten with correct provider order (GestureHandlerRootView → SafeAreaProvider → NavigationContainer)
+- authStore stub created for navigation gating
+- All 5 auth screens and 4 main tab screens have placeholder components
+
+### Files Created / Modified
+- App.tsx: full rewrite with correct provider stack
+- app/navigation/RootNavigator.tsx: root stack, auth gating logic
+- app/navigation/AuthNavigator.tsx: stack navigator for auth screens
+- app/navigation/MainTabNavigator.tsx: bottom tab navigator with Ionicons
+- store/authStore.ts: stub store (isAuthenticated, isLoading, hasCompletedOnboarding)
+
+### Known Issues / Deferred
+- `npx expo start --offline` still fails before Metro boots because `/opt/homebrew/bin/node` is Node.js v23.11.0 and Expo CLI hits `ERR_SOCKET_BAD_PORT`; `npx tsc --noEmit` passes.
+
+### Next Up
+- Task 09: Auth service layer (signInWithPhone, verifyOTP, signInWithEmail, signOut)
+- Prerequisite for Task 09: populate .env with Firebase values, add GoogleService-Info.plist and google-services.json
+
 ---
 
 ## [Phase 1.2] — 2026-05-03
