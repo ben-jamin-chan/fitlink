@@ -24,6 +24,23 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 1.4] — 2026-05-06
+### Completed
+- Task 09: Auth service layer created (sendOTP, verifyOTP, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple stub, signOut, subscribeToAuthState)
+- utils/errorUtils.ts created (mapFirebaseError returns i18n keys)
+
+### Files Created / Modified
+- services/firebase/auth.ts: all auth functions, AppError type
+- utils/errorUtils.ts: mapFirebaseError, isFirebaseError, FIREBASE_ERROR_MAP
+
+### Known Issues / Deferred
+- signInWithGoogle uses signInWithPopup — works in Expo Go dev only, needs expo-auth-session for production (TODO comment added)
+- signInWithApple is a stub — needs @invertase/react-native-apple-authentication and a development build
+- Phone auth reCAPTCHA: use Firebase Console test phone numbers for now — production reCAPTCHA wired in Task 12
+
+### Next Up
+- Task 10: Auth Zustand store (full implementation — replaces stub, wires subscribeToAuthState, persists with AsyncStorage)
+
 ## [Phase 1.3] — 2026-05-05
 ### Completed
 - Task 08: Navigation shell complete — RootNavigator, AuthNavigator, MainTabNavigator
