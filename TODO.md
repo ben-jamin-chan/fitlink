@@ -31,4 +31,15 @@ const app = initializeApp(firebaseConfig);
 # 29 April 2026
 1. Maybe prompt with CODEX_PROMPT_PHASE0.md 
 
+# 4 MAY 2026, (done)
+**Before Task 09 (auth screens), you must:**
+1. Copy `.env.example` → `.env` in your project root
+2. Fill in all 7 values from Firebase Console → Project Settings → Your Apps → Web App
+3. Add `GoogleService-Info.plist` (iOS) to the project root
+4. Add `google-services.json` (Android) to the project root
+
+Task 08 (navigation shell) does not require Firebase to be live yet — you can proceed to Task 08 immediately after Task 07.
+
+# 5 MAY 2026
+1. TASK 09 
 
