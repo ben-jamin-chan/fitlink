@@ -24,6 +24,20 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 1.5] — 2026-05-07
+### Completed
+- Task 10: authStore fully implemented — replaces stub
+- Firebase onAuthStateChanged wired via initialise() called in App.tsx
+- AsyncStorage persistence for isAuthenticated and hasCompletedOnboarding
+- Navigation now reacts automatically to auth state changes
+
+### Files Created / Modified
+- store/authStore.ts: full rewrite with persist middleware, initialise(), logout()
+- App.tsx: added useEffect to call initialise() and wire cleanup
+
+### Next Up
+- Task 11: Landing screen + Button component
+
 ## [Phase 1.4] — 2026-05-06
 ### Completed
 - Task 09: Auth service layer created (sendOTP, verifyOTP, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple stub, signOut, subscribeToAuthState)
