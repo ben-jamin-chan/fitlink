@@ -24,6 +24,19 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 1.6] — 2026-05-08
+### Completed
+- Task 11: Landing screen built, Button component created
+- AuthNavigator updated to use real LandingScreen
+
+### Files Created / Modified
+- components/ui/Button.tsx: primary/outline/ghost variants, loading and disabled states
+- app/auth/LandingScreen.tsx: logo, tagline, auth buttons (Apple iOS-only), terms
+- app/navigation/AuthNavigator.tsx: LandingPlaceholder replaced with LandingScreen
+
+### Next Up
+- Task 12: Phone login screen + PhoneInput component
+
 ## [Phase 1.5] — 2026-05-07
 ### Completed
 - Task 10: authStore fully implemented — replaces stub
