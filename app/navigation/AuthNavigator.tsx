@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 
 import LandingScreen from '@/app/auth/LandingScreen'
+import PhoneLoginScreen from '@/app/auth/PhoneLoginScreen'
 
 import { colors, typography } from '@/constants/theme'
 
@@ -25,15 +26,11 @@ const Stack = createStackNavigator<AuthStackParamList>()
 export const AuthNavigator = (): React.JSX.Element => (
   <Stack.Navigator screenOptions={screenOptions}>
     <Stack.Screen name="Landing" component={LandingScreen} />
-    <Stack.Screen name="PhoneLogin" component={PhoneLoginPlaceholder} />
+    <Stack.Screen name="PhoneLogin" component={PhoneLoginScreen} />
     <Stack.Screen name="OTPVerify" component={OTPVerifyPlaceholder} />
     <Stack.Screen name="EmailLogin" component={EmailLoginPlaceholder} />
     <Stack.Screen name="SignUp" component={SignUpPlaceholder} />
   </Stack.Navigator>
-)
-
-const PhoneLoginPlaceholder = (): React.JSX.Element => (
-  <PlaceholderScreen name="Phone Login" />
 )
 
 const OTPVerifyPlaceholder = (): React.JSX.Element => (

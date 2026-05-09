@@ -24,6 +24,25 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 1.7] — 2026-05-09
+### Completed
+- Task 12: Phone login screen built, PhoneInput component created
+- services/firebase/auth.ts: added setPendingConfirmation/getPendingConfirmation for ConfirmationResult handoff
+- AuthNavigator updated to use real PhoneLoginScreen
+
+### Files Created / Modified
+- components/ui/PhoneInput.tsx: country code picker (9 SEA+global codes), phone field, error state
+- app/auth/PhoneLoginScreen.tsx: RHF+Zod, sendOTP, 5-attempt lockout with countdown
+- services/firebase/auth.ts: module-level ConfirmationResult store (3 new exports)
+- app/navigation/AuthNavigator.tsx: PhoneLoginPlaceholder replaced with PhoneLoginScreen
+
+### Known Issues / Deferred
+- sendOTP in Expo Go requires test phone numbers in Firebase Console (no reCAPTCHA yet)
+- Add test number: Firebase Console → Authentication → Sign-in method → Phone → Test numbers
+
+### Next Up
+- Task 13: OTP verify screen + OTPInput component
+
 ## [Phase 1.6] — 2026-05-08
 ### Completed
 - Task 11: Landing screen built, Button component created

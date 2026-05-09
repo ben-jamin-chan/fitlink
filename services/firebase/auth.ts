@@ -12,6 +12,21 @@ import type { ConfirmationResult, User, UserCredential } from 'firebase/auth'
 import { auth } from '@/services/firebase/config'
 import { isFirebaseError, mapFirebaseError } from '@/utils/errorUtils'
 
+// Module-level store for ConfirmationResult.
+// ConfirmationResult cannot be serialised into nav params or AsyncStorage.
+// PhoneLoginScreen writes it; OTPVerifyScreen reads it.
+let _pendingConfirmation: ConfirmationResult | null = null
+
+export const setPendingConfirmation = (
+  result: ConfirmationResult | null
+): void => {
+  _pendingConfirmation = result
+}
+
+export const getPendingConfirmation = (): ConfirmationResult | null => {
+  return _pendingConfirmation
+}
+
 export interface AppError {
   code: string
   raw?: string
