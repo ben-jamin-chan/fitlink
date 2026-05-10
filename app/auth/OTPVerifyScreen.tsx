@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button } from '@/components/ui/Button'
 import { OTPInput } from '@/components/ui/OTPInput'
@@ -146,63 +147,69 @@ export default function OTPVerifyScreen(): React.JSX.Element {
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.back}
-        onPress={handleBackPress}
-        activeOpacity={0.7}
-        accessibilityLabel={t('common.back')}
-      >
-        <Ionicons
-          name="arrow-back"
-          size={typography.sizes.xl}
-          color={colors.gray[700]}
-        />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        <Text style={styles.title}>{t('auth.otp.title')}</Text>
-        <Text style={styles.subtitle}>
-          {t('auth.otp.subtitle', { phone: phoneNumber })}
-        </Text>
-
-        <View style={styles.otpWrapper}>
-          <OTPInput
-            key={otpKey}
-            onComplete={handleOTPComplete}
-            onReset={resetError}
-            error={hasError}
-            disabled={isVerifying}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.back}
+          onPress={handleBackPress}
+          activeOpacity={0.7}
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={typography.sizes.xl}
+            color={colors.gray[700]}
           />
-        </View>
+        </TouchableOpacity>
 
-        {error !== null && <Text style={styles.errorText}>{t(error)}</Text>}
+        <View style={styles.content}>
+          <Text style={styles.title}>{t('auth.otp.title')}</Text>
+          <Text style={styles.subtitle}>
+            {t('auth.otp.subtitle', { phone: phoneNumber })}
+          </Text>
 
-        {isVerifying && (
-          <Text style={styles.verifyingText}>{t('common.loading')}</Text>
-        )}
-
-        <View style={styles.resendWrapper}>
-          {countdown > 0 ? (
-            <Text style={styles.countdown}>
-              {t('auth.otp.resendIn', { seconds: countdown })}
-            </Text>
-          ) : (
-            <Button
-              label={t('auth.otp.resend')}
-              onPress={handleResend}
-              variant="ghost"
-              loading={isResending}
-              fullWidth={false}
+          <View style={styles.otpWrapper}>
+            <OTPInput
+              key={otpKey}
+              onComplete={handleOTPComplete}
+              onReset={resetError}
+              error={hasError}
+              disabled={isVerifying}
             />
+          </View>
+
+          {error !== null && <Text style={styles.errorText}>{t(error)}</Text>}
+
+          {isVerifying && (
+            <Text style={styles.verifyingText}>{t('common.loading')}</Text>
           )}
+
+          <View style={styles.resendWrapper}>
+            {countdown > 0 ? (
+              <Text style={styles.countdown}>
+                {t('auth.otp.resendIn', { seconds: countdown })}
+              </Text>
+            ) : (
+              <Button
+                label={t('auth.otp.resend')}
+                onPress={handleResend}
+                variant="ghost"
+                loading={isResending}
+                fullWidth={false}
+              />
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,

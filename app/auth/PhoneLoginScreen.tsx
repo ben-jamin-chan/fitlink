@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -141,74 +142,80 @@ export default function PhoneLoginScreen(): React.JSX.Element {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-    >
-      <TouchableOpacity
-        style={styles.back}
-        onPress={handleBackPress}
-        activeOpacity={0.7}
-        accessibilityLabel={t('common.back')}
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
       >
-        <Ionicons
-          name="arrow-back"
-          size={typography.sizes.xl}
-          color={colors.gray[700]}
-        />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        <Text style={styles.title}>{t('auth.phone.title')}</Text>
-        <Text style={styles.subtitle}>{t('auth.phone.subtitle')}</Text>
-
-        <View style={styles.inputWrapper}>
-          <Controller
-            control={control}
-            name="phoneNumber"
-            render={({ field: { onChange, value } }) => (
-              <PhoneInput
-                value={value}
-                onChangeText={onChange}
-                onCountryCodeChange={setCountryCode}
-                selectedCountryCode={countryCode}
-                placeholder={t('auth.phone.placeholder')}
-                error={
-                  errors.phoneNumber
-                    ? t(errors.phoneNumber.message ?? 'errors.required')
-                    : undefined
-                }
-              />
-            )}
+        <TouchableOpacity
+          style={styles.back}
+          onPress={handleBackPress}
+          activeOpacity={0.7}
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={typography.sizes.xl}
+            color={colors.gray[700]}
           />
-        </View>
+        </TouchableOpacity>
 
-        {submitError !== null && (
-          <Text style={styles.errorText}>
-            {submitError === 'errors.auth.tooManyAttempts'
-              ? t(submitError, { minutes: '1' })
-              : t(submitError)}
-          </Text>
-        )}
+        <View style={styles.content}>
+          <Text style={styles.title}>{t('auth.phone.title')}</Text>
+          <Text style={styles.subtitle}>{t('auth.phone.subtitle')}</Text>
 
-        <View style={styles.buttonWrapper}>
-          <Button
-            label={
-              isLocked
-                ? t('auth.otp.resendIn', { seconds: lockoutRemaining })
-                : t('auth.phone.send')
-            }
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading}
-            disabled={isLocked}
-          />
+          <View style={styles.inputWrapper}>
+            <Controller
+              control={control}
+              name="phoneNumber"
+              render={({ field: { onChange, value } }) => (
+                <PhoneInput
+                  value={value}
+                  onChangeText={onChange}
+                  onCountryCodeChange={setCountryCode}
+                  selectedCountryCode={countryCode}
+                  placeholder={t('auth.phone.placeholder')}
+                  error={
+                    errors.phoneNumber
+                      ? t(errors.phoneNumber.message ?? 'errors.required')
+                      : undefined
+                  }
+                />
+              )}
+            />
+          </View>
+
+          {submitError !== null && (
+            <Text style={styles.errorText}>
+              {submitError === 'errors.auth.tooManyAttempts'
+                ? t(submitError, { minutes: '1' })
+                : t(submitError)}
+            </Text>
+          )}
+
+          <View style={styles.buttonWrapper}>
+            <Button
+              label={
+                isLocked
+                  ? t('auth.otp.resendIn', { seconds: lockoutRemaining })
+                  : t('auth.phone.send')
+              }
+              onPress={handleSubmit(onSubmit)}
+              loading={isLoading}
+              disabled={isLocked}
+            />
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flexGrow: 1,
     backgroundColor: colors.background,

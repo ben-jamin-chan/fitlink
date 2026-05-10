@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/Button'
@@ -90,99 +91,105 @@ export default function EmailLoginScreen(): React.JSX.Element {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-    >
-      <TouchableOpacity
-        style={styles.back}
-        onPress={handleBackPress}
-        activeOpacity={0.7}
-        accessibilityLabel={t('common.back')}
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
       >
-        <Ionicons
-          name="arrow-back"
-          size={typography.sizes.xl}
-          color={colors.gray[700]}
-        />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        <Text style={styles.title}>{t('auth.email.title')}</Text>
-
-        <View style={styles.form}>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label={t('auth.email.emailPlaceholder')}
-                placeholder={t('auth.email.emailPlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={
-                  errors.email
-                    ? t(errors.email.message ?? 'errors.required')
-                    : undefined
-                }
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                textContentType="emailAddress"
-              />
-            )}
+        <TouchableOpacity
+          style={styles.back}
+          onPress={handleBackPress}
+          activeOpacity={0.7}
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={typography.sizes.xl}
+            color={colors.gray[700]}
           />
+        </TouchableOpacity>
 
-          <View style={styles.fieldGap} />
+        <View style={styles.content}>
+          <Text style={styles.title}>{t('auth.email.title')}</Text>
 
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label={t('auth.email.passwordPlaceholder')}
-                placeholder={t('auth.email.passwordPlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={
-                  errors.password
-                    ? t(errors.password.message ?? 'errors.required')
-                    : undefined
-                }
-                secureTextEntry
-                autoComplete="password"
-                textContentType="password"
-              />
-            )}
-          />
+          <View style={styles.form}>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label={t('auth.email.emailPlaceholder')}
+                  placeholder={t('auth.email.emailPlaceholder')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={
+                    errors.email
+                      ? t(errors.email.message ?? 'errors.required')
+                      : undefined
+                  }
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                />
+              )}
+            />
+
+            <View style={styles.fieldGap} />
+
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label={t('auth.email.passwordPlaceholder')}
+                  placeholder={t('auth.email.passwordPlaceholder')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={
+                    errors.password
+                      ? t(errors.password.message ?? 'errors.required')
+                      : undefined
+                  }
+                  secureTextEntry
+                  autoComplete="password"
+                  textContentType="password"
+                />
+              )}
+            />
+          </View>
+
+          {submitError !== null && (
+            <Text style={styles.errorText}>{t(submitError)}</Text>
+          )}
+
+          <View style={styles.buttonWrapper}>
+            <Button
+              label={t('auth.email.login')}
+              onPress={handleSubmit(onSubmit)}
+              loading={isLoading}
+            />
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>{t('auth.email.noAccount')}</Text>
+            <TouchableOpacity onPress={handleSignUpPress} activeOpacity={0.7}>
+              <Text style={styles.footerLink}>{t('auth.email.signup')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        {submitError !== null && (
-          <Text style={styles.errorText}>{t(submitError)}</Text>
-        )}
-
-        <View style={styles.buttonWrapper}>
-          <Button
-            label={t('auth.email.login')}
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading}
-          />
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>{t('auth.email.noAccount')}</Text>
-          <TouchableOpacity onPress={handleSignUpPress} activeOpacity={0.7}>
-            <Text style={styles.footerLink}>{t('auth.email.signup')}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flexGrow: 1,
     backgroundColor: colors.background,
