@@ -24,6 +24,21 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 2.0] — 2026-05-10
+### Completed
+- Task 15: Onboarding shell built — OnboardingNavigator, ProgressDots, onboardingStore
+- RootNavigator updated to use real OnboardingNavigator
+- New users now land on Step 1 placeholder after authentication
+
+### Files Created / Modified
+- store/onboardingStore.ts: OnboardingDraft interface, draft + currentStep state, persisted
+- components/ui/ProgressDots.tsx: 6 dots, active/completed/inactive states
+- app/onboarding/OnboardingNavigator.tsx: stack with Step1–6 placeholders, shared OnboardingHeader
+- app/navigation/RootNavigator.tsx: OnboardingPlaceholder replaced with OnboardingNavigator
+
+### Next Up
+- Task 16: Onboarding Step 1 — Basic Info (firstName, dateOfBirth, gender, city)
+
 ## [Phase 1.9] — 2026-05-10
 ### Completed
 - Task 14: Email login and sign up screens built, Input component created

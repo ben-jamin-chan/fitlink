@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore'
 
 import { AuthNavigator } from '@/app/navigation/AuthNavigator'
 import { MainTabNavigator } from '@/app/navigation/MainTabNavigator'
+import { OnboardingNavigator } from '@/app/onboarding/OnboardingNavigator'
 
 import type { AuthStackParamList } from '@/app/navigation/AuthNavigator'
 import type { MainTabParamList } from '@/app/navigation/MainTabNavigator'
@@ -39,17 +40,13 @@ export const RootNavigator = (): React.JSX.Element => {
       {!isAuthenticated ? (
         <Stack.Screen name="Auth" component={AuthNavigator} />
       ) : !hasCompletedOnboarding ? (
-        <Stack.Screen name="Onboarding" component={OnboardingPlaceholder} />
+        <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
       ) : (
         <Stack.Screen name="Main" component={MainTabNavigator} />
       )}
     </Stack.Navigator>
   )
 }
-
-const OnboardingPlaceholder = (): React.JSX.Element => (
-  <View style={styles.placeholder} />
-)
 
 const screenOptions = {
   headerShown: false,
@@ -60,10 +57,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  placeholder: {
-    flex: 1,
     backgroundColor: colors.background,
   },
 })
