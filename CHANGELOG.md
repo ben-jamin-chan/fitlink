@@ -24,6 +24,20 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 1.8] — 2026-05-10
+### Completed
+- Task 13: OTP verify screen built, OTPInput component created
+- Full phone auth flow end-to-end: Phone → OTP → main app (Discover tab)
+- AuthNavigator updated to use real OTPVerifyScreen
+
+### Files Created / Modified
+- components/ui/OTPInput.tsx: 6-box input, auto-advance, backspace, paste support, auto-submit
+- app/auth/OTPVerifyScreen.tsx: auto-verify on completion, resend with countdown, error clears boxes
+- app/navigation/AuthNavigator.tsx: OTPVerifyPlaceholder replaced with OTPVerifyScreen
+
+### Next Up
+- Task 14: Email login + sign up screens + Input component
+
 ## [Phase 1.7] — 2026-05-09
 ### Completed
 - Task 12: Phone login screen built, PhoneInput component created
