@@ -24,6 +24,21 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 2.1] — 2026-05-10
+### Completed
+- Task 16: Onboarding Step 1 built (firstName, dateOfBirth, gender, city)
+- Installed @react-native-community/datetimepicker
+- OnboardingNavigator updated to use real Step1Screen
+
+### Files Created / Modified
+- app/onboarding/Step1Screen.tsx: first name, DOB picker (iOS inline/Android dialog), gender chips, city input
+- app/onboarding/OnboardingNavigator.tsx: Step1Screen placeholder replaced with real screen
+- package.json: added @react-native-community/datetimepicker
+- app.json: added datetimepicker Expo config plugin
+
+### Next Up
+- Task 17: Onboarding Step 2 — Photos (PhotoGrid, expo-image-picker, compression)
+
 ## [Phase 2.0] — 2026-05-10
 ### Completed
 - Task 15: Onboarding shell built — OnboardingNavigator, ProgressDots, onboardingStore

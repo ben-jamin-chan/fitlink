@@ -9,6 +9,8 @@ import { useOnboardingStore } from '@/store/onboardingStore'
 
 import { ProgressDots } from '@/components/ui/ProgressDots'
 
+import Step1Screen from '@/app/onboarding/Step1Screen'
+
 import { colors, spacing, typography } from '@/constants/theme'
 
 export type OnboardingStackParamList = {
@@ -69,7 +71,6 @@ const StepPlaceholder = ({ step }: StepPlaceholderProps): React.JSX.Element => {
   )
 }
 
-const Step1Screen = (): React.JSX.Element => <StepPlaceholder step={1} />
 const Step2Screen = (): React.JSX.Element => <StepPlaceholder step={2} />
 const Step3Screen = (): React.JSX.Element => <StepPlaceholder step={3} />
 const Step4Screen = (): React.JSX.Element => <StepPlaceholder step={4} />
