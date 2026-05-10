@@ -24,6 +24,21 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 1.9] — 2026-05-10
+### Completed
+- Task 14: Email login and sign up screens built, Input component created
+- All 5 auth screens are now real — AuthNavigator has zero placeholder components
+- Authentication phase (Tasks 08–14) complete
+
+### Files Created / Modified
+- components/ui/Input.tsx: label, error, secureTextEntry with eye toggle, multiline support
+- app/auth/EmailLoginScreen.tsx: RHF+Zod, signInWithEmail, inline errors, link to SignUp
+- app/auth/SignUpScreen.tsx: RHF+Zod, signUpWithEmail, password strength, confirm match
+- app/navigation/AuthNavigator.tsx: EmailLoginPlaceholder and SignUpPlaceholder removed
+
+### Next Up
+- Task 15: Onboarding shell — OnboardingNavigator, ProgressDots, onboardingStore
+
 ## [Phase 1.8] — 2026-05-10
 ### Completed
 - Task 13: OTP verify screen built, OTPInput component created

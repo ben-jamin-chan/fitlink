@@ -1,0 +1,272 @@
+import React, { useState } from 'react'
+
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+
+import { Ionicons } from '@expo/vector-icons'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { Controller, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
+
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+
+import { AppError, signUpWithEmail } from '@/services/firebase/auth'
+
+import type { AuthStackParamList } from '@/app/navigation/AuthNavigator'
+
+import { colors, spacing, typography } from '@/constants/theme'
+import { mapFirebaseError } from '@/utils/errorUtils'
+
+type SignUpNavProp = StackNavigationProp<AuthStackParamList, 'SignUp'>
+
+type SignUpFormData = z.infer<typeof signUpSchema>
+
+const signUpSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, 'errors.required')
+      .email('errors.auth.invalidEmail'),
+    password: z
+      .string()
+      .min(8, 'errors.auth.weakPassword')
+      .regex(/[A-Z]/, 'errors.auth.weakPassword')
+      .regex(/[0-9]/, 'errors.auth.weakPassword'),
+    confirmPassword: z.string().min(1, 'errors.required'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'errors.auth.passwordMismatch',
+    path: ['confirmPassword'],
+  })
+
+const isAppError = (error: unknown): error is AppError => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'string'
+  )
+}
+
+const getAuthErrorKey = (error: unknown): string => {
+  if (isAppError(error)) {
+    return error.code
+  }
+
+  return mapFirebaseError(error)
+}
+
+export default function SignUpScreen(): React.JSX.Element {
+  const { t } = useTranslation()
+  const navigation = useNavigation<SignUpNavProp>()
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { email: '', password: '', confirmPassword: '' },
+  })
+
+  const onSubmit = async (data: SignUpFormData): Promise<void> => {
+    setSubmitError(null)
+    setIsLoading(true)
+
+    try {
+      await signUpWithEmail(data.email, data.password)
+    } catch (error) {
+      setSubmitError(getAuthErrorKey(error))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleBackPress = (): void => {
+    navigation.goBack()
+  }
+
+  const handleLoginPress = (): void => {
+    navigation.navigate('EmailLogin')
+  }
+
+  return (
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
+      <TouchableOpacity
+        style={styles.back}
+        onPress={handleBackPress}
+        activeOpacity={0.7}
+        accessibilityLabel={t('common.back')}
+      >
+        <Ionicons
+          name="arrow-back"
+          size={typography.sizes.xl}
+          color={colors.gray[700]}
+        />
+      </TouchableOpacity>
+
+      <View style={styles.content}>
+        <Text style={styles.title}>{t('auth.signup.title')}</Text>
+
+        <View style={styles.form}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.signup.emailPlaceholder')}
+                placeholder={t('auth.signup.emailPlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={
+                  errors.email
+                    ? t(errors.email.message ?? 'errors.required')
+                    : undefined
+                }
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                textContentType="emailAddress"
+              />
+            )}
+          />
+
+          <View style={styles.fieldGap} />
+
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.signup.passwordPlaceholder')}
+                placeholder={t('auth.signup.passwordPlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={
+                  errors.password
+                    ? t(errors.password.message ?? 'errors.required')
+                    : undefined
+                }
+                secureTextEntry
+                autoComplete="new-password"
+                textContentType="newPassword"
+              />
+            )}
+          />
+
+          <View style={styles.fieldGap} />
+
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.signup.confirmPlaceholder')}
+                placeholder={t('auth.signup.confirmPlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={
+                  errors.confirmPassword
+                    ? t(errors.confirmPassword.message ?? 'errors.required')
+                    : undefined
+                }
+                secureTextEntry
+                autoComplete="new-password"
+                textContentType="newPassword"
+              />
+            )}
+          />
+        </View>
+
+        {submitError !== null && (
+          <Text style={styles.errorText}>{t(submitError)}</Text>
+        )}
+
+        <View style={styles.buttonWrapper}>
+          <Button
+            label={t('auth.signup.create')}
+            onPress={handleSubmit(onSubmit)}
+            loading={isLoading}
+          />
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>{t('auth.signup.hasAccount')}</Text>
+          <TouchableOpacity onPress={handleLoginPress} activeOpacity={0.7}>
+            <Text style={styles.footerLink}>{t('auth.signup.login')}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: colors.background,
+    padding: spacing.lg,
+  },
+  back: {
+    paddingVertical: spacing.sm,
+    alignSelf: 'flex-start',
+  },
+  content: {
+    flex: 1,
+    paddingTop: spacing.xl,
+  },
+  title: {
+    fontSize: typography.sizes.xxl,
+    fontWeight: typography.weights.bold,
+    color: colors.gray[900],
+    marginBottom: spacing.xl,
+  },
+  form: {
+    marginBottom: spacing.md,
+  },
+  fieldGap: {
+    height: spacing.md,
+  },
+  errorText: {
+    fontSize: typography.sizes.sm,
+    color: colors.danger,
+    marginBottom: spacing.md,
+  },
+  buttonWrapper: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  footerText: {
+    fontSize: typography.sizes.sm,
+    color: colors.gray[600],
+  },
+  footerLink: {
+    fontSize: typography.sizes.sm,
+    color: colors.primary,
+    fontWeight: typography.weights.semibold,
+  },
+})
