@@ -10,6 +10,7 @@ import { useOnboardingStore } from '@/store/onboardingStore'
 import { ProgressDots } from '@/components/ui/ProgressDots'
 
 import Step1Screen from '@/app/onboarding/Step1Screen'
+import Step2Screen from '@/app/onboarding/Step2Screen'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
@@ -71,7 +72,6 @@ const StepPlaceholder = ({ step }: StepPlaceholderProps): React.JSX.Element => {
   )
 }
 
-const Step2Screen = (): React.JSX.Element => <StepPlaceholder step={2} />
 const Step3Screen = (): React.JSX.Element => <StepPlaceholder step={3} />
 const Step4Screen = (): React.JSX.Element => <StepPlaceholder step={4} />
 const Step5Screen = (): React.JSX.Element => <StepPlaceholder step={5} />

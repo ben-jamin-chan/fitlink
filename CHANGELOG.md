@@ -24,6 +24,26 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 2.2] — 2026-05-11
+### Completed
+- Task 17: Onboarding Step 2 built (photo selection, compression, grid)
+- utils/imageUtils.ts created (compressImage, pickAndCompressImage)
+- PhotoGrid component created in components/profile/
+- OnboardingNavigator updated to use real Step2Screen
+
+### Files Created / Modified
+- utils/imageUtils.ts: compressImage (1080px, 80% quality), pickAndCompressImage (picker + compress)
+- components/profile/PhotoGrid.tsx: 3-column grid, 6 slots, 3:4 ratio, Primary badge, remove button
+- app/onboarding/Step2Screen.tsx: photo grid, min 2 photos required, saves local URIs to draft
+- app/onboarding/OnboardingNavigator.tsx: Step2Screen placeholder replaced with real screen
+
+### Known Issues / Deferred
+- Photo upload to Firebase Storage deferred to Step 6 completion (Task 21)
+- Drag-to-reorder photos deferred to Phase 2
+
+### Next Up
+- Task 18: Onboarding Step 3 — Fitness Profile (activities MultiSelect, fitness level, frequency)
+
 ## [Phase 2.1] — 2026-05-10
 ### Completed
 - Task 16: Onboarding Step 1 built (firstName, dateOfBirth, gender, city)
