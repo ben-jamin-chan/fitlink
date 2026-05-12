@@ -85,15 +85,40 @@
       "guidelines": "Clear face photos work best"
     },
     "step3": {
-      "title": "Fitness Profile",
-      "activities": "Your Activities",
-      "activitiesHelper": "Select 1–10 activities",
-      "fitnessLevel": "Fitness Level",
-      "workoutFrequency": "Workout Frequency",
-      "beginner": "Beginner",
-      "intermediate": "Intermediate",
-      "advanced": "Advanced",
-      "athlete": "Athlete"
+      "title": "Your Fitness Profile",
+      "activitiesLabel": "What activities do you do? (pick up to 10)",
+      "fitnessLevelLabel": "What's your fitness level?",
+      "frequencyLabel": "How often do you work out?",
+      "activityOptions": {
+        "gym": "Gym",
+        "running": "Running",
+        "cycling": "Cycling",
+        "swimming": "Swimming",
+        "yoga": "Yoga",
+        "hiking": "Hiking",
+        "crossFit": "CrossFit",
+        "boxing": "Boxing",
+        "dancing": "Dancing",
+        "badminton": "Badminton",
+        "football": "Football",
+        "basketball": "Basketball",
+        "tennis": "Tennis",
+        "martialArts": "Martial Arts",
+        "rockClimbing": "Rock Climbing",
+        "pilates": "Pilates"
+      },
+      "fitnessLevelOptions": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "athlete": "Athlete"
+      },
+      "frequencyOptions": {
+        "oneToTwo": "1-2x/week",
+        "threeToFour": "3-4x/week",
+        "fiveToSix": "5-6x/week",
+        "daily": "Daily"
+      }
     },
     "step4": {
       "title": "Lifestyle",

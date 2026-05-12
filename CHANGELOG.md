@@ -24,6 +24,26 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 2.3] — 2026-05-12
+### Completed
+- Task 18: Onboarding Step 3 built (activities MultiSelect, fitness level, workout frequency)
+- MultiSelect component created in components/ui/
+- SingleSelect component created in components/ui/
+- OnboardingNavigator updated to use real Step3Screen
+
+### Files Created / Modified
+- components/ui/MultiSelect.tsx: chip multi-select, min/max enforcement, primary colour selected state
+- components/ui/SingleSelect.tsx: chip single-select, cannot deselect, same chip styles as MultiSelect
+- app/onboarding/Step3Screen.tsx: activities (16 options, max 10), fitness level, frequency; Next disabled until all valid
+- app/onboarding/OnboardingNavigator.tsx: Step3Screen placeholder replaced with real screen
+- i18n/en.json, my.json, zh.json, ta.json: step3 keys added
+
+### Known Issues / Deferred
+- Display strings for fitness level ('Beginner' etc.) are mapped to FitnessLevel enum values on save — display translations deferred until native speaker review
+
+### Next Up
+- Task 19: Onboarding Step 4 — Lifestyle (diet, fitness goals, smoking, drinking)
+
 ## [Phase 2.2] — 2026-05-11
 ### Completed
 - Task 17: Onboarding Step 2 built (photo selection, compression, grid)
