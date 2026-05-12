@@ -588,7 +588,8 @@ During `firebase init`, select: Firestore, Functions, Storage, Emulators
   - `useSharedValue` for x, y position and rotation
   - `useAnimatedGestureHandler` for pan gesture ← ⚠️ SEE CONVENTIONS.md SECTION 11 — use Gesture.Pan() instead
   - `useAnimatedStyle` for transform (translateX, translateY, rotate)
-  - When drag > 100px right: trigger like (call `runOnJS(onSwipeRight)`)
+  - When drag > 100px right: trigger like (call `runOnJS(onSwipeRight)`)qweasd123
+  
   - When drag < -100px left: trigger pass (call `runOnJS(onSwipeLeft)`)
   - When drag > 100px up: trigger super like (call `runOnJS(onSuperLike)`)
   - Rotation: -15° to +15° based on x drag
