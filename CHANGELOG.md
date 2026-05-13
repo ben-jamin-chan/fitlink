@@ -24,6 +24,27 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 2.5] — 2026-05-13
+### Completed
+- Task 20: Onboarding Step 5 built (bio textarea, height slider, religion modal picker)
+- Slider component created in components/ui/
+- @react-native-community/slider installed
+- OnboardingNavigator updated to use real Step5Screen
+
+### Files Created / Modified
+- components/ui/Slider.tsx: labelled RNSlider wrapper, primary tint, formatted value display
+- app/onboarding/Step5Screen.tsx: bio (50-500 chars, live counter), height slider (140-220 cm, default 170), religion modal picker (optional, 7 options)
+- app/onboarding/OnboardingNavigator.tsx: Step5Screen placeholder replaced with real screen
+- store/onboardingStore.ts: confirmed bio, height, religion fields on OnboardingDraft
+- i18n/en.json, my.json, zh.json, ta.json: step5 keys added
+
+### Known Issues / Deferred
+- Religion display strings are English placeholders in my/zh/ta - deferred to native speaker review
+- Height field does not expose an imperial (ft/in) toggle - deferred to Phase 2 polish
+
+### Next Up
+- Task 21: Onboarding Step 6 - Preferences + Profile Submit (lookingFor, age range, distance, gender preference, Firebase photo upload, createUserProfile)
+
 ## [Phase 2.4] — 2026-05-13
 ### Completed
 - Task 19: Onboarding Step 4 built (dietary preference, fitness goals, smoking, drinking)

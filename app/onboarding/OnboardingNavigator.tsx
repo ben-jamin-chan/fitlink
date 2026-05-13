@@ -13,6 +13,7 @@ import Step1Screen from '@/app/onboarding/Step1Screen'
 import Step2Screen from '@/app/onboarding/Step2Screen'
 import Step3Screen from '@/app/onboarding/Step3Screen'
 import { Step4Screen } from '@/app/onboarding/Step4Screen'
+import Step5Screen from '@/app/onboarding/Step5Screen'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
@@ -74,7 +75,6 @@ const StepPlaceholder = ({ step }: StepPlaceholderProps): React.JSX.Element => {
   )
 }
 
-const Step5Screen = (): React.JSX.Element => <StepPlaceholder step={5} />
 const Step6Screen = (): React.JSX.Element => <StepPlaceholder step={6} />
 
 const getInitialRouteName = (step: number): OnboardingRouteName => {

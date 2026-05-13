@@ -168,12 +168,31 @@
     },
     "step5": {
       "title": "About You",
-      "bio": "Your bio",
-      "bioPlaceholder": "Tell others about yourself and your fitness journey...",
-      "bioCounter": "{{count}} characters remaining",
-      "height": "Height",
-      "heightLabel": "{{value}} cm",
-      "religion": "Religion (optional)"
+      "bio": {
+        "label": "About Me",
+        "placeholder": "Tell people about yourself, your fitness journey, and what you're looking for...",
+        "errorMin": "Write at least 50 characters so matches can get to know you",
+        "counter": "{{count}}/{{max}}"
+      },
+      "height": {
+        "label": "Height",
+        "value": "{{value}} cm"
+      },
+      "religion": {
+        "label": "Religion (Optional)",
+        "placeholder": "Select religion",
+        "modalTitle": "Select Religion",
+        "clearSelection": "Clear selection",
+        "options": {
+          "islam": "Islam",
+          "buddhism": "Buddhism",
+          "christianity": "Christianity",
+          "hinduism": "Hinduism",
+          "sikhism": "Sikhism",
+          "noPreference": "No preference",
+          "preferNotToSay": "Prefer not to say"
+        }
+      }
     },
     "step6": {
       "title": "Your Preferences",
