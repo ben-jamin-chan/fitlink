@@ -122,12 +122,50 @@
       }
     },
     "step4": {
-      "title": "Lifestyle",
-      "diet": "Dietary Preference",
-      "goals": "Fitness Goals",
-      "goalsHelper": "Select up to 5",
-      "smoking": "Smoking",
-      "drinking": "Drinking"
+      "title": "Your Lifestyle",
+      "diet": {
+        "label": "Dietary Preference",
+        "options": {
+          "noPreference": "No preference",
+          "vegetarian": "Vegetarian",
+          "vegan": "Vegan",
+          "pescatarian": "Pescatarian",
+          "keto": "Keto",
+          "halal": "Halal",
+          "paleo": "Paleo",
+          "glutenFree": "Gluten-free"
+        }
+      },
+      "goals": {
+        "label": "Fitness Goals",
+        "counter": "{{selected}} / {{max}} selected",
+        "counterEmpty": "Select up to {{max}}",
+        "options": {
+          "weightLoss": "Weight loss",
+          "muscleGain": "Muscle gain",
+          "maintenance": "Maintenance",
+          "athleticPerformance": "Athletic performance",
+          "generalHealth": "General health",
+          "flexibility": "Flexibility",
+          "endurance": "Endurance"
+        }
+      },
+      "smoking": {
+        "label": "Smoking",
+        "options": {
+          "no": "No",
+          "occasionally": "Occasionally",
+          "yes": "Yes"
+        }
+      },
+      "drinking": {
+        "label": "Drinking",
+        "options": {
+          "no": "No",
+          "socially": "Socially",
+          "yes": "Yes"
+        }
+      }
     },
     "step5": {
       "title": "About You",

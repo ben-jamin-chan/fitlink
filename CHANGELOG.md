@@ -24,6 +24,24 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 2.4] — 2026-05-13
+### Completed
+- Task 19: Onboarding Step 4 built (dietary preference, fitness goals, smoking, drinking)
+- SingleSelect and MultiSelect reused from Task 18 without modification
+- OnboardingNavigator updated to use real Step4Screen
+
+### Files Created / Modified
+- app/onboarding/Step4Screen.tsx: four lifestyle fields, enum mapping for smoking/drinking, pre-fill from draft, fixed button row
+- app/onboarding/OnboardingNavigator.tsx: Step4Screen placeholder replaced with real screen
+- store/onboardingStore.ts: OnboardingDraft already had dietaryPreference, fitnessGoals, smoking, drinking fields with correct types
+- i18n/en.json, my.json, zh.json, ta.json: step4 keys added
+
+### Known Issues / Deferred
+- Display strings for smoking/drinking options ('No', 'Occasionally', 'Socially') are UI-only — mapped to enum values on save; translations deferred until native speaker review
+
+### Next Up
+- Task 20: Onboarding Step 5 — About You (bio textarea, height slider, religion dropdown, Slider component)
+
 ## [Phase 2.3] — 2026-05-12
 ### Completed
 - Task 18: Onboarding Step 3 built (activities MultiSelect, fitness level, workout frequency)
