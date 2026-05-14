@@ -24,6 +24,36 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 3.1] — 2026-05-14
+### Completed
+- Task 22: Cloud Function onUserCreated implemented (2nd gen, asia-southeast1)
+- functions/ package bootstrapped (Node.js 18, TypeScript strict, firebase-admin, firebase-functions v4)
+- Age calculated server-side from dateOfBirth Timestamp — client never writes age
+- Underage accounts (age < 18) auto-banned: banned=true, banReason="UNDERAGE", tokens revoked
+- firebase.json updated with functions source configuration
+- firestore.rules verified and tightened: age, banned, banReason, bannedAt, verified are server-only fields
+
+### Files Created / Modified
+- functions/package.json: Node.js 18, firebase-admin ^12, firebase-functions ^4, TypeScript dev deps
+- functions/tsconfig.json: strict mode, commonjs, output to lib/
+- functions/.eslintrc.js: TypeScript ESLint rules, no-explicit-any as error
+- functions/src/index.ts: admin SDK init guard, exports onUserCreated
+- functions/src/onUserCreated.ts: onDocumentCreated trigger, calculateAgeInYears, underage ban + token revoke
+- firebase.json: functions block added
+- firestore.rules: server-only field guards include age, banned, banReason, bannedAt, verified
+
+### Schema Changes
+- /users/{uid}.age: now populated by onUserCreated Cloud Function on document creation
+- /users/{uid}.banReason: "UNDERAGE" set for auto-banned accounts
+- /users/{uid}.bannedAt: Timestamp set on auto-ban
+
+### Known Issues / Deferred
+- onUserCreated fires on Firestore document create, not Firebase Auth onCreate — this means if Step 6 fails mid-write and no document is created, the function never fires; the client already guards this with LoadingOverlay + retry
+- Token revocation is best-effort (wrapped in try/catch); the Firestore ban is the authoritative gate
+
+### Next Up
+- Task 23: Cloud Function getDiscoveryStack (HTTP callable, scoring algorithm, candidate filtering)
+
 ## [Phase 2.6] — 2026-05-14
 ### Completed
 - Task 21: Onboarding Step 6 built (preferences, photo upload, Firestore profile write)

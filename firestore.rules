@@ -42,7 +42,17 @@ service cloud.firestore {
     }
 
     function serverOnlyUserFields() {
-      return ['uid', 'age', 'stats', 'subscription', 'banned', 'verified', 'createdAt'];
+      return [
+        'uid',
+        'age',
+        'stats',
+        'subscription',
+        'banned',
+        'banReason',
+        'bannedAt',
+        'verified',
+        'createdAt'
+      ];
     }
 
     match /users/{userId} {
