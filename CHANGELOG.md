@@ -24,6 +24,39 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 2.6] — 2026-05-14
+### Completed
+- Task 21: Onboarding Step 6 built (preferences, photo upload, Firestore profile write)
+- services/firebase/storage.ts created (uploadProfilePhoto, uploadAllProfilePhotos, deleteProfilePhoto)
+- services/firebase/firestore.ts created (createUserProfile, updateUserProfile)
+- LoadingOverlay fully implemented
+- OnboardingNavigator updated to use real Step6Screen
+- Full onboarding flow is now end-to-end: Steps 1–6 complete, profile lands in Firestore
+
+### Files Created / Modified
+- services/firebase/storage.ts: sequential photo upload with per-photo and overall progress callbacks, deleteProfilePhoto
+- services/firebase/firestore.ts: createUserProfile (safe defaults, age omitted), updateUserProfile
+- app/onboarding/Step6Screen.tsx: lookingFor MultiSelect, genderPreference MultiSelect, age range dual sliders (min < max enforced), distance slider, submit with LoadingOverlay and sequential photo upload
+- components/ui/LoadingOverlay.tsx: Modal-based overlay with ActivityIndicator and optional message text
+- app/onboarding/OnboardingNavigator.tsx: Step6Screen placeholder replaced with real screen
+- i18n/en.json, my.json, zh.json, ta.json: step6 and submit keys added
+- firestore.rules, storage.rules: scoped user profile and photo upload rules added
+
+### Schema Changes
+- /users/{userId} document now being written by client at onboarding completion
+- age field intentionally omitted from client write — awaiting onUserCreated Cloud Function (Task 22)
+- religion field written conditionally (omitted when undefined/empty string)
+- Firebase Storage writes now allowed only for the authenticated user's own profile photo path
+
+### Known Issues / Deferred
+- age field will be absent/0 on user documents until Task 22 (onUserCreated Cloud Function) is deployed
+- Looking For / Gender Preference label↔value mapping is English-only; translation of chip labels deferred to native speaker review
+- Location coordinates currently use a neutral GeoPoint placeholder because Step 1 only captures city/country; precise location capture remains deferred
+- Drag-to-reorder photos deferred to Phase 2
+
+### Next Up
+- Task 22: Cloud Function onUserCreated (calculates age server-side from dateOfBirth, auto-bans under-18 accounts)
+
 ## [Phase 2.5] — 2026-05-13
 ### Completed
 - Task 20: Onboarding Step 5 built (bio textarea, height slider, religion modal picker)

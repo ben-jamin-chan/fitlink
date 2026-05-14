@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -14,6 +14,7 @@ import Step2Screen from '@/app/onboarding/Step2Screen'
 import Step3Screen from '@/app/onboarding/Step3Screen'
 import { Step4Screen } from '@/app/onboarding/Step4Screen'
 import Step5Screen from '@/app/onboarding/Step5Screen'
+import Step6Screen from '@/app/onboarding/Step6Screen'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
@@ -50,32 +51,6 @@ export const OnboardingHeader = ({
     </View>
   )
 }
-
-interface StepPlaceholderProps {
-  step: number
-}
-
-const StepPlaceholder = ({ step }: StepPlaceholderProps): React.JSX.Element => {
-  const { t } = useTranslation()
-  const setCurrentStep = useOnboardingStore((state) => state.setCurrentStep)
-
-  useEffect((): void => {
-    setCurrentStep(step)
-  }, [setCurrentStep, step])
-
-  return (
-    <View style={styles.placeholder}>
-      <OnboardingHeader step={step} />
-      <View style={styles.placeholderContent}>
-        <Text style={styles.placeholderText}>
-          {t('onboarding.step', { current: step, total: TOTAL_STEPS })}
-        </Text>
-      </View>
-    </View>
-  )
-}
-
-const Step6Screen = (): React.JSX.Element => <StepPlaceholder step={6} />
 
 const getInitialRouteName = (step: number): OnboardingRouteName => {
   switch (step) {
@@ -132,18 +107,5 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: colors.gray[500],
     textAlign: 'center',
-  },
-  placeholder: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  placeholderContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: typography.sizes.lg,
-    color: colors.gray[400],
   },
 })

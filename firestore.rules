@@ -2,18 +2,98 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function userCreateKeys() {
+      return [
+        'uid',
+        'firstName',
+        'dateOfBirth',
+        'gender',
+        'location',
+        'photos',
+        'bio',
+        'height',
+        'religion',
+        'activities',
+        'fitnessLevel',
+        'workoutFrequency',
+        'dietaryPreference',
+        'fitnessGoals',
+        'smoking',
+        'drinking',
+        'lookingFor',
+        'preferences',
+        'stats',
+        'subscription',
+        'verified',
+        'paused',
+        'banned',
+        'language',
+        'createdAt',
+        'lastActive'
+      ];
+    }
+
+    function serverOnlyUserFields() {
+      return ['uid', 'age', 'stats', 'subscription', 'banned', 'verified', 'createdAt'];
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && !('age' in request.resource.data)
+        && request.resource.data.keys().hasAll([
+          'uid',
+          'firstName',
+          'dateOfBirth',
+          'gender',
+          'location',
+          'photos',
+          'bio',
+          'height',
+          'activities',
+          'fitnessLevel',
+          'workoutFrequency',
+          'dietaryPreference',
+          'fitnessGoals',
+          'smoking',
+          'drinking',
+          'lookingFor',
+          'preferences',
+          'stats',
+          'subscription',
+          'verified',
+          'paused',
+          'banned',
+          'language',
+          'createdAt',
+          'lastActive'
+        ])
+        && request.resource.data.keys().hasOnly(userCreateKeys())
+        && request.resource.data.stats.keys().hasOnly(['likes', 'passes', 'matches'])
+        && request.resource.data.stats.likes == 0
+        && request.resource.data.stats.passes == 0
+        && request.resource.data.stats.matches == 0
+        && request.resource.data.subscription.keys().hasOnly(['tier'])
+        && request.resource.data.subscription.tier == 'free'
+        && request.resource.data.verified == false
+        && request.resource.data.paused == false
+        && request.resource.data.banned == false;
+      allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverOnlyUserFields());
+      allow delete: if false;
+    }
+
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 5, 28);
+      allow read, write: if false;
     }
   }
 }

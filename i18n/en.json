@@ -196,12 +196,47 @@
     },
     "step6": {
       "title": "Your Preferences",
-      "lookingFor": "Looking For",
+      "subtitle": "Tell us who you're looking to connect with",
+      "lookingFor": "I'm looking for",
+      "lookingForOptions": {
+        "friends": "Friends",
+        "workoutPartners": "Workout Partners",
+        "dating": "Dating"
+      },
+      "genderPreference": "Show me",
+      "genderPreferenceOptions": {
+        "men": "Men",
+        "women": "Women",
+        "everyone": "Everyone"
+      },
       "ageRange": "Age Range",
-      "ageRangeLabel": "{{min}}–{{max}} years",
-      "distance": "Distance",
-      "distanceLabel": "{{value}} km",
-      "genderPreference": "Interested In"
+      "ageRangeValue": "{{min}} – {{max}} years old",
+      "ageMin": "Minimum age",
+      "ageMax": "Maximum age",
+      "distance": "Maximum Distance",
+      "distanceValue": "{{value}} km"
+    },
+    "submit": {
+      "uploadingPhotos": "Uploading your photos…",
+      "uploadProgress": "Uploading photos… {{percent}}%",
+      "savingProfile": "Almost there…",
+      "missingFieldsMessage": "Please go back and complete: {{fields}}.",
+      "missingFields": {
+        "firstName": "name",
+        "dateOfBirth": "date of birth",
+        "gender": "gender",
+        "location": "location",
+        "photos": "photos",
+        "bio": "bio",
+        "height": "height",
+        "activities": "activities",
+        "fitnessLevel": "fitness level",
+        "workoutFrequency": "workout frequency",
+        "dietaryPreference": "dietary preference",
+        "fitnessGoals": "fitness goals",
+        "smoking": "smoking",
+        "drinking": "drinking"
+      }
     }
   },
   "discovery": {
