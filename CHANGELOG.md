@@ -24,6 +24,28 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 3.2] — 2026-05-15
+### Completed
+- Task 23: Cloud Function getDiscoveryStack implemented (2nd gen callable, asia-southeast1)
+- Scoring algorithm from PRD.md Section 5.3 implemented: activities, fitness level, frequency, recency, premium, verified, diet, and lookingFor overlap
+- Bidirectional age and gender filtering applied
+- Exclusion set covers liked, passed, matched, and blocked users
+- Composite Firestore index (location.city, banned, paused, lastActive DESC) confirmed in firestore.indexes.json
+
+### Files Created / Modified
+- functions/src/getDiscoveryStack.ts: callable function with local types, scoreCandidate, fetchExcludedIds, bidirectional age/gender checks
+- functions/src/index.ts: added getDiscoveryStack export
+- firestore.indexes.json: composite index for discovery query added
+
+### Known Issues / Deferred
+- score field included in response for debugging — strip before production launch
+- lookingFor overlap scoring uses loaded caller and candidate arrays; this remains an unindexed field
+- Distance-based filtering is not yet applied — city-level filtering is used in Phase 1; geo-distance filtering is deferred to Phase 2 using Geohash or a geo library
+- If city population is small, QUERY_LIMIT=100 may exhaust available candidates quickly; expanding to country-level fallback is a Phase 2 enhancement
+
+### Next Up
+- Task 24: Cloud Function onSwipeCreated (Firestore trigger, mutual like detection, match document creation, stats increment)
+
 ## [Phase 3.1] — 2026-05-14
 ### Completed
 - Task 22: Cloud Function onUserCreated implemented (2nd gen, asia-southeast1)
