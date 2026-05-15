@@ -24,6 +24,26 @@
 - What Phase X.Y+1 should tackle
 ```
 
+## [Phase 3.3] — 2026-05-15
+### Completed
+- Task 24: Cloud Function onSwipeCreated implemented (2nd gen Firestore trigger, asia-southeast1)
+- Mutual like detection: reads reverse swipe doc, creates match only if both sides exist
+- matchId = [userId, targetId].sort().join('_') — canonical, consistent with future matchStore usage
+- Idempotency guard prevents duplicate match creation on at-least-once redelivery
+- Batch write atomically creates match doc + increments stats.matches on both user docs
+- sendMatchNotifications stubbed with logger.info — full push implementation deferred to Task 33
+
+### Files Created / Modified
+- functions/src/onSwipeCreated.ts: onDocumentCreated trigger, mutual like check, idempotency guard, batch write, notification stub
+- functions/src/index.ts: onSwipeCreated export added
+
+### Known Issues / Deferred
+- Push notifications to both matched users not yet sent — stub only; Task 33 (onNewMessage) will add Expo Push API calls
+- No Firestore transaction used (batch is sufficient here because the idempotency guard handles the race condition window; a full transaction would be more robust for very high concurrency — revisit in Phase 2 if needed)
+
+### Next Up
+- Task 25: Discovery Zustand store (discoveryStore.ts — fetchStack callable, swipeRight, swipeLeft, swipeSuperLike, daily limit check, auto-refetch when stack < 3)
+
 ## [Phase 3.2] — 2026-05-15
 ### Completed
 - Task 23: Cloud Function getDiscoveryStack implemented (2nd gen callable, asia-southeast1)
