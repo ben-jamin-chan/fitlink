@@ -2,12 +2,14 @@ import {
   deleteObject,
   getDownloadURL,
   ref,
-  uploadBytesResumable,
+  uploadBytes,
 } from 'firebase/storage'
 
 import { storage } from '@/services/firebase/config'
 
 import { compressImage } from '@/utils/imageUtils'
+
+const PROFILE_PHOTO_CONTENT_TYPE = 'image/jpeg'
 
 export const uploadProfilePhoto = async (
   userId: string,
@@ -20,31 +22,16 @@ export const uploadProfilePhoto = async (
   const blob = await response.blob()
   const filename = `users/${userId}/photos/photo_${index}_${Date.now()}.jpg`
   const storageRef = ref(storage, filename)
-  const uploadTask = uploadBytesResumable(storageRef, blob)
 
-  return new Promise<string>((resolve, reject): void => {
-    uploadTask.on(
-      'state_changed',
-      (snapshot): void => {
-        if (onProgress === undefined) {
-          return
-        }
+  onProgress?.(10)
 
-        const percent = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        )
-        onProgress(percent)
-      },
-      (error): void => {
-        reject(error)
-      },
-      (): void => {
-        getDownloadURL(uploadTask.snapshot.ref)
-          .then(resolve)
-          .catch(reject)
-      }
-    )
+  const snapshot = await uploadBytes(storageRef, blob, {
+    contentType: PROFILE_PHOTO_CONTENT_TYPE,
   })
+
+  onProgress?.(100)
+
+  return getDownloadURL(snapshot.ref)
 }
 
 export const uploadAllProfilePhotos = async (

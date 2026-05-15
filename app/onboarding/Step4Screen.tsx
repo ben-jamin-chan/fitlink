@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
@@ -7,6 +7,7 @@ import type { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 
 import { useOnboardingStore } from '@/store/onboardingStore'
+import type { OnboardingDraft } from '@/store/onboardingStore'
 
 import { Button } from '@/components/ui/Button'
 import { MultiSelect } from '@/components/ui/MultiSelect'
@@ -106,17 +107,42 @@ export const Step4Screen = (): React.JSX.Element => {
           max: MAX_GOALS,
         })
 
+  useEffect((): void => {
+    setCurrentStep(STEP)
+  }, [setCurrentStep])
+
+  const saveDraft = (): void => {
+    const partialDraft: Partial<OnboardingDraft> = {
+      fitnessGoals: goals,
+    }
+
+    if (diet !== null) {
+      partialDraft.dietaryPreference = diet
+    }
+
+    if (smoking !== null) {
+      partialDraft.smoking = smokingMap[smoking]
+    }
+
+    if (drinking !== null) {
+      partialDraft.drinking = drinkingMap[drinking]
+    }
+
+    updateDraft(partialDraft)
+  }
+
+  const handleBack = (): void => {
+    saveDraft()
+    setCurrentStep(3)
+    navigation.navigate('Step3')
+  }
+
   const handleNext = (): void => {
     if (diet === null || smoking === null || drinking === null) {
       return
     }
 
-    updateDraft({
-      dietaryPreference: diet,
-      fitnessGoals: goals,
-      smoking: smokingMap[smoking],
-      drinking: drinkingMap[drinking],
-    })
+    saveDraft()
     setCurrentStep(5)
     navigation.navigate('Step5')
   }
@@ -178,7 +204,7 @@ export const Step4Screen = (): React.JSX.Element => {
         <View style={styles.backButton}>
           <Button
             label={t('common.back')}
-            onPress={() => navigation.goBack()}
+            onPress={handleBack}
             variant="ghost"
           />
         </View>

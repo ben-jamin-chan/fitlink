@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   FlatList,
@@ -72,8 +72,22 @@ export default function Step5Screen(): React.JSX.Element {
   const charsRemaining = MAX_BIO_LENGTH - charCount
   const isValid = charCount >= MIN_BIO_LENGTH
 
-  const handleNext = (): void => {
+  useEffect((): void => {
+    setCurrentStep(STEP)
+  }, [setCurrentStep])
+
+  const saveDraft = (): void => {
     updateDraft({ bio, height, religion })
+  }
+
+  const handleBack = (): void => {
+    saveDraft()
+    setCurrentStep(4)
+    navigation.navigate('Step4')
+  }
+
+  const handleNext = (): void => {
+    saveDraft()
     setCurrentStep(6)
     navigation.navigate('Step6')
   }
@@ -192,7 +206,7 @@ export default function Step5Screen(): React.JSX.Element {
         <View style={styles.backButton}>
           <Button
             label={t('common.back')}
-            onPress={() => navigation.goBack()}
+            onPress={handleBack}
             variant="outline"
           />
         </View>

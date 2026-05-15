@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
@@ -29,7 +29,17 @@ export default function Step2Screen(): React.JSX.Element {
 
   const [photoUris, setPhotoUris] = useState<string[]>(draft.photoUris ?? [])
 
+  useEffect((): void => {
+    setCurrentStep(STEP)
+  }, [setCurrentStep])
+
   const isValid = photoUris.length >= MIN_PHOTOS
+
+  const handleBack = (): void => {
+    updateDraft({ photoUris })
+    setCurrentStep(1)
+    navigation.navigate('Step1')
+  }
 
   const handleNext = (): void => {
     updateDraft({ photoUris })
@@ -38,25 +48,36 @@ export default function Step2Screen(): React.JSX.Element {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-    >
-      <OnboardingHeader step={STEP} />
+    <View style={styles.root}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <OnboardingHeader step={STEP} />
 
-      <View style={styles.content}>
-        <Text style={styles.title}>{t('onboarding.step2.title')}</Text>
-        <Text style={styles.subtitle}>{t('onboarding.step2.subtitle')}</Text>
+        <View style={styles.content}>
+          <Text style={styles.title}>{t('onboarding.step2.title')}</Text>
+          <Text style={styles.subtitle}>{t('onboarding.step2.subtitle')}</Text>
 
-        <View style={styles.gridWrapper}>
-          <PhotoGrid photoUris={photoUris} onPhotosChange={setPhotoUris} />
+          <View style={styles.gridWrapper}>
+            <PhotoGrid photoUris={photoUris} onPhotosChange={setPhotoUris} />
+          </View>
+
+          <Text style={styles.guidelines}>
+            {t('onboarding.step2.guidelines')}
+          </Text>
         </View>
+      </ScrollView>
 
-        <Text style={styles.guidelines}>
-          {t('onboarding.step2.guidelines')}
-        </Text>
-
-        <View style={styles.buttonWrapper}>
+      <View style={styles.buttonRow}>
+        <View style={styles.backButton}>
+          <Button
+            label={t('common.back')}
+            onPress={handleBack}
+            variant="outline"
+          />
+        </View>
+        <View style={styles.nextButton}>
           <Button
             label={t('common.next')}
             onPress={handleNext}
@@ -64,11 +85,15 @@ export default function Step2Screen(): React.JSX.Element {
           />
         </View>
       </View>
-    </ScrollView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flexGrow: 1,
     backgroundColor: colors.background,
@@ -98,7 +123,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
-  buttonWrapper: {
-    marginTop: spacing.md,
+  buttonRow: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.gray[200],
+    backgroundColor: colors.background,
+    gap: spacing.sm,
+  },
+  backButton: {
+    flex: 1,
+  },
+  nextButton: {
+    flex: 2,
   },
 })

@@ -10,6 +10,8 @@ import {
 
 import * as Localization from 'expo-localization'
 import { GeoPoint } from 'firebase/firestore'
+import { useNavigation } from '@react-navigation/native'
+import type { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 
 import { useAuthStore } from '@/store/authStore'
@@ -22,6 +24,7 @@ import { MultiSelect } from '@/components/ui/MultiSelect'
 import { Slider } from '@/components/ui/Slider'
 
 import { OnboardingHeader } from '@/app/onboarding/OnboardingNavigator'
+import type { OnboardingStackParamList } from '@/app/onboarding/OnboardingNavigator'
 import { createUserProfile } from '@/services/firebase/firestore'
 import { uploadAllProfilePhotos } from '@/services/firebase/storage'
 import { mapFirebaseError } from '@/utils/errorUtils'
@@ -43,6 +46,8 @@ const MAX_DISTANCE_KM = 100
 const DEFAULT_DISTANCE_KM = 25
 const FALLBACK_COUNTRY = 'Malaysia'
 const FALLBACK_LANGUAGE = 'en'
+
+type Step6NavigationProp = StackNavigationProp<OnboardingStackParamList, 'Step6'>
 
 interface LookingForOption {
   label: string
@@ -135,6 +140,7 @@ const buildLocation = (city: string, country: string): UserLocation => ({
 
 export default function Step6Screen(): React.JSX.Element {
   const { t } = useTranslation()
+  const navigation = useNavigation<Step6NavigationProp>()
   const { draft, updateDraft, setCurrentStep, clearDraft } =
     useOnboardingStore()
   const { user, setHasCompletedOnboarding } = useAuthStore()
@@ -301,11 +307,7 @@ export default function Step6Screen(): React.JSX.Element {
     setAgeMax(Math.max(value, ageMin + 1))
   }
 
-  const handleCompleteProfile = async (): Promise<void> => {
-    if (!isValid || user === null) {
-      return
-    }
-
+  const saveDraft = (): void => {
     updateDraft({
       lookingFor,
       preferredAgeMin: ageMin,
@@ -313,6 +315,20 @@ export default function Step6Screen(): React.JSX.Element {
       preferredDistanceKm: distanceKm,
       preferredGenders: genderPreference,
     })
+  }
+
+  const handleBack = (): void => {
+    saveDraft()
+    setCurrentStep(5)
+    navigation.navigate('Step5')
+  }
+
+  const handleCompleteProfile = async (): Promise<void> => {
+    if (!isValid || user === null) {
+      return
+    }
+
+    saveDraft()
 
     const requiredDraft = getRequiredDraft()
     if (requiredDraft === null) {
@@ -464,12 +480,22 @@ export default function Step6Screen(): React.JSX.Element {
       </ScrollView>
 
       <View style={styles.buttonRow}>
-        <Button
-          label={t('onboarding.completeProfile')}
-          onPress={handleCompleteProfile}
-          disabled={!isValid || isSubmitting}
-          loading={isSubmitting}
-        />
+        <View style={styles.backButton}>
+          <Button
+            label={t('common.back')}
+            onPress={handleBack}
+            variant="outline"
+            disabled={isSubmitting}
+          />
+        </View>
+        <View style={styles.nextButton}>
+          <Button
+            label={t('onboarding.completeProfile')}
+            onPress={handleCompleteProfile}
+            disabled={!isValid || isSubmitting}
+            loading={isSubmitting}
+          />
+        </View>
       </View>
     </View>
   )
@@ -512,10 +538,18 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   buttonRow: {
+    flexDirection: 'row',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.gray[200],
     backgroundColor: colors.background,
+    gap: spacing.sm,
+  },
+  backButton: {
+    flex: 1,
+  },
+  nextButton: {
+    flex: 2,
   },
 })

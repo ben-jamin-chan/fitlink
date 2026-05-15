@@ -14,7 +14,7 @@ import { getDatabase } from 'firebase/database'
 import type { Database } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
 import type { Auth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, initializeFirestore } from 'firebase/firestore'
 import type { Firestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import type { FirebaseStorage } from 'firebase/storage'
@@ -29,11 +29,13 @@ const firebaseConfig = {
   databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL,
 }
 
-const app: FirebaseApp =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+const isNewApp = getApps().length === 0
+const app: FirebaseApp = isNewApp ? initializeApp(firebaseConfig) : getApp()
 
 export const auth: Auth = getAuth(app)
-export const db: Firestore = getFirestore(app)
+export const db: Firestore = isNewApp
+  ? initializeFirestore(app, { experimentalForceLongPolling: true })
+  : getFirestore(app)
 export const storage: FirebaseStorage = getStorage(app)
 export const rtdb: Database = getDatabase(app)
 export { app }

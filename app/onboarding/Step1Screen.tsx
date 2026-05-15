@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import {
   Platform,
@@ -77,6 +77,10 @@ export default function Step1Screen(): React.JSX.Element {
   const [showPicker, setShowPicker] = useState(false)
   const [gender, setGender] = useState<Gender | undefined>(draft.gender)
   const [city, setCity] = useState(draft.city ?? '')
+
+  useEffect((): void => {
+    setCurrentStep(STEP)
+  }, [setCurrentStep])
 
   const firstNameError =
     firstName.length > 0 && !step1Schema.shape.firstName.safeParse(firstName).success

@@ -10,6 +10,8 @@ import { db } from '@/services/firebase/config'
 
 import type { LookingFor, UserProfile } from '@/types/user'
 
+const FIRESTORE_WRITE_TIMEOUT_MS = 20000
+
 interface CreateUserProfileInput {
   uid: string
   firstName: string
@@ -30,6 +32,24 @@ interface CreateUserProfileInput {
   lookingFor: LookingFor[]
   preferences: UserProfile['preferences']
   language: string
+}
+
+const withWriteTimeout = async (operation: Promise<void>): Promise<void> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+  const timeout = new Promise<void>((_, reject): void => {
+    timeoutId = setTimeout((): void => {
+      reject(new Error('firestore-write-timeout'))
+    }, FIRESTORE_WRITE_TIMEOUT_MS)
+  })
+
+  try {
+    await Promise.race([operation, timeout])
+  } finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId)
+    }
+  }
 }
 
 export const createUserProfile = async (
@@ -69,7 +89,7 @@ export const createUserProfile = async (
     lastActive: serverTimestamp(),
   }
 
-  await setDoc(userRef, profileData)
+  await withWriteTimeout(setDoc(userRef, profileData))
 }
 
 export const updateUserProfile = async (
@@ -89,8 +109,10 @@ export const updateUserProfile = async (
 ): Promise<void> => {
   const userRef = doc(db, 'users', userId)
 
-  await updateDoc(userRef, {
-    ...data,
-    lastActive: serverTimestamp(),
-  })
+  await withWriteTimeout(
+    updateDoc(userRef, {
+      ...data,
+      lastActive: serverTimestamp(),
+    })
+  )
 }

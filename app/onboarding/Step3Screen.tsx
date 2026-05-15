@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
@@ -7,6 +7,7 @@ import type { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 
 import { useOnboardingStore } from '@/store/onboardingStore'
+import type { OnboardingDraft } from '@/store/onboardingStore'
 
 import { Button } from '@/components/ui/Button'
 import { MultiSelect } from '@/components/ui/MultiSelect'
@@ -91,16 +92,38 @@ export default function Step3Screen(): React.JSX.Element {
     selectedFitnessLevel !== null &&
     selectedFrequency !== null
 
+  useEffect((): void => {
+    setCurrentStep(STEP)
+  }, [setCurrentStep])
+
+  const saveDraft = (): void => {
+    const partialDraft: Partial<OnboardingDraft> = {
+      activities,
+    }
+
+    if (selectedFitnessLevel !== null) {
+      partialDraft.fitnessLevel = fitnessLevelMap[selectedFitnessLevel]
+    }
+
+    if (selectedFrequency !== null) {
+      partialDraft.workoutFrequency = selectedFrequency
+    }
+
+    updateDraft(partialDraft)
+  }
+
+  const handleBack = (): void => {
+    saveDraft()
+    setCurrentStep(2)
+    navigation.navigate('Step2')
+  }
+
   const handleNext = (): void => {
     if (selectedFitnessLevel === null || selectedFrequency === null) {
       return
     }
 
-    updateDraft({
-      activities,
-      fitnessLevel: fitnessLevelMap[selectedFitnessLevel],
-      workoutFrequency: selectedFrequency,
-    })
+    saveDraft()
     setCurrentStep(4)
     navigation.navigate('Step4')
   }
@@ -145,11 +168,20 @@ export default function Step3Screen(): React.JSX.Element {
         <View style={styles.bottomSpacer} />
       </ScrollView>
       <View style={styles.buttonContainer}>
-        <Button
-          label={t('common.next')}
-          onPress={handleNext}
-          disabled={!isValid}
-        />
+        <View style={styles.backButton}>
+          <Button
+            label={t('common.back')}
+            onPress={handleBack}
+            variant="outline"
+          />
+        </View>
+        <View style={styles.nextButton}>
+          <Button
+            label={t('common.next')}
+            onPress={handleNext}
+            disabled={!isValid}
+          />
+        </View>
       </View>
     </View>
   )
@@ -177,9 +209,17 @@ const styles = StyleSheet.create({
     height: spacing.xxxl,
   },
   buttonContainer: {
+    flexDirection: 'row',
     backgroundColor: colors.background,
     paddingBottom: spacing.xl,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+    gap: spacing.sm,
+  },
+  backButton: {
+    flex: 1,
+  },
+  nextButton: {
+    flex: 2,
   },
 })
