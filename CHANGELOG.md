@@ -4,6 +4,30 @@
 
 ---
 
+## [Phase 3.5] — 2026-05-16
+### Completed
+- Task 26: SwipeCard component built (Reanimated 3, Gesture.Pan(), 60fps)
+- ActivityBadge chip component created
+- SwipeLabel overlay component created (LIKE/NOPE/SUPER, SharedValue-driven opacity)
+- expo-linear-gradient installed and gradient overlay implemented
+- Photo carousel with left/centre/right tap zones
+- Haptics wired per swipe direction
+
+### Files Created / Modified
+- components/discovery/SwipeCard.tsx: full swipe card with gesture, animation, exit, layout
+- components/discovery/SwipeLabel.tsx: LIKE/NOPE/SUPER labels driven by SharedValue opacity
+- components/discovery/ActivityBadge.tsx: pill chip for activity and fitness level display
+- package.json, package-lock.json: expo-linear-gradient installed
+- i18n/en.json, my.json, zh.json, ta.json: discovery.swipe.* and activeNow/activeHoursAgo/activeDaysAgo keys added
+
+### Known Issues / Deferred
+- Actual GPS distance from viewer not shown — deferred to Phase 2; city name and lastActive shown instead
+- Pinch-to-zoom on card photo deferred to FullProfileModal (Task 28)
+- "Active today" badge from fitness tracker data deferred to Phase 2 (Strava/Health integration)
+
+### Next Up
+- Task 27: DiscoveryScreen (renders card stack, wires ActionButtons to discoveryStore, empty state, upsell modal stub)
+
 ## [Phase 3.4] — 2026-05-16
 ### Completed
 - Task 25: Discovery Zustand store implemented (discoveryStore.ts)

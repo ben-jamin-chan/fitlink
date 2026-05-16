@@ -250,10 +250,20 @@
     "upgradeNow": "Upgrade Now",
     "maybeLater": "Maybe Later",
     "loading": "Finding your matches...",
+    "activeNow": "Active now",
+    "activeHoursAgo_one": "Active {{count}}h ago",
+    "activeHoursAgo_other": "Active {{count}}h ago",
+    "activeDaysAgo_one": "Active {{count}}d ago",
+    "activeDaysAgo_other": "Active {{count}}d ago",
     "emptyState": {
       "title": "No More Profiles",
       "subtitle": "Check back later or expand your preferences",
       "refresh": "Refresh"
+    },
+    "swipe": {
+      "like": "LIKE",
+      "nope": "NOPE",
+      "super": "SUPER"
     },
     "labels": {
       "like": "LIKE",
