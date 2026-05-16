@@ -1,6 +1,8 @@
 import {
   Timestamp,
   doc,
+  getDoc,
+  increment,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -115,4 +117,77 @@ export const updateUserProfile = async (
       lastActive: serverTimestamp(),
     })
   )
+}
+
+/** Shape of the dailyLikes sub-document at /users/{userId}/dailyLikes/doc */
+export interface DailyLikesDoc {
+  count: number
+  resetAt: Timestamp
+}
+
+const getTodayMidnight = (): Date => {
+  const todayMidnight = new Date()
+  todayMidnight.setHours(0, 0, 0, 0)
+  return todayMidnight
+}
+
+/**
+ * Returns the current dailyLikes doc for a user.
+ * Missing or stale counters are treated as reset to 0 for today.
+ */
+export const getDailyLikesDoc = async (
+  userId: string
+): Promise<DailyLikesDoc> => {
+  const ref = doc(db, 'users', userId, 'dailyLikes', 'doc')
+  const snap = await getDoc(ref)
+  const todayMidnight = getTodayMidnight()
+
+  if (!snap.exists()) {
+    return { count: 0, resetAt: Timestamp.fromDate(todayMidnight) }
+  }
+
+  const data = snap.data()
+  const count = typeof data.count === 'number' ? data.count : 0
+  const resetAt =
+    data.resetAt instanceof Timestamp
+      ? data.resetAt
+      : Timestamp.fromDate(todayMidnight)
+
+  if (resetAt.toDate() < todayMidnight) {
+    return { count: 0, resetAt: Timestamp.fromDate(todayMidnight) }
+  }
+
+  return { count, resetAt }
+}
+
+/**
+ * Increments the daily like count by 1.
+ * Missing or stale counters are reset first, then counted as today's first like.
+ */
+export const incrementDailyLikes = async (userId: string): Promise<void> => {
+  const ref = doc(db, 'users', userId, 'dailyLikes', 'doc')
+  const snap = await getDoc(ref)
+  const todayMidnight = getTodayMidnight()
+  const nextMidnight = new Date(todayMidnight)
+  nextMidnight.setDate(nextMidnight.getDate() + 1)
+
+  const resetAt = snap.exists() ? snap.data().resetAt : undefined
+  const isStale =
+    !(resetAt instanceof Timestamp) || resetAt.toDate() < todayMidnight
+
+  if (!snap.exists() || isStale) {
+    await setDoc(
+      ref,
+      {
+        count: 1,
+        resetAt: Timestamp.fromDate(nextMidnight),
+      },
+      { merge: true }
+    )
+    return
+  }
+
+  await updateDoc(ref, {
+    count: increment(1),
+  })
 }

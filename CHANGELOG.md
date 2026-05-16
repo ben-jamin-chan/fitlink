@@ -4,6 +4,28 @@
 
 ---
 
+## [Phase 3.4] — 2026-05-16
+### Completed
+- Task 25: Discovery Zustand store implemented (discoveryStore.ts)
+- fetchStack calls getDiscoveryStack callable, resolves IDs to UserProfile objects
+- swipeRight/swipeLeft/swipeSuperLike write to Firestore swipe subcollections
+- Daily like limit enforced for free users (50 likes/day, reset at midnight)
+- Auto-refetch signal (isRefetching) fires when stack drops to <= 3 cards
+- getDailyLikesDoc and incrementDailyLikes added to services/firebase/firestore.ts
+
+### Files Created / Modified
+- store/discoveryStore.ts: full discovery store with all swipe actions and limit logic
+- services/firebase/firestore.ts: getDailyLikesDoc, incrementDailyLikes added
+- i18n/en.json, my.json, zh.json, ta.json: discovery.* keys added/confirmed
+
+### Known Issues / Deferred
+- advanceStack sets isRefetching:true as a signal; DiscoveryScreen (Task 27) must observe this flag and call fetchStack(userId) itself; the store does not auto-call fetchStack to avoid auth coupling
+- Distance-based filtering still deferred (same as Task 23 note); city-level only in Phase 1
+- score field still present in getDiscoveryStack response; strip before production
+
+### Next Up
+- Task 26: SwipeCard component (Reanimated 3, Gesture.Pan(), 60fps, LIKE/NOPE/SUPER labels, photo pagination dots)
+
 ## Format
 
 ```

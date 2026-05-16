@@ -241,16 +241,19 @@
     }
   },
   "discovery": {
+    "noMore": "No more profiles nearby",
+    "noMoreSubtitle": "Check back later or adjust your distance range",
+    "refresh": "Refresh",
+    "editPreferences": "Edit Preferences",
+    "limitReached": "You're out of likes for today",
+    "limitReachedSubtitle": "Likes reset at midnight. Upgrade for unlimited likes.",
+    "upgradeNow": "Upgrade Now",
+    "maybeLater": "Maybe Later",
+    "loading": "Finding your matches...",
     "emptyState": {
       "title": "No More Profiles",
       "subtitle": "Check back later or expand your preferences",
       "refresh": "Refresh"
-    },
-    "limitReached": {
-      "title": "You're Out of Likes",
-      "subtitle": "Upgrade to Premium for unlimited likes",
-      "upgrade": "Upgrade Now",
-      "later": "Maybe Later"
     },
     "labels": {
       "like": "LIKE",
