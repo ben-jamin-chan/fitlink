@@ -10,6 +10,7 @@ import { useDiscoveryStore } from '@/store/discoveryStore'
 
 import { ActionButtons } from '@/components/discovery/ActionButtons'
 import { EmptyState } from '@/components/discovery/EmptyState'
+import { FullProfileModal } from '@/components/discovery/FullProfileModal'
 import { SwipeCard } from '@/components/discovery/SwipeCard'
 import {
   UpsellModal,
@@ -41,6 +42,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   const [upsellVisible, setUpsellVisible] = useState(false)
   const [upsellTrigger, setUpsellTrigger] =
     useState<UpsellTrigger>('super_like')
+  const [modalProfile, setModalProfile] = useState<UserProfile | null>(null)
 
   const visibleStack = useMemo(
     () => stack.slice(currentIndex, currentIndex + STACK_SIZE),
@@ -137,8 +139,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   }
 
   const handleTapInfo = (user: UserProfile): void => {
-    // TODO: Task 28 — open FullProfileModal
-    Alert.alert(user.firstName, user.bio ?? '')
+    setModalProfile(user)
   }
 
   const handleRefresh = (): void => {
@@ -207,6 +208,17 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
         trigger={upsellTrigger}
         onDismiss={() => setUpsellVisible(false)}
         onUpgrade={handleUpgrade}
+      />
+
+      <FullProfileModal
+        visible={modalProfile !== null}
+        profile={modalProfile}
+        viewerProfile={null}
+        onClose={() => setModalProfile(null)}
+        onActionComplete={() => {
+          setModalProfile(null)
+          advanceStack()
+        }}
       />
     </SafeAreaView>
   )

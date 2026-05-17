@@ -328,8 +328,17 @@
     "icebreaker": "You both love {{activity}} — say hi!"
   },
   "profile": {
+    "activeNow": "Active now",
+    "activeHoursAgo": "Active {{hours}}h ago",
+    "activeDaysAgo": "Active {{days}}d ago",
+    "kmAway": "{{distance}} km away",
+    "sameCity": "Same city",
+    "metaSeparator": "·",
+    "verified": "Verified profile",
+    "readMore": "Read more",
+    "showLess": "Show less",
+    "bioTruncated": "{{bio}}...",
     "editProfile": "Edit Profile",
-    "verified": "Verified",
     "active": "Active now",
     "activeRecently": "Active recently",
     "stats": {
@@ -337,10 +346,56 @@
       "matches": "Matches"
     },
     "sections": {
+      "fitness": "Fitness & Activities",
       "fitnessProfile": "Fitness Profile",
       "lifestyle": "Lifestyle",
       "about": "About",
-      "inCommon": "In Common"
+      "inCommon": "What You Have in Common"
+    },
+    "fitness": {
+      "level": "Fitness Level",
+      "frequency": "Works out",
+      "goals": "Goals"
+    },
+    "lifestyle": {
+      "diet": "Diet",
+      "smoking": "Smoking",
+      "drinking": "Drinking"
+    },
+    "about": {
+      "height": "Height",
+      "heightCm": "{{height}} cm",
+      "religion": "Religion",
+      "lookingFor": "Looking For"
+    },
+    "lookingFor": {
+      "friends": "Friends",
+      "workout_partners": "Workout Partners",
+      "dating": "Dating"
+    },
+    "inCommon": {
+      "sharedActivities": "You both love {{activity}}",
+      "sharedLevel": "You're both {{level}}",
+      "sharedDiet": "You both prefer {{diet}}",
+      "noCommon": "Explore their profile to find out more"
+    },
+    "actions": {
+      "report": "Report User",
+      "close": "Close"
+    },
+    "report": {
+      "title": "Report {{name}}",
+      "categories": {
+        "inappropriatePhotos": "Inappropriate Photos",
+        "harassment": "Harassment or Bullying",
+        "spam": "Spam or Scam",
+        "fakeProfile": "Fake Profile",
+        "underage": "Underage User",
+        "solicitation": "Solicitation",
+        "other": "Other"
+      },
+      "submit": "Submit Report",
+      "submitted": "Report submitted. Thank you for keeping fitlink safe."
     }
   },
   "settings": {

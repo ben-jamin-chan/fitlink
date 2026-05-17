@@ -4,6 +4,33 @@
 
 ---
 
+## [Phase 3.7] — 2026-05-17
+### Completed
+- Task 28: FullProfileModal built — scrollable profile, photo carousel, shared interest highlights, action bar
+- PhotoViewer component created — pinch-to-zoom, swipe-down to dismiss
+- ProfileSection reusable section wrapper created
+- ActivityBadge extended with 'shared' variant (highlighted shared activities)
+- DiscoveryScreen handleInfo stub replaced with real modal wiring
+- Report category sheet implemented (Firestore write stubbed, TODO Task 38)
+- i18n profile.* keys added to all 4 language files
+
+### Files Created / Modified
+- components/discovery/FullProfileModal.tsx: full scrollable modal, photo carousel, sections, action bar, report sheet
+- components/discovery/PhotoViewer.tsx: fullscreen viewer, pinch-to-zoom, swipe-down dismiss
+- components/profile/ProfileSection.tsx: reusable titled section wrapper
+- components/discovery/ActivityBadge.tsx: 'shared' variant added
+- app/discovery/DiscoveryScreen.tsx: handleInfo stub replaced, FullProfileModal wired with modalProfile state
+- i18n/en.json, my.json, zh.json, ta.json: profile.* namespace added
+
+### Known Issues / Deferred
+- Report Firestore write (addDoc to /reports) deferred to Task 38 (SettingsScreen reporting service)
+- Distance display (X km away) shows city name only — geo-distance calculation deferred to Phase 2
+- Pinch-to-zoom on card photos inside SwipeCard still not implemented — interaction model differs from modal
+- Discovery currently passes `viewerProfile={null}` because `store/profileStore.ts` is not present in this repo state; shared-interest rendering is ready for callers that provide the viewer profile.
+
+### Next Up
+- Task 29: Match Store (Firestore real-time listener on /matches, MatchWithProfile type resolution, unmatch action)
+
 ## [Phase 3.6] — 2026-05-17
 ### Completed
 - Task 27: DiscoveryScreen built — card stack orchestration, z-ordered rendering, gesture isolation
