@@ -24,6 +24,7 @@ interface DiscoveryState {
   error: string | null
   dailyLikesCount: number
   isLimitReached: boolean
+  dailyLimitReached: boolean
   isRefetching: boolean
 }
 
@@ -55,6 +56,7 @@ const initialState: DiscoveryState = {
   error: null,
   dailyLikesCount: 0,
   isLimitReached: false,
+  dailyLimitReached: false,
   isRefetching: false,
 }
 
@@ -113,7 +115,7 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
       return
     }
 
-    set({ isLoading: true, error: null })
+    set({ isLoading: true, error: null, dailyLimitReached: false })
 
     try {
       const functions = getFunctions(undefined, 'asia-southeast1')
@@ -155,6 +157,7 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
           set({
             dailyLikesCount: dailyLikes.count,
             isLimitReached: true,
+            dailyLimitReached: true,
           })
           return 'limit_reached'
         }
@@ -181,10 +184,10 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         set({
           dailyLikesCount: nextDailyLikesCount,
           isLimitReached: nextDailyLikesCount >= FREE_DAILY_LIKE_LIMIT,
+          dailyLimitReached: nextDailyLikesCount >= FREE_DAILY_LIKE_LIMIT,
         })
       }
 
-      get().advanceStack()
       return 'ok'
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Swipe failed'
@@ -202,9 +205,8 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         createdAt: serverTimestamp(),
       })
     } catch (error) {
-      console.warn('swipeLeft write failed:', error)
-    } finally {
-      get().advanceStack()
+      const message = error instanceof Error ? error.message : 'Pass failed'
+      set({ error: message })
     }
   },
 
@@ -225,7 +227,6 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         isSuperLike: true,
         createdAt: serverTimestamp(),
       })
-      get().advanceStack()
       return 'ok'
     } catch (error) {
       const message =
@@ -241,9 +242,12 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
       set({
         dailyLikesCount: data.count,
         isLimitReached: data.count >= FREE_DAILY_LIKE_LIMIT,
+        dailyLimitReached: data.count >= FREE_DAILY_LIKE_LIMIT,
       })
     } catch (error) {
-      console.warn('checkDailyLimit failed:', error)
+      const message =
+        error instanceof Error ? error.message : 'Daily limit check failed'
+      set({ error: message })
     }
   },
 

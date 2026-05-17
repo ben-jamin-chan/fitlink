@@ -5,6 +5,8 @@ import { StyleSheet, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 
+import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
+
 import { colors, spacing, typography } from '@/constants/theme'
 
 export type MainTabParamList = {
@@ -48,15 +50,11 @@ export const MainTabNavigator = (): React.JSX.Element => (
       },
     })}
   >
-    <Tab.Screen name="Discover" component={DiscoverPlaceholder} />
+    <Tab.Screen name="Discover" component={DiscoveryScreen} />
     <Tab.Screen name="Matches" component={MatchesPlaceholder} />
     <Tab.Screen name="Profile" component={ProfilePlaceholder} />
     <Tab.Screen name="Settings" component={SettingsPlaceholder} />
   </Tab.Navigator>
-)
-
-const DiscoverPlaceholder = (): React.JSX.Element => (
-  <PlaceholderScreen name="Discover" />
 )
 
 const MatchesPlaceholder = (): React.JSX.Element => (

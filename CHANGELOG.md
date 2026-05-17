@@ -4,6 +4,35 @@
 
 ---
 
+## [Phase 3.6] — 2026-05-17
+### Completed
+- Task 27: DiscoveryScreen built — card stack orchestration, z-ordered rendering, gesture isolation
+- ActionButtons component: 5 buttons, haptics, premium lock badge, disabled state
+- EmptyState component: icon, copy, Refresh and Edit Preferences CTAs
+- UpsellModal stub: trigger-aware headline, benefits list, Coming Soon alert on upgrade tap
+- dailyLimitReached flag added to discoveryStore
+- i18n keys added: discovery.empty.* and discovery.upsell.*
+- MainTabNavigator Discover tab wired to real DiscoveryScreen
+
+### Files Created / Modified
+- components/discovery/ActionButtons.tsx: 5 action buttons, haptics, premium gate lock badge
+- components/discovery/EmptyState.tsx: empty stack view with refresh CTA
+- components/discovery/UpsellModal.tsx: presentational paywall stub, 3 trigger types
+- app/discovery/DiscoveryScreen.tsx: card stack, swipe handlers, auto-refetch, upsell integration
+- store/discoveryStore.ts: dailyLimitReached boolean added and swipe advancement ownership moved to DiscoveryScreen
+- i18n/en.json, my.json, zh.json, ta.json: discovery.empty.* and discovery.upsell.* keys added
+- app/navigation/MainTabNavigator.tsx: Discover tab placeholder replaced with DiscoveryScreen
+
+### Known Issues / Deferred
+- FullProfileModal (Task 28) not yet built — onTapInfo shows Alert stub with TODO comment
+- Rewind action is no-op even for premium users — full undo stack deferred to Phase 2
+- Edit Preferences button in EmptyState calls no-op stub — wired in Task 38 (SettingsScreen)
+- UpsellModal onUpgrade shows Coming Soon alert only — Phase 2 wires to PremiumScreen
+- Premium subscription state is not yet exposed by authStore/profileStore in this repo state, so DiscoveryScreen currently treats users as free tier until that store source exists
+
+### Next Up
+- Task 28: FullProfileModal (scrollable profile view, shared-interest highlights, photo fullscreen, like/pass/super like from modal)
+
 ## [Phase 3.5] — 2026-05-16
 ### Completed
 - Task 26: SwipeCard component built (Reanimated 3, Gesture.Pan(), 60fps)

@@ -250,6 +250,25 @@
     "upgradeNow": "Upgrade Now",
     "maybeLater": "Maybe Later",
     "loading": "Finding your matches...",
+    "empty": {
+      "title": "No more profiles nearby",
+      "subtitle": "Check back later or expand your distance range",
+      "refresh": "Refresh",
+      "editPreferences": "Edit Preferences"
+    },
+    "upsell": {
+      "outOfLikes": "You're Out of Likes",
+      "superLike": "Unlock Super Likes",
+      "rewind": "Unlock Rewind",
+      "upgradeCta": "Upgrade to Premium",
+      "maybeLater": "Maybe Later",
+      "benefit1": "Unlimited Likes",
+      "benefit2": "5 Super Likes per week",
+      "benefit3": "Rewind last swipe",
+      "benefit4": "See who liked you",
+      "comingSoon": "Coming Soon",
+      "comingSoonMsg": "Premium subscriptions launching soon!"
+    },
     "activeNow": "Active now",
     "activeHoursAgo_one": "Active {{count}}h ago",
     "activeHoursAgo_other": "Active {{count}}h ago",
