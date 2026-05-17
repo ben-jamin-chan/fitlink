@@ -298,27 +298,52 @@
     }
   },
   "matches": {
+    "title": "Matches",
     "tabs": {
       "matches": "Matches",
       "messages": "Messages"
     },
-    "emptyMatches": {
-      "title": "No Matches Yet",
-      "subtitle": "Keep swiping to find your fitness match!"
+    "empty": {
+      "matchesTitle": "No Matches Yet",
+      "matchesSub": "Start swiping to find your fitness match!",
+      "startSwiping": "Start Swiping",
+      "messagesTitle": "No Messages Yet",
+      "messagesSub": "Say hi to your matches and break the ice!",
+      "viewMatches": "View Matches"
     },
-    "emptyMessages": {
-      "title": "No Messages Yet",
-      "subtitle": "Start a conversation with one of your matches"
+    "actions": {
+      "viewProfile": "View Profile",
+      "unmatch": "Unmatch",
+      "report": "Report"
     },
-    "newBadge": "NEW",
-    "unmatch": "Unmatch",
-    "report": "Report",
-    "viewProfile": "View Profile",
+    "unmatch": {
+      "title": "Unmatch {{name}}?",
+      "message": "This will remove the match and delete all messages.",
+      "confirm": "Unmatch"
+    },
+    "messages": {
+      "noMessages": "Say hello!"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m",
+      "hoursAgo": "{{count}}h",
+      "yesterday": "Yesterday"
+    },
+    "badge": {
+      "new": "NEW"
+    },
+    "chat": {
+      "placeholder": "Chat - Task 32"
+    },
     "celebration": {
       "title": "It's a Match!",
       "subtitle": "You and {{name}} liked each other",
       "sendMessage": "Send Message",
       "keepSwiping": "Keep Swiping"
+    },
+    "error": {
+      "loadFailed": "Could not load matches. Please try again."
     }
   },
   "chat": {
@@ -396,25 +421,6 @@
       },
       "submit": "Submit Report",
       "submitted": "Report submitted. Thank you for keeping fitlink safe."
-    }
-  },
-  "matches": {
-    "tabMatches": "Matches",
-    "tabMessages": "Messages",
-    "noMatches": "No Matches Yet",
-    "noMatchesSubtitle": "Start swiping to find your fitness match!",
-    "noMessages": "No Messages Yet",
-    "noMessagesSubtitle": "Say hi to your matches and break the ice!",
-    "newBadge": "NEW",
-    "activeNow": "Active now",
-    "unmatch": "Unmatch",
-    "unmatchConfirmTitle": "Unmatch {{name}}?",
-    "unmatchConfirmMessage": "This will remove the match and delete all messages.",
-    "unmatchConfirm": "Unmatch",
-    "viewProfile": "View Profile",
-    "report": "Report",
-    "error": {
-      "loadFailed": "Could not load matches. Please try again."
     }
   },
   "settings": {

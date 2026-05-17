@@ -4,6 +4,30 @@
 
 ---
 
+## [Phase 4.2] — 2026-05-17
+### Completed
+- Task 30: MatchesScreen built — 2-tab (Matches grid + Messages list), real-time from matchStore
+- MatchCard component: photo, name, NEW badge, unread badge, online dot, verified badge, long-press action sheet
+- MessageListItem component: avatar with online dot, name, message preview, relative timestamp, unread badge, swipe-to-unmatch
+- MatchesNavigator (Stack) created to wrap MatchesScreen + Chat placeholder
+- MainTabNavigator Matches tab wired to MatchesNavigator
+- i18n matches.* keys confirmed / extended in all 4 language files
+
+### Files Created / Modified
+- components/chat/MatchCard.tsx: grid card component with badges and long-press actions
+- components/chat/MessageListItem.tsx: list row with swipe-to-unmatch via PanResponder + Animated
+- app/matches/MatchesScreen.tsx: tab switcher, grid, list, empty states, matchStore subscription
+- app/navigation/MainTabNavigator.tsx: MatchesNavigator (stack) added, Chat placeholder registered
+- i18n/en.json, my.json, zh.json, ta.json: matches.* keys confirmed / added
+
+### Known Issues / Deferred
+- Navigation to Chat uses placeholder screen — real ChatScreen built in Task 32
+- "View Profile" in long-press action sheet is a no-op stub — wired when FullProfileModal accepts external trigger
+- "Report" in long-press action sheet is a no-op stub — reporting service wired in Task 38
+
+### Next Up
+- Task 31: Chat Store (chatStore.ts, services/firebase/realtime.ts — RTDB subscription, send message, offline queue)
+
 ## [Phase 4.1] — 2026-05-17
 ### Completed
 - Task 29: matchStore built — real-time Firestore listener, MatchWithProfile resolution, unmatch, markAsRead

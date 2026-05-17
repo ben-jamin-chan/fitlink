@@ -4,8 +4,11 @@ import { StyleSheet, Text, View } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { createStackNavigator } from '@react-navigation/stack'
+import { useTranslation } from 'react-i18next'
 
 import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
+import MatchesScreen from '@/app/matches/MatchesScreen'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
@@ -16,11 +19,17 @@ export type MainTabParamList = {
   Settings: undefined
 }
 
+export type MatchesStackParamList = {
+  MatchesList: undefined
+  Chat: { matchId: string }
+}
+
 interface PlaceholderScreenProps {
   name: string
 }
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
+const MatchesStack = createStackNavigator<MatchesStackParamList>()
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name']
 
@@ -51,15 +60,30 @@ export const MainTabNavigator = (): React.JSX.Element => (
     })}
   >
     <Tab.Screen name="Discover" component={DiscoveryScreen} />
-    <Tab.Screen name="Matches" component={MatchesPlaceholder} />
+    <Tab.Screen name="Matches" component={MatchesNavigator} />
     <Tab.Screen name="Profile" component={ProfilePlaceholder} />
     <Tab.Screen name="Settings" component={SettingsPlaceholder} />
   </Tab.Navigator>
 )
 
-const MatchesPlaceholder = (): React.JSX.Element => (
-  <PlaceholderScreen name="Matches" />
+const MatchesNavigator = (): React.JSX.Element => (
+  <MatchesStack.Navigator screenOptions={matchesStackScreenOptions}>
+    <MatchesStack.Screen name="MatchesList" component={MatchesScreen} />
+    <MatchesStack.Screen name="Chat" component={ChatScreenPlaceholder} />
+  </MatchesStack.Navigator>
 )
+
+const ChatScreenPlaceholder = (): React.JSX.Element => {
+  const { t } = useTranslation()
+
+  return (
+    <View style={styles.placeholder}>
+      <Text style={styles.placeholderText}>
+        {t('matches.chat.placeholder')}
+      </Text>
+    </View>
+  )
+}
 
 const ProfilePlaceholder = (): React.JSX.Element => (
   <PlaceholderScreen name="Profile" />
@@ -76,6 +100,10 @@ const PlaceholderScreen = ({
     <Text style={styles.placeholderText}>{name}</Text>
   </View>
 )
+
+const matchesStackScreenOptions = {
+  headerShown: false,
+}
 
 const styles = StyleSheet.create({
   tabBar: {
