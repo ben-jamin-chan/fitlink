@@ -1,18 +1,51 @@
 import {
   Timestamp,
+  collection,
+  deleteDoc,
   doc,
   getDoc,
   increment,
+  onSnapshot,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from 'firebase/firestore'
+import type { Unsubscribe } from 'firebase/firestore'
 
 import { db } from '@/services/firebase/config'
 
+import type { Match } from '@/types/match'
 import type { LookingFor, UserProfile } from '@/types/user'
 
 const FIRESTORE_WRITE_TIMEOUT_MS = 20000
+
+const sortMatchesByActivity = (first: Match, second: Match): number => {
+  const firstLastMessageAt =
+    first.lastMessageAt instanceof Timestamp
+      ? first.lastMessageAt.toMillis()
+      : null
+  const secondLastMessageAt =
+    second.lastMessageAt instanceof Timestamp
+      ? second.lastMessageAt.toMillis()
+      : null
+
+  if (firstLastMessageAt === null && secondLastMessageAt === null) {
+    return 0
+  }
+
+  if (firstLastMessageAt === null) {
+    return -1
+  }
+
+  if (secondLastMessageAt === null) {
+    return 1
+  }
+
+  return secondLastMessageAt - firstLastMessageAt
+}
 
 interface CreateUserProfileInput {
   uid: string
@@ -117,6 +150,84 @@ export const updateUserProfile = async (
       lastActive: serverTimestamp(),
     })
   )
+}
+
+/**
+ * Fetch a single user profile by UID.
+ * Returns null if the document does not exist.
+ */
+export const getUserProfile = async (
+  uid: string
+): Promise<UserProfile | null> => {
+  const snap = await getDoc(doc(db, 'users', uid))
+
+  if (!snap.exists()) {
+    return null
+  }
+
+  // Firestore returns untyped document data; users/{uid} is guarded by schema
+  // and security rules, so this is the service boundary cast.
+  return snap.data() as UserProfile
+}
+
+/**
+ * Subscribe to all matches for a given userId.
+ * Calls onUpdate every time the collection changes.
+ * Returns an Unsubscribe function; call it on cleanup.
+ *
+ * Firestore composite index required:
+ * Collection: matches
+ * Fields: users (Array) ASC, lastMessageAt DESC
+ */
+export const subscribeToMatches = (
+  userId: string,
+  onUpdate: (matches: Match[]) => void,
+  onError: (error: Error) => void
+): Unsubscribe => {
+  const matchesQuery = query(
+    collection(db, 'matches'),
+    where('users', 'array-contains', userId),
+    orderBy('lastMessageAt', 'desc')
+  )
+
+  return onSnapshot(
+    matchesQuery,
+    (snapshot): void => {
+      const matches: Match[] = snapshot.docs.map((matchDoc) => {
+        // Firestore returns untyped document data; matches/{matchId} is the
+        // service boundary where the document id is injected into the app type.
+        const data = matchDoc.data() as Match
+        return {
+          ...data,
+          id: matchDoc.id,
+        }
+      })
+      matches.sort(sortMatchesByActivity)
+      onUpdate(matches)
+    },
+    onError
+  )
+}
+
+/**
+ * Delete a match document from Firestore.
+ * Cascading cleanup is handled by rules or backend logic when available.
+ */
+export const deleteMatch = async (matchId: string): Promise<void> => {
+  await deleteDoc(doc(db, 'matches', matchId))
+}
+
+/**
+ * Reset the unread message count for a user on a given match to zero.
+ * Called when the chat screen becomes active.
+ */
+export const resetUnreadCount = async (
+  matchId: string,
+  userId: string
+): Promise<void> => {
+  await updateDoc(doc(db, 'matches', matchId), {
+    [`${userId}_unread`]: 0,
+  })
 }
 
 /** Shape of the dailyLikes sub-document at /users/{userId}/dailyLikes/doc */

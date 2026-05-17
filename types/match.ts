@@ -6,8 +6,8 @@ export interface Match {
   id: string
   users: [string, string]
   createdAt: Timestamp
-  lastMessage?: string
-  lastMessageAt?: Timestamp
+  lastMessage?: string | null
+  lastMessageAt?: Timestamp | null
   [key: string]: unknown
 }
 

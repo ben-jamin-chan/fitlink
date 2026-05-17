@@ -4,6 +4,28 @@
 
 ---
 
+## [Phase 4.1] — 2026-05-17
+### Completed
+- Task 29: matchStore built — real-time Firestore listener, MatchWithProfile resolution, unmatch, markAsRead
+- subscribeToMatches, deleteMatch, resetUnreadCount added to services/firebase/firestore.ts
+- getUserProfile added to firestore.ts
+- newMatchIds first-load suppression implemented
+- i18n matches.* keys added to all 4 language files
+
+### Files Created / Modified
+- store/matchStore.ts: full match store, listener management, optimistic unmatch, unread reset
+- services/firebase/firestore.ts: subscribeToMatches, deleteMatch, resetUnreadCount, getUserProfile added
+- types/match.ts: id field and MatchWithProfile confirmed present; nullable lastMessage fields aligned with Cloud Function output
+- i18n/en.json, my.json, zh.json, ta.json: matches.* namespace added
+
+### Known Issues / Deferred
+- subscribeToMatches not yet called from RootNavigator or hook — wired in Task 30 (MatchesScreen)
+- unsubscribeFromMatches not yet called on sign-out — wired in Task 38 (SettingsScreen logout flow)
+- MatchCelebrationModal (Task 34) reads newMatchIds — not yet built
+
+### Next Up
+- Task 30: MatchesScreen (grid + messages tabs, MatchCard, MessageListItem, real-time from matchStore)
+
 ## [Phase 3.7] — 2026-05-17
 ### Completed
 - Task 28: FullProfileModal built — scrollable profile, photo carousel, shared interest highlights, action bar
