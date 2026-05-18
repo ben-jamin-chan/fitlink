@@ -346,10 +346,32 @@
     }
   },
   "chat": {
+    "headerOnline": "Active now",
+    "headerLastSeen": "Active {{time}} ago",
+    "headerOffline": "",
+    "typing": "{{name}} is typing...",
     "inputPlaceholder": "Type a message...",
-    "sentPhoto": "Sent a photo 📷",
-    "read": "Read",
-    "icebreaker": "You both love {{activity}} — say hi!"
+    "send": "Send",
+    "photoMessage": "📷 Photo",
+    "icebreaker": "Say hi to {{name}}!",
+    "messageCopied": "Message copied",
+    "unmatch": "Unmatch",
+    "unmatchConfirmTitle": "Unmatch {{name}}?",
+    "unmatchConfirmMessage": "This will remove the match and delete all messages.",
+    "report": "Report",
+    "viewProfile": "View Profile",
+    "error": {
+      "sendFailed": "Message not sent. It will be resent when you're back online.",
+      "uploadFailed": "Photo upload failed. Please try again."
+    },
+    "empty": {
+      "title": "Start the conversation",
+      "subtitle": "You and {{name}} matched! Say hello 👋"
+    },
+    "readReceipt": {
+      "sent": "Sent",
+      "read": "Read"
+    }
   },
   "profile": {
     "activeNow": "Active now",

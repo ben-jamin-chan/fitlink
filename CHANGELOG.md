@@ -4,6 +4,29 @@
 
 ---
 
+## [Phase 4.3] — 2026-05-18
+### Completed
+- Task 31: Chat store and Firebase Realtime Database service layer built
+- services/firebase/realtime.ts: subscribeToMessages, sendTextMessage, sendImageMessage, markMessagesAsRead, setTypingStatus, subscribeToTyping, registerPresence, setOffline, subscribeToPresence
+- store/chatStore.ts: openChat, closeChat, sendMessage, sendImage, onTypingStart, markAsRead, flushOfflineQueue
+- RTDBMessage, RTDBPresence, QueuedMessage types defined and exported
+- Offline message queue via AsyncStorage (flush on foreground)
+- Typing debounce (1 second)
+- i18n chat.* namespace added to all 4 language files
+
+### Files Created / Modified
+- services/firebase/realtime.ts: full RTDB service layer
+- store/chatStore.ts: chat session store with subscriptions, send, upload, queue
+- i18n/en.json, my.json, zh.json, ta.json: chat.* keys added
+
+### Known Issues / Deferred
+- AppState listener for flushOfflineQueue not yet wired — Task 32 (ChatScreen) calls flushOfflineQueue on foreground
+- ChatScreen, MessageBubble, ChatInput not yet built — Task 32
+- RTDB security rules not yet set — Phase 2
+
+### Next Up
+- Task 32: ChatScreen + MessageBubble + ChatInput (UI layer consuming chatStore)
+
 ## [Phase 4.2] — 2026-05-17
 ### Completed
 - Task 30: MatchesScreen built — 2-tab (Matches grid + Messages list), real-time from matchStore
