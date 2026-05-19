@@ -9,3 +9,4 @@ if (admin.apps.length === 0) {
 export { onUserCreated } from "./onUserCreated";
 export { getDiscoveryStack } from "./getDiscoveryStack";
 export { onSwipeCreated } from "./onSwipeCreated";
+export { onNewMessage } from "./onNewMessage";

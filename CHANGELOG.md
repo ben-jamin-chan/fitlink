@@ -4,6 +4,32 @@
 
 ---
 
+## [Phase 1D — Task 33] — 2026-05-19
+### Completed
+- Task 33: onNewMessage Cloud Function — push notification on new RTDB message
+
+### Files Created / Modified
+- functions/src/onNewMessage.ts: RTDB onValueCreated trigger (2nd gen), increments unread count, sends Expo push notification via fetch, validates token format, handles missing tokens gracefully
+- functions/src/index.ts: export { onNewMessage } added
+- firebase.json: Realtime Database rules configuration added
+- database.rules.json: RTDB chat, metadata, and presence rules added for emulator/deploy config
+
+### Architecture Decisions
+- Unread increment separated from push send — always runs, push is best-effort
+- Expo Push API used (not FCM direct) — correct for Expo-managed workflow
+- DeviceNotRegistered cleanup deferred to Phase 2 maintenance function
+- fetch used natively (Node 18) — no node-fetch dependency added
+
+### Known Issues / Deferred
+- DeviceNotRegistered token cleanup deferred (Phase 2)
+- Notification badge count (iOS) not yet set — requires separate unread query
+- Push notification delivery for matches (as opposed to messages) handled in Task 34 (match celebration)
+- RTDB_INSTANCE must be set in each deployed functions environment
+- Client RTDB send helpers currently also increment unread counts; remove that client-side increment when client files are in scope to avoid double counts
+
+### Next Up
+- Task 34: MatchCelebrationModal — confetti animation, both user photos, "Send Message" + "Keep Swiping" CTAs
+
 ## [Phase 4.4] — 2026-05-19
 ### Completed
 - Task 32: ChatScreen built — real-time messages, MessageBubble, ChatInput, typing indicator, image send

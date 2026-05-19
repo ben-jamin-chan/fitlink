@@ -1,0 +1,29 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "chats": {
+      "$matchId": {
+        ".read": "auth != null && ($matchId.beginsWith(auth.uid + '_') || $matchId.endsWith('_' + auth.uid))",
+        "messages": {
+          "$messageId": {
+            ".write": "auth != null && ($matchId.beginsWith(auth.uid + '_') || $matchId.endsWith('_' + auth.uid)) && ((!data.exists() && newData.child('senderId').val() === auth.uid) || (data.exists() && data.child('senderId').val() !== auth.uid && newData.child('senderId').val() === data.child('senderId').val() && newData.child('text').val() === data.child('text').val() && newData.child('imageUrl').val() === data.child('imageUrl').val() && newData.child('timestamp').val() === data.child('timestamp').val()))",
+            ".validate": "newData.hasChildren(['senderId', 'timestamp', 'read']) && newData.child('senderId').isString() && (newData.child('text').isString() || newData.child('text').val() === null) && (newData.child('imageUrl').isString() || newData.child('imageUrl').val() === null) && newData.child('timestamp').isNumber() && newData.child('read').isBoolean() && ((!data.exists() && newData.child('read').val() === false) || (data.exists() && newData.child('read').val() === true))"
+          }
+        },
+        "metadata": {
+          "$field": {
+            ".write": "auth != null && ($matchId.beginsWith(auth.uid + '_') || $matchId.endsWith('_' + auth.uid)) && $field === auth.uid + '_typing'",
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "presence": {
+          "$field": {
+            ".write": "auth != null && ($matchId.beginsWith(auth.uid + '_') || $matchId.endsWith('_' + auth.uid)) && ($field === auth.uid + '_online' || $field === auth.uid + '_lastSeen')",
+            ".validate": "($field === auth.uid + '_online' && newData.isBoolean()) || ($field === auth.uid + '_lastSeen' && newData.isNumber())"
+          }
+        }
+      }
+    }
+  }
+}
