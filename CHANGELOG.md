@@ -4,6 +4,33 @@
 
 ---
 
+## [Phase 4.4] — 2026-05-19
+### Completed
+- Task 32: ChatScreen built — real-time messages, MessageBubble, ChatInput, typing indicator, image send
+- MessageBubble: sent/received variants, image support, timestamp, read receipts
+- ChatInput: multiline auto-grow, image picker delegation to chatStore.sendImage, send button state
+- ChatScreen: custom header, inverted FlatList, date separators, icebreaker chips, fullscreen image viewer, unmatch flow
+- chat.uploading and other missing chat.* i18n keys added to all 4 language files
+- AppState listener for flushOfflineQueue wired in ChatScreen
+- Image upload driven by chatStore.sendImage internally — no storage changes in this task
+
+### Files Created / Modified
+- components/chat/MessageBubble.tsx: bubble variants, image thumbnail, timestamp, read receipts
+- components/chat/ChatInput.tsx: multiline input, image button, send button
+- app/chat/ChatScreen.tsx: full conversation screen with all Task 32 features
+- app/navigation/MainTabNavigator.tsx: Chat placeholder replaced with ChatScreen
+- i18n/en.json, my.json, zh.json, ta.json: chat.* keys completed
+
+### Known Issues / Deferred
+- "View Profile" from chat header menu is a stub — deferred to FullProfileModal Phase 2 integration
+- "Report User" from chat header is a stub — wired in Task 38
+- "Delete Message" from long press is a stub — RTDB delete deferred to Phase 2
+- Pinch-to-zoom in fullscreen image viewer deferred to Phase 2
+- Proper clipboard library (@react-native-clipboard/clipboard) deferred to Phase 2
+
+### Next Up
+- Task 33: Cloud Function onNewMessage (RTDB trigger → Expo push notification on new chat message)
+
 ## [Phase 4.3] — 2026-05-18
 ### Completed
 - Task 31: Chat store and Firebase Realtime Database service layer built

@@ -15,7 +15,8 @@
     "edit": "Edit",
     "yes": "Yes",
     "no": "No",
-    "or": "or"
+    "or": "or",
+    "comingSoon": "Coming soon"
   },
   "auth": {
     "landing": {
@@ -352,15 +353,37 @@
     "headerOffline": "",
     "typing": "{{name}} is typing...",
     "inputPlaceholder": "Type a message...",
+    "placeholder": "Type a message...",
     "send": "Send",
+    "attachImage": "Attach image",
+    "menu": "Chat actions",
+    "imageAlt": "Chat image",
+    "uploading": "Uploading image...",
+    "imageFailed": "Image failed to send. Tap to retry.",
     "photoMessage": "📷 Photo",
     "icebreaker": "Say hi to {{name}}!",
+    "icebreakerHint": "Break the ice 👋",
+    "noMessages": "Say hello to {{name}}!",
     "messageCopied": "Message copied",
+    "messageOptions": "Message options",
+    "deleteMessage": "Delete Message",
+    "copyMessage": "Copy",
+    "reportMessage": "Report",
+    "activeNow": "Active now",
+    "activeAgo": "Active {{time}} ago",
     "unmatch": "Unmatch",
     "unmatchConfirmTitle": "Unmatch {{name}}?",
     "unmatchConfirmMessage": "This will remove the match and delete all messages.",
     "report": "Report",
     "viewProfile": "View Profile",
+    "menuViewProfile": "View Profile",
+    "menuUnmatch": "Unmatch",
+    "menuReport": "Report User",
+    "confirmUnmatch": {
+      "title": "Unmatch {{name}}?",
+      "message": "This will remove the match and delete all messages.",
+      "confirm": "Unmatch"
+    },
     "error": {
       "sendFailed": "Message not sent. It will be resent when you're back online.",
       "uploadFailed": "Photo upload failed. Please try again."
@@ -372,6 +395,23 @@
     "readReceipt": {
       "sent": "Sent",
       "read": "Read"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "minutesCompact": "{{count}}m",
+      "hoursCompact": "{{count}}h",
+      "older": "{{date}} · {{time}}"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "icebreakers": {
+      "trainingTime": "Hey {{name}}! I see you're into {{activity}}. What's your favourite time to train?",
+      "frequency": "Hi {{name}}! {{activity}} is my favourite too! How often do you go?",
+      "general": "Hey {{name}}! Excited to match with you!"
     }
   },
   "profile": {

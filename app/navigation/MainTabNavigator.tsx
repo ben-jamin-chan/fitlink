@@ -5,8 +5,8 @@ import { StyleSheet, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
-import { useTranslation } from 'react-i18next'
 
+import ChatScreen from '@/app/chat/ChatScreen'
 import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
 
@@ -69,21 +69,13 @@ export const MainTabNavigator = (): React.JSX.Element => (
 const MatchesNavigator = (): React.JSX.Element => (
   <MatchesStack.Navigator screenOptions={matchesStackScreenOptions}>
     <MatchesStack.Screen name="MatchesList" component={MatchesScreen} />
-    <MatchesStack.Screen name="Chat" component={ChatScreenPlaceholder} />
+    <MatchesStack.Screen
+      name="Chat"
+      component={ChatScreen}
+      options={{ headerShown: true }}
+    />
   </MatchesStack.Navigator>
 )
-
-const ChatScreenPlaceholder = (): React.JSX.Element => {
-  const { t } = useTranslation()
-
-  return (
-    <View style={styles.placeholder}>
-      <Text style={styles.placeholderText}>
-        {t('matches.chat.placeholder')}
-      </Text>
-    </View>
-  )
-}
 
 const ProfilePlaceholder = (): React.JSX.Element => (
   <PlaceholderScreen name="Profile" />
