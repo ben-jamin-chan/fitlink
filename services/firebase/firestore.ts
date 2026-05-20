@@ -1,5 +1,6 @@
 import {
   Timestamp,
+  arrayRemove,
   collection,
   deleteDoc,
   doc,
@@ -14,6 +15,7 @@ import {
   where,
 } from 'firebase/firestore'
 import type { Unsubscribe } from 'firebase/firestore'
+import type { FieldValue } from 'firebase/firestore'
 
 import { db } from '@/services/firebase/config'
 
@@ -67,6 +69,22 @@ interface CreateUserProfileInput {
   lookingFor: LookingFor[]
   preferences: UserProfile['preferences']
   language: string
+}
+
+export type UserProfileUpdateInput = Partial<
+  Omit<
+    UserProfile,
+    | 'uid'
+    | 'age'
+    | 'stats'
+    | 'subscription'
+    | 'banned'
+    | 'verified'
+    | 'createdAt'
+    | 'lastActive'
+  >
+> & {
+  lastActive?: UserProfile['lastActive'] | FieldValue
 }
 
 const withWriteTimeout = async (operation: Promise<void>): Promise<void> => {
@@ -129,25 +147,28 @@ export const createUserProfile = async (
 
 export const updateUserProfile = async (
   userId: string,
-  data: Partial<
-    Omit<
-      UserProfile,
-      | 'uid'
-      | 'age'
-      | 'stats'
-      | 'subscription'
-      | 'banned'
-      | 'verified'
-      | 'createdAt'
-    >
-  >
+  data: UserProfileUpdateInput
+): Promise<void> => {
+  const userRef = doc(db, 'users', userId)
+
+  // updateDoc accepts a plain object subset; this cast is safe because the
+  // input type excludes server-controlled user profile fields.
+  await withWriteTimeout(updateDoc(userRef, data as Record<string, unknown>))
+}
+
+/**
+ * Removes a photo URL from the /users/{userId} photos array.
+ * Uses Firestore arrayRemove so no read-modify-write is needed.
+ */
+export const removePhotoFromProfile = async (
+  userId: string,
+  photoUrl: string
 ): Promise<void> => {
   const userRef = doc(db, 'users', userId)
 
   await withWriteTimeout(
     updateDoc(userRef, {
-      ...data,
-      lastActive: serverTimestamp(),
+      photos: arrayRemove(photoUrl),
     })
   )
 }

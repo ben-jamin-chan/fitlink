@@ -4,6 +4,44 @@
 
 ---
 
+## [Phase 1E — Task 35] — 2026-05-20
+
+### Completed
+
+- Task 35: profileStore fully implemented — fetchProfile, updateProfile, uploadPhoto, deletePhoto
+- Optimistic updates with rollback for updateProfile and deletePhoto
+- uploadPhoto: compress → upload → Firestore array write → local state sync
+- deletePhoto: Firestore arrayRemove + Storage deleteObject + rollback
+- authStore.initialise() now calls profileStore.fetchProfile on login
+- authStore.logout() now calls profileStore.reset()
+- profile.errors.* i18n keys added to all 4 locale files
+
+### Files Created / Modified
+
+- store/profileStore.ts: full implementation replacing Task 34 stub
+- store/authStore.ts: fetchProfile on login, reset on logout wired
+- services/firebase/firestore.ts: updateUserProfile typed write helper tightened, removePhotoFromProfile added
+- services/firebase/storage.ts: uploadProfilePhoto confirmed, uploadAllProfilePhotos keeps compression, deleteProfilePhoto handles missing objects
+- i18n/en.json, my.json, zh.json, ta.json: profile.errors.* keys added
+
+### Architecture Decisions
+
+- profileStore is intentionally non-persisted — always fetched fresh from Firestore on auth
+- Circular import handled by calling useProfileStore.getState() lazily inside auth callbacks and actions
+- Minimum photo enforcement at store level is 1; form-level EditProfileScreen can enforce 2 separately
+- serverTimestamp() included in profileStore writes that update profile documents
+- deleteProfilePhoto handles storage/object-not-found silently because an already-deleted file is not fatal
+- uploadProfilePhoto now assumes a compressed URI; uploadAllProfilePhotos compresses before calling it to preserve onboarding behavior
+
+### Known Issues / Deferred
+
+- Profile photo reorder (drag-to-reorder) deferred to Phase 2
+- Upload progress percentage not surfaced to profileStore UI — isLoading is binary for now; progress bar deferred to Task 37 (EditProfileScreen)
+
+### Next Up
+
+- Task 36: ProfileScreen — own profile view, stats row, verified badge, photo grid, edit/settings navigation
+
 ## [Phase 1D — Task 34] — 2026-05-20
 
 ### Completed

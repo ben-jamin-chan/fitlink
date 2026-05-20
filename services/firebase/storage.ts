@@ -14,11 +14,10 @@ const PROFILE_PHOTO_CONTENT_TYPE = 'image/jpeg'
 export const uploadProfilePhoto = async (
   userId: string,
   index: number,
-  localUri: string,
+  uri: string,
   onProgress?: (percent: number) => void
 ): Promise<string> => {
-  const compressedUri = await compressImage(localUri)
-  const response = await fetch(compressedUri)
+  const response = await fetch(uri)
   const blob = await response.blob()
   const filename = `users/${userId}/photos/photo_${index}_${Date.now()}.jpg`
   const storageRef = ref(storage, filename)
@@ -45,10 +44,11 @@ export const uploadAllProfilePhotos = async (
   // Upload sequentially for mobile reliability; avoid parallel Storage uploads.
   for (let index = 0; index < total; index += 1) {
     const localUri = localUris[index]
+    const compressedUri = await compressImage(localUri)
     const downloadUrl = await uploadProfilePhoto(
       userId,
       index,
-      localUri,
+      compressedUri,
       (singlePercent: number): void => {
         if (onProgress === undefined) {
           return
@@ -70,6 +70,19 @@ export const uploadAllProfilePhotos = async (
 export const deleteProfilePhoto = async (
   downloadUrl: string
 ): Promise<void> => {
-  const photoRef = ref(storage, downloadUrl)
-  await deleteObject(photoRef)
+  try {
+    const photoRef = ref(storage, downloadUrl)
+    await deleteObject(photoRef)
+  } catch (error: unknown) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'storage/object-not-found'
+    ) {
+      return
+    }
+
+    throw error
+  }
 }

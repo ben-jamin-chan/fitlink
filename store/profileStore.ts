@@ -1,8 +1,33 @@
 import { create } from 'zustand'
+import { serverTimestamp } from 'firebase/firestore'
 
-import { getUserProfile } from '@/services/firebase/firestore'
+import {
+  getUserProfile,
+  removePhotoFromProfile,
+  updateUserProfile,
+} from '@/services/firebase/firestore'
+import { deleteProfilePhoto, uploadProfilePhoto } from '@/services/firebase/storage'
+import { useAuthStore } from '@/store/authStore'
+
+import { compressImage } from '@/utils/imageUtils'
 
 import type { UserProfile } from '@/types/user'
+
+const MAX_PROFILE_PHOTOS = 6
+
+type EditableProfileUpdate = Partial<
+  Omit<
+    UserProfile,
+    | 'uid'
+    | 'age'
+    | 'stats'
+    | 'subscription'
+    | 'banned'
+    | 'verified'
+    | 'createdAt'
+    | 'lastActive'
+  >
+>
 
 interface ProfileState {
   profile: UserProfile | null
@@ -12,6 +37,11 @@ interface ProfileState {
 
 interface ProfileActions {
   fetchProfile: (userId: string) => Promise<void>
+  updateProfile: (partial: EditableProfileUpdate) => Promise<void>
+  uploadPhoto: (uri: string, index: number) => Promise<void>
+  deletePhoto: (index: number) => Promise<void>
+  clearError: () => void
+  reset: () => void
   clearProfile: () => void
 }
 
@@ -23,7 +53,7 @@ const initialState: ProfileState = {
   error: null,
 }
 
-export const useProfileStore = create<ProfileStore>()((set) => ({
+export const useProfileStore = create<ProfileStore>()((set, get) => ({
   ...initialState,
 
   fetchProfile: async (userId: string): Promise<void> => {
@@ -32,11 +62,134 @@ export const useProfileStore = create<ProfileStore>()((set) => ({
     try {
       const profile = await getUserProfile(userId)
       set({ profile, isLoading: false, error: null })
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'errors.generic'
-      set({ isLoading: false, error: errorMessage })
+    } catch {
+      set({ isLoading: false, error: 'profile.errors.fetchFailed' })
     }
+  },
+
+  updateProfile: async (partial: EditableProfileUpdate): Promise<void> => {
+    const { profile } = get()
+    const userId = useAuthStore.getState().user?.uid
+
+    if (profile === null || userId === undefined) {
+      set({ error: 'profile.errors.notAuthenticated' })
+      return
+    }
+
+    const snapshot = profile
+    set({ profile: { ...profile, ...partial }, isLoading: true, error: null })
+
+    try {
+      await updateUserProfile(userId, {
+        ...partial,
+        lastActive: serverTimestamp(),
+      })
+      set({ isLoading: false, error: null })
+    } catch {
+      set({
+        profile: snapshot,
+        isLoading: false,
+        error: 'profile.errors.updateFailed',
+      })
+    }
+  },
+
+  uploadPhoto: async (uri: string, index: number): Promise<void> => {
+    const { profile } = get()
+    const userId = useAuthStore.getState().user?.uid
+
+    if (profile === null || userId === undefined) {
+      set({ error: 'profile.errors.notAuthenticated' })
+      return
+    }
+
+    if (!Number.isInteger(index) || index < 0 || index >= MAX_PROFILE_PHOTOS) {
+      set({ error: 'profile.errors.uploadFailed' })
+      return
+    }
+
+    set({ isLoading: true, error: null })
+
+    try {
+      const compressedUri = await compressImage(uri)
+      const downloadUrl = await uploadProfilePhoto(
+        userId,
+        index,
+        compressedUri
+      )
+      const updatedPhotos = [...profile.photos]
+
+      if (index < updatedPhotos.length) {
+        updatedPhotos[index] = downloadUrl
+      } else {
+        updatedPhotos.push(downloadUrl)
+      }
+
+      await updateUserProfile(userId, {
+        photos: updatedPhotos,
+        lastActive: serverTimestamp(),
+      })
+
+      set({
+        profile: { ...profile, photos: updatedPhotos },
+        isLoading: false,
+        error: null,
+      })
+    } catch {
+      set({ isLoading: false, error: 'profile.errors.uploadFailed' })
+    }
+  },
+
+  deletePhoto: async (index: number): Promise<void> => {
+    const { profile } = get()
+    const userId = useAuthStore.getState().user?.uid
+
+    if (profile === null || userId === undefined) {
+      set({ error: 'profile.errors.notAuthenticated' })
+      return
+    }
+
+    if (profile.photos.length <= 1) {
+      set({ error: 'profile.errors.minPhotos' })
+      return
+    }
+
+    const photoUrl = profile.photos[index]
+    if (photoUrl === undefined) {
+      set({ error: 'profile.errors.photoNotFound' })
+      return
+    }
+
+    const snapshot = profile
+    const updatedPhotos = profile.photos.filter(
+      (_photo: string, photoIndex: number): boolean => photoIndex !== index
+    )
+
+    set({
+      profile: { ...profile, photos: updatedPhotos },
+      isLoading: true,
+      error: null,
+    })
+
+    try {
+      await removePhotoFromProfile(userId, photoUrl)
+      await deleteProfilePhoto(photoUrl)
+      set({ isLoading: false, error: null })
+    } catch {
+      set({
+        profile: snapshot,
+        isLoading: false,
+        error: 'profile.errors.deleteFailed',
+      })
+    }
+  },
+
+  clearError: (): void => {
+    set({ error: null })
+  },
+
+  reset: (): void => {
+    set(initialState)
   },
 
   clearProfile: (): void => {

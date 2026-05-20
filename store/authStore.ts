@@ -7,6 +7,8 @@ import {
   signOut as firebaseSignOut,
   subscribeToAuthState,
 } from '@/services/firebase/auth'
+import { useProfileStore } from '@/store/profileStore'
+
 import type { AppError } from '@/services/firebase/auth'
 
 interface AuthState {
@@ -69,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async (): Promise<void> => {
         try {
           await firebaseSignOut()
+          useProfileStore.getState().reset()
           set({
             user: null,
             isAuthenticated: false,
@@ -84,6 +87,10 @@ export const useAuthStore = create<AuthState>()(
       initialise: (): (() => void) => {
         const unsubscribe = subscribeToAuthState((user: User | null): void => {
           get().setUser(user)
+
+          if (user !== null) {
+            void useProfileStore.getState().fetchProfile(user.uid)
+          }
         })
 
         return unsubscribe

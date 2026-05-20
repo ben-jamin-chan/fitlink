@@ -492,6 +492,15 @@
       },
       "submit": "Submit Report",
       "submitted": "Report submitted. Thank you for keeping fitlink safe."
+    },
+    "errors": {
+      "fetchFailed": "Could not load profile. Please try again.",
+      "updateFailed": "Could not save changes. Please try again.",
+      "uploadFailed": "Photo upload failed. Please try again.",
+      "deleteFailed": "Could not remove photo. Please try again.",
+      "notAuthenticated": "You must be signed in to update your profile.",
+      "minPhotos": "You must have at least one photo.",
+      "photoNotFound": "Photo not found."
     }
   },
   "settings": {
