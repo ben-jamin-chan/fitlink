@@ -43,3 +43,5 @@ Task 08 (navigation shell) does not require Firebase to be live yet — you can 
 # 5 MAY 2026
 1. TASK 09 
 
+# 19 MAY 2026
+1. One important follow-up: the current client RTDB send helpers also increment unread counts, so once client files are in scope, remove that client-side increment to avoid double unread counts.
