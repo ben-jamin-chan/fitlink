@@ -4,6 +4,42 @@
 
 ---
 
+## [Phase 1D — Task 34] — 2026-05-20
+
+### Completed
+
+- Task 34: MatchCelebrationModal — confetti, animated photo pop-in, shared activities badge, Send Message → ChatScreen navigation, Keep Swiping dismiss
+
+### Files Created / Modified
+
+- components/discovery/MatchCelebrationModal.tsx: full celebration modal with Reanimated animation sequence, ConfettiCannon, icebreaker suggestion, queue-draining dismiss pattern
+- app/discovery/DiscoveryScreen.tsx: modal wired to matchStore.newMatchIds, pendingMatch resolved, current user profile data passed into modal
+- store/matchStore.ts: clearNewMatch(matchId) action added
+- store/profileStore.ts: minimal read-only profile hydration added so DiscoveryScreen can pass current user photos and activities; Task 35 still owns full profile store actions
+- services/firebase/realtime.ts: duplicate _unread increment removed from client message sends (now Cloud Function only)
+- app/navigation/MainTabNavigator.tsx: Matches nested chat params accept optional icebreakerSuggestion
+- i18n/*.json: discovery.matchCelebration.* keys added to all four locale files
+
+### Packages Added
+
+- react-native-confetti-cannon
+
+### Architecture Decisions
+
+- One modal at a time: newMatchIds[0] drives render; clearNewMatch shifts queue
+- Dismiss animation gate: runOnJS(clearNewMatch) fires only after withTiming completes
+- Confetti imperative ref + setTimeout: avoids firing before modal is visible
+- currentUserActivities is passed from profileStore.profile.activities; no hardcoded empty activity list remains
+
+### Known Issues / Deferred
+
+- Icebreaker pre-fill in ChatScreen input not yet implemented; the navigation param is passed for future ChatScreen wiring
+- Task 35 remains responsible for full profileStore capabilities: updateProfile, uploadPhoto, deletePhoto, and richer loading/error UX
+
+### Next Up
+
+- Task 35: ProfileStore — fetchProfile, updateProfile, uploadPhoto, deletePhoto
+
 ## [Phase 1D — Task 33] — 2026-05-19
 ### Completed
 - Task 33: onNewMessage Cloud Function — push notification on new RTDB message

@@ -250,6 +250,16 @@
     "upgradeNow": "Upgrade Now",
     "maybeLater": "Maybe Later",
     "loading": "Finding your matches...",
+    "matchCelebration": {
+      "headline": "It's a Match!",
+      "subheadline": "You and {{name}} liked each other",
+      "sharedActivities": "You both love {{activities}}",
+      "sendMessage": "Send Message",
+      "keepSwiping": "Keep Swiping",
+      "icebreakerPrefix": "Hey {{name}}! I see you're into {{activity}} too —",
+      "activitiesTwo": "{{first}} and {{second}}",
+      "activitiesMore": "{{first}}, {{second}} and more"
+    },
     "empty": {
       "title": "No more profiles nearby",
       "subtitle": "Check back later or expand your distance range",

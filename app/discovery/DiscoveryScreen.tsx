@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native'
 
@@ -7,10 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAuthStore } from '@/store/authStore'
 import { useDiscoveryStore } from '@/store/discoveryStore'
+import { useMatchStore } from '@/store/matchStore'
+import { useProfileStore } from '@/store/profileStore'
 
 import { ActionButtons } from '@/components/discovery/ActionButtons'
 import { EmptyState } from '@/components/discovery/EmptyState'
 import { FullProfileModal } from '@/components/discovery/FullProfileModal'
+import { MatchCelebrationModal } from '@/components/discovery/MatchCelebrationModal'
 import { SwipeCard } from '@/components/discovery/SwipeCard'
 import {
   UpsellModal,
@@ -38,6 +41,11 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   const swipeLeft = useDiscoveryStore((state) => state.swipeLeft)
   const swipeSuperLike = useDiscoveryStore((state) => state.swipeSuperLike)
   const advanceStack = useDiscoveryStore((state) => state.advanceStack)
+  const newMatchIds = useMatchStore((state) => state.newMatchIds)
+  const matches = useMatchStore((state) => state.matches)
+  const clearNewMatch = useMatchStore((state) => state.clearNewMatch)
+  const profile = useProfileStore((state) => state.profile)
+  const fetchProfile = useProfileStore((state) => state.fetchProfile)
 
   const [upsellVisible, setUpsellVisible] = useState(false)
   const [upsellTrigger, setUpsellTrigger] =
@@ -48,7 +56,19 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
     () => stack.slice(currentIndex, currentIndex + STACK_SIZE),
     [currentIndex, stack],
   )
+  const pendingMatchId = newMatchIds.length > 0 ? newMatchIds[0] : null
+  const pendingMatch =
+    pendingMatchId !== null
+      ? matches.find((match) => match.id === pendingMatchId) ?? null
+      : null
+  const currentUserPhoto = profile?.photos[0] ?? ''
   const isPremium = false
+
+  useEffect(() => {
+    if (userId && profile?.uid !== userId) {
+      void fetchProfile(userId)
+    }
+  }, [fetchProfile, profile?.uid, userId])
 
   useEffect(() => {
     if (userId && stack.length === 0 && !isLoading) {
@@ -158,6 +178,12 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
     }
   }
 
+  const handleModalDismiss = useCallback((): void => {
+    if (pendingMatchId !== null) {
+      clearNewMatch(pendingMatchId)
+    }
+  }, [clearNewMatch, pendingMatchId])
+
   const isStackEmpty = visibleStack.length === 0
 
   return (
@@ -220,6 +246,16 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
           advanceStack()
         }}
       />
+
+      {pendingMatch !== null && (
+        <MatchCelebrationModal
+          matchId={pendingMatch.id}
+          otherUser={pendingMatch.otherUser}
+          currentUserPhoto={currentUserPhoto}
+          currentUserActivities={profile?.activities ?? []}
+          onDismiss={handleModalDismiss}
+        />
+      )}
     </SafeAreaView>
   )
 }

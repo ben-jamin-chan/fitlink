@@ -11,7 +11,6 @@ import {
 import type { DatabaseReference, DataSnapshot } from 'firebase/database'
 import {
   doc,
-  increment,
   serverTimestamp as firestoreServerTimestamp,
   updateDoc,
 } from 'firebase/firestore'
@@ -99,7 +98,7 @@ export const unsubscribeFromMessages = (
 export const sendTextMessage = async (
   matchId: string,
   senderId: string,
-  recipientId: string,
+  _recipientId: string,
   text: string
 ): Promise<string> => {
   const messagesRef = ref(rtdb, `chats/${matchId}/messages`)
@@ -120,7 +119,6 @@ export const sendTextMessage = async (
   await updateDoc(doc(db, 'matches', matchId), {
     lastMessage: buildTextPreview(text),
     lastMessageAt: firestoreServerTimestamp(),
-    [`${recipientId}_unread`]: increment(1),
   })
 
   return newRef.key
@@ -129,7 +127,7 @@ export const sendTextMessage = async (
 export const sendImageMessage = async (
   matchId: string,
   senderId: string,
-  recipientId: string,
+  _recipientId: string,
   imageUrl: string
 ): Promise<string> => {
   const messagesRef = ref(rtdb, `chats/${matchId}/messages`)
@@ -150,7 +148,6 @@ export const sendImageMessage = async (
   await updateDoc(doc(db, 'matches', matchId), {
     lastMessage: PHOTO_MESSAGE_PREVIEW,
     lastMessageAt: firestoreServerTimestamp(),
-    [`${recipientId}_unread`]: increment(1),
   })
 
   return newRef.key

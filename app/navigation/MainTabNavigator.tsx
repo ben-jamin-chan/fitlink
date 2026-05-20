@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import type { NavigatorScreenParams } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
 import ChatScreen from '@/app/chat/ChatScreen'
@@ -12,16 +13,16 @@ import MatchesScreen from '@/app/matches/MatchesScreen'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
-export type MainTabParamList = {
-  Discover: undefined
-  Matches: undefined
-  Profile: undefined
-  Settings: undefined
-}
-
 export type MatchesStackParamList = {
   MatchesList: undefined
-  Chat: { matchId: string }
+  Chat: { matchId: string; icebreakerSuggestion?: string }
+}
+
+export type MainTabParamList = {
+  Discover: undefined
+  Matches: NavigatorScreenParams<MatchesStackParamList> | undefined
+  Profile: undefined
+  Settings: undefined
 }
 
 interface PlaceholderScreenProps {

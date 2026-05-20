@@ -23,6 +23,7 @@ interface MatchActions {
   unsubscribeFromMatches: () => void
   unmatch: (matchId: string) => Promise<void>
   markAsRead: (matchId: string) => Promise<void>
+  clearNewMatch: (matchId: string) => void
   clearNewMatchId: (matchId: string) => void
 }
 
@@ -140,9 +141,13 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
     }
   },
 
-  clearNewMatchId: (matchId: string): void => {
+  clearNewMatch: (matchId: string): void => {
     set((state) => ({
       newMatchIds: state.newMatchIds.filter((id) => id !== matchId),
     }))
+  },
+
+  clearNewMatchId: (matchId: string): void => {
+    get().clearNewMatch(matchId)
   },
 }))
