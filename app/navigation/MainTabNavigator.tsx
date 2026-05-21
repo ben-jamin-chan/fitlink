@@ -6,10 +6,12 @@ import { Ionicons } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import type { NavigatorScreenParams } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
+import { useTranslation } from 'react-i18next'
 
 import ChatScreen from '@/app/chat/ChatScreen'
 import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
+import ProfileScreen from '@/app/profile/ProfileScreen'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
@@ -18,19 +20,26 @@ export type MatchesStackParamList = {
   Chat: { matchId: string; icebreakerSuggestion?: string }
 }
 
+export type ProfileStackParamList = {
+  Profile: undefined
+  EditProfile: undefined
+  Settings: undefined
+}
+
 export type MainTabParamList = {
   Discover: undefined
   Matches: NavigatorScreenParams<MatchesStackParamList> | undefined
-  Profile: undefined
+  Profile: NavigatorScreenParams<ProfileStackParamList> | undefined
   Settings: undefined
 }
 
 interface PlaceholderScreenProps {
-  name: string
+  title: string
 }
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 const MatchesStack = createStackNavigator<MatchesStackParamList>()
+const ProfileStack = createStackNavigator<ProfileStackParamList>()
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name']
 
@@ -62,7 +71,7 @@ export const MainTabNavigator = (): React.JSX.Element => (
   >
     <Tab.Screen name="Discover" component={DiscoveryScreen} />
     <Tab.Screen name="Matches" component={MatchesNavigator} />
-    <Tab.Screen name="Profile" component={ProfilePlaceholder} />
+    <Tab.Screen name="Profile" component={ProfileStackNavigator} />
     <Tab.Screen name="Settings" component={SettingsPlaceholder} />
   </Tab.Navigator>
 )
@@ -78,23 +87,42 @@ const MatchesNavigator = (): React.JSX.Element => (
   </MatchesStack.Navigator>
 )
 
-const ProfilePlaceholder = (): React.JSX.Element => (
-  <PlaceholderScreen name="Profile" />
+const ProfileStackNavigator = (): React.JSX.Element => (
+  <ProfileStack.Navigator screenOptions={profileStackScreenOptions}>
+    <ProfileStack.Screen name="Profile" component={ProfileScreen} />
+    <ProfileStack.Screen
+      name="EditProfile"
+      component={EditProfilePlaceholder}
+    />
+    <ProfileStack.Screen name="Settings" component={SettingsPlaceholder} />
+  </ProfileStack.Navigator>
 )
 
-const SettingsPlaceholder = (): React.JSX.Element => (
-  <PlaceholderScreen name="Settings" />
-)
+const EditProfilePlaceholder = (): React.JSX.Element => {
+  const { t } = useTranslation()
+
+  return <PlaceholderScreen title={t('profile.editProfile')} />
+}
+
+const SettingsPlaceholder = (): React.JSX.Element => {
+  const { t } = useTranslation()
+
+  return <PlaceholderScreen title={t('profile.settings')} />
+}
 
 const PlaceholderScreen = ({
-  name,
+  title,
 }: PlaceholderScreenProps): React.JSX.Element => (
   <View style={styles.placeholder}>
-    <Text style={styles.placeholderText}>{name}</Text>
+    <Text style={styles.placeholderText}>{title}</Text>
   </View>
 )
 
 const matchesStackScreenOptions = {
+  headerShown: false,
+}
+
+const profileStackScreenOptions = {
   headerShown: false,
 }
 

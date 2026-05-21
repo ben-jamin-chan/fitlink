@@ -30,18 +30,24 @@ const SLOT_SIZE = (SCREEN_WIDTH - GRID_PADDING - GRID_GAP * 2) / 3
 
 interface PhotoGridProps {
   photoUris: string[]
-  onPhotosChange: (uris: string[]) => void
+  onPhotosChange?: (uris: string[]) => void
   maxPhotos?: number
+  readOnly?: boolean
 }
 
 export const PhotoGrid = ({
   photoUris,
   onPhotosChange,
   maxPhotos = MAX_PHOTOS,
+  readOnly = false,
 }: PhotoGridProps): React.JSX.Element => {
   const { t } = useTranslation()
 
   const handleAddPhoto = async (slotIndex: number): Promise<void> => {
+    if (onPhotosChange === undefined) {
+      return
+    }
+
     const uri = await pickAndCompressImage()
 
     if (uri === null) {
@@ -57,13 +63,19 @@ export const PhotoGrid = ({
   }
 
   const handleRemovePhoto = (index: number): void => {
+    if (onPhotosChange === undefined) {
+      return
+    }
+
     onPhotosChange(photoUris.filter((_, photoIndex) => photoIndex !== index))
   }
 
-  const slots = Array.from({ length: maxPhotos }, (_, index) => ({
-    index,
-    uri: photoUris[index] ?? null,
-  }))
+  const slots = readOnly
+    ? photoUris.map((uri: string, index: number) => ({ index, uri }))
+    : Array.from({ length: maxPhotos }, (_, index) => ({
+        index,
+        uri: photoUris[index] ?? null,
+      }))
 
   return (
     <View style={styles.grid}>
@@ -84,19 +96,21 @@ export const PhotoGrid = ({
                   </View>
                 )}
 
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => handleRemovePhoto(index)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons
-                    name="close-circle"
-                    size={22}
-                    color={colors.white}
-                  />
-                </TouchableOpacity>
+                {!readOnly && (
+                  <TouchableOpacity
+                    style={styles.removeButton}
+                    onPress={() => handleRemovePhoto(index)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name="close-circle"
+                      size={22}
+                      color={colors.white}
+                    />
+                  </TouchableOpacity>
+                )}
               </View>
-            ) : (
+            ) : !readOnly ? (
               <TouchableOpacity
                 style={[styles.emptySlot, isDisabled && styles.emptySlotDisabled]}
                 onPress={() => handleAddPhoto(index)}
@@ -109,7 +123,7 @@ export const PhotoGrid = ({
                   color={isDisabled ? colors.gray[300] : colors.gray[400]}
                 />
               </TouchableOpacity>
-            )}
+            ) : null}
           </View>
         )
       })}

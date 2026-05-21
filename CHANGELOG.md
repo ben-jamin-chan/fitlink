@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 1E — Task 36] — 2026-05-21
+
+### Completed
+
+- Task 36: ProfileScreen built — hero photo, stats row, read-only photo grid, verification card, bio with read-more, Basic Info / Fitness / Lifestyle InfoCards, action buttons
+- ProfileStackNavigator added inside MainTabNavigator Profile tab; EditProfile and Settings stubs ready for Tasks 37 and 38
+
+### Files Created / Modified
+
+- app/profile/ProfileScreen.tsx: full own-profile view (read-only)
+- components/profile/StatsBadge.tsx: value + label stat display
+- components/profile/InfoCard.tsx: bordered card + InfoRow helper
+- components/profile/ActivityChip.tsx: pill chip for activity display
+- components/profile/PhotoGrid.tsx: added readOnly prop — empty slots and controls hidden in read-only mode
+- app/navigation/MainTabNavigator.tsx: Profile tab replaced with ProfileStackNavigator (Profile → EditProfile stub → Settings stub)
+- i18n/en.json, my.json, zh.json, ta.json: profile.* keys completed
+
+### Packages Added
+
+- None — expo-linear-gradient was already installed
+
+### Architecture Decisions
+
+- ProfileScreen is strictly read-only; no form state, no writes
+- ProfileStackNavigator wraps Profile tab so edit/settings nav doesn't dismiss tab bar
+- Days Active calculated from createdAt.toDate() diff — returns '—' if field missing
+- Bio read-more toggle uses local useState<boolean> — explicitly permitted per CONVENTIONS.md §7
+- PhotoGrid readOnly prop: hides empty slots and remove controls, preserves Primary badge
+- profile.about.title added instead of replacing existing profile.about.* nested keys used by FullProfileModal
+
+### Known Issues / Deferred
+
+- "Verify Now" button is a stub (console.log + TODO) — full verification flow is Phase 2
+- "Get Premium" button is a stub — PremiumScreen is Phase 2
+- Photo drag-to-reorder deferred to Phase 2
+- Profile view count (profile.stats.views) not tracked yet; stats row shows matches + likes + days active only
+
+### Next Up
+
+- Task 37: EditProfileScreen — pre-filled React Hook Form + Zod, photo management, save to profileStore
+
 ## [Phase 1E — Task 35] — 2026-05-20
 
 ### Completed
