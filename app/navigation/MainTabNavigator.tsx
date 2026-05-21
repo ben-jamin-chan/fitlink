@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import ChatScreen from '@/app/chat/ChatScreen'
 import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
+import EditProfileScreen from '@/app/profile/EditProfileScreen'
 import ProfileScreen from '@/app/profile/ProfileScreen'
 
 import { colors, spacing, typography } from '@/constants/theme'
@@ -90,19 +91,10 @@ const MatchesNavigator = (): React.JSX.Element => (
 const ProfileStackNavigator = (): React.JSX.Element => (
   <ProfileStack.Navigator screenOptions={profileStackScreenOptions}>
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />
-    <ProfileStack.Screen
-      name="EditProfile"
-      component={EditProfilePlaceholder}
-    />
+    <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
     <ProfileStack.Screen name="Settings" component={SettingsPlaceholder} />
   </ProfileStack.Navigator>
 )
-
-const EditProfilePlaceholder = (): React.JSX.Element => {
-  const { t } = useTranslation()
-
-  return <PlaceholderScreen title={t('profile.editProfile')} />
-}
 
 const SettingsPlaceholder = (): React.JSX.Element => {
   const { t } = useTranslation()

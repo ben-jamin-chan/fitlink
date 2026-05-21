@@ -4,6 +4,37 @@
 
 ---
 
+## [Phase 1E — Task 37] — 2026-05-21
+
+### Completed
+
+- Task 37: EditProfileScreen — pre-filled React Hook Form + Zod, photo management, 6 sections, unsaved changes guard, save to profileStore
+
+### Files Created / Modified
+
+- app/profile/EditProfileScreen.tsx: full edit screen with all 6 sections, Zod schema, syncPhotos helper, beforeRemove guard
+- i18n/en.json, my.json, zh.json, ta.json: editProfile.* keys added
+- app/navigation/MainTabNavigator.tsx: EditProfile route now uses the real EditProfileScreen
+- app/onboarding/Step3Screen.tsx: MultiSelect and SingleSelect exported as named exports
+
+### Architecture Decisions
+
+- syncPhotos() uses useProfileStore.getState() outside React render, consistent with authStore/profileStore patterns
+- photosDirty local state tracks photo changes separately from React Hook Form isDirty
+- DOB and Gender are read-only display rows, not form fields
+- Age range sliders use watch() to constrain each other dynamically
+- Existing shared Input already supported multiline and numberOfLines, so no Input changes were needed
+
+### Known Issues / Deferred
+
+- Photo upload progress percentage not surfaced — binary isLoading from profileStore
+- Drag-to-reorder photos deferred to Phase 2
+- Location (city/state) editing not included in Task 37 — requires Google Places autocomplete, deferred to Phase 2
+
+### Next Up
+
+- Task 38: SettingsScreen — account, discovery preferences, notifications, privacy, subscription, danger zone
+
 ## [Phase 1E — Task 36] — 2026-05-21
 
 ### Completed

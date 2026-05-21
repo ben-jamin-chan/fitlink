@@ -25,6 +25,8 @@ type Step3NavigationProp = StackNavigationProp<OnboardingStackParamList, 'Step3'
 
 const STEP = 3
 
+export { MultiSelect, SingleSelect }
+
 export default function Step3Screen(): React.JSX.Element {
   const { t } = useTranslation()
   const navigation = useNavigation<Step3NavigationProp>()
