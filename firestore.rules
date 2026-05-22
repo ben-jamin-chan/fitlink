@@ -76,9 +76,22 @@ service cloud.firestore {
     // Cloud Function using the Admin SDK. Client can read their own matches.
     // matchId format: [uid1, uid2].sort().join('_')
     match /matches/{matchId} {
-      allow read:             if isAuthenticated() && isMatchParticipant(matchId);
-      allow create, update:   if false; // Cloud Function only
-      allow delete:           if false; // Cloud Function only (unmatch flow)
+      allow read:   if isAuthenticated() && isMatchParticipant(matchId);
+      allow create: if false; // Cloud Function only (onSwipeCreated)
+      allow delete: if false; // Cloud Function only (unmatchUser)
+
+      // Participants may update only chat metadata fields.
+      // Structural fields (users, createdAt) and the other user's unread count
+      // cannot be modified from the client — only the requester's own unread counter
+      // and the shared lastMessage fields are permitted.
+      allow update: if isAuthenticated()
+                    && isMatchParticipant(matchId)
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly([
+                           'lastMessage',
+                           'lastMessageAt',
+                           (request.auth.uid + '_unread'),
+                         ]);
 
       // ─── /matches/{matchId}/messages/{messageId} ───────────────────────────
       // Firestore message subcollection (used for persistent history queries).
@@ -94,6 +107,13 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if false;
       }
+    }
+
+    // ─── /blocked/{userId}/users/{blockedUserId} ─────────────────────────────
+    // Written exclusively by the unmatchUser Cloud Function (Admin SDK bypasses rules).
+    // No client reads or writes permitted.
+    match /blocked/{userId}/users/{blockedUserId} {
+      allow read, write: if false;
     }
 
     // ─── /reports/{reportId} ─────────────────────────────────────────────────

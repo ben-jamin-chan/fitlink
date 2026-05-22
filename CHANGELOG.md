@@ -4,6 +4,42 @@
 
 ---
 
+## [Phase 1F — Task 39B] — 2026-05-22
+
+### Completed
+
+- Task 39B: Remediated all client writes to /matches/{matchId} exposed by Task 39 rules
+- unmatchUser Cloud Function created — bilateral unmatch, RTDB cleanup, blocked entries, stats decrement
+- matchStore.unmatch() now calls httpsCallable('unmatchUser') — no direct deleteDoc
+- deleteMatch() removed from services/firebase/firestore.ts
+- firestore.rules /matches update rule relaxed to allow participant chat metadata writes only (lastMessage, lastMessageAt, {uid}_unread)
+- firestore.rules /blocked collection added (deny all client access)
+
+### Files Created / Modified
+
+- functions/src/unmatchUser.ts: new callable Cloud Function
+- functions/src/index.ts: unmatchUser export added
+- store/matchStore.ts: unmatch() rewritten to use httpsCallable
+- services/firebase/firestore.ts: deleteMatch() removed
+- firestore.rules: /matches update rule scoped to hasOnly([...]), /blocked rule added
+
+### Architecture Decisions
+
+- Chat metadata updates (lastMessage, lastMessageAt, own unread) kept as client writes to avoid Cloud Function latency on every message send
+- Dynamic key (request.auth.uid + '_unread') used in hasOnly — prevents cross-user unread tampering
+- RTDB cleanup in unmatchUser is best-effort (catch+log) — Firestore match doc is source of truth
+- /blocked written exclusively by Admin SDK; client read/write denied at rules level
+
+### Known Issues / Deferred
+
+- Orphaned RTDB chat data if unmatchUser RTDB delete fails — scheduled cleanup Cloud Function deferred to Phase 2
+- Match message subcollection cleanup on unmatch deferred to Phase 2 onUserDeleted / scheduled function
+- RTDB rules hardening beyond current chat coverage deferred to Phase 2
+
+### Next Up
+
+- Task 40: Firestore indexes (firestore.indexes.json)
+
 ## [Phase 1F — Task 39] — 2026-05-22
 
 ### Completed

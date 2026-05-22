@@ -1,13 +1,14 @@
 import type { Unsubscribe } from 'firebase/firestore'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 import { create } from 'zustand'
 
 import { useAuthStore } from '@/store/authStore'
 import {
-  deleteMatch,
   getUserProfile,
   resetUnreadCount,
   subscribeToMatches,
 } from '@/services/firebase/firestore'
+import { mapFirebaseError } from '@/utils/errorUtils'
 
 import type { Match, MatchWithProfile } from '@/types/match'
 
@@ -28,6 +29,10 @@ interface MatchActions {
 }
 
 type MatchStore = MatchState & MatchActions
+
+interface UnmatchUserResponse {
+  success: boolean
+}
 
 const initialState: MatchState = {
   matches: [],
@@ -111,15 +116,23 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
   },
 
   unmatch: async (matchId: string): Promise<void> => {
-    set((state) => ({
-      matches: state.matches.filter((match) => match.id !== matchId),
-      newMatchIds: state.newMatchIds.filter((id) => id !== matchId),
-    }))
-
+    set({ isLoading: true, error: null })
     try {
-      await deleteMatch(matchId)
+      const functions = getFunctions(undefined, 'asia-southeast1')
+      const unmatchUser = httpsCallable<
+        { matchId: string },
+        UnmatchUserResponse
+      >(functions, 'unmatchUser')
+
+      await unmatchUser({ matchId })
+
+      set((state) => ({
+        matches: state.matches.filter((match) => match.id !== matchId),
+        newMatchIds: state.newMatchIds.filter((id) => id !== matchId),
+        isLoading: false,
+      }))
     } catch (error: unknown) {
-      console.error('[matchStore] unmatch failed:', error)
+      set({ isLoading: false, error: mapFirebaseError(error) })
     }
   },
 

@@ -2,7 +2,6 @@ import {
   Timestamp,
   arrayRemove,
   collection,
-  deleteDoc,
   doc,
   getDoc,
   increment,
@@ -228,14 +227,6 @@ export const subscribeToMatches = (
     },
     onError
   )
-}
-
-/**
- * Delete a match document from Firestore.
- * Cascading cleanup is handled by rules or backend logic when available.
- */
-export const deleteMatch = async (matchId: string): Promise<void> => {
-  await deleteDoc(doc(db, 'matches', matchId))
 }
 
 /**
