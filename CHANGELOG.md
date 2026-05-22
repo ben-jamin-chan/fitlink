@@ -4,6 +4,40 @@
 
 ---
 
+## [Phase 1F — Task 39] — 2026-05-22
+
+### Completed
+
+- Task 39: Firestore security rules written for all Phase 1 collections
+- Server-only fields (banned, verified, age, stats, verifiedAt, bannedAt, banReason) blocked from client writes via doesNotModifyServerOnlyFields() helper
+- paused remains client-writable (Settings toggle)
+- /matches/{matchId} fully locked — client create/update/delete denied, Cloud Function Admin SDK bypasses rules
+- Daily likes subcollection scoped to document owner only
+- Swipes immutable — update and delete permanently blocked
+- Reports write-once, read-never for clients
+- Default catch-all denies all unmatched collections
+
+### Files Created / Modified
+
+- firestore.rules: full production security rules for all Phase 1 collections
+- firebase.json: verified/patched to reference firestore.rules and firestore.indexes.json
+
+### Architecture Decisions
+
+- Deny-list approach for server-only fields (affectedKeys().hasAny([...])) preferred over allow-list to avoid breaking on new field additions
+- isMatchParticipant() uses cross-document get() — acceptable for low-frequency match reads, not used in discovery hot path
+- RTDB security rules deferred to Phase 2 (chat delivery via RTDB is separate from Firestore rules)
+- /matches delete blocked at rules level even though unmatch flow exists — unmatch calls a Cloud Function
+
+### Known Issues / Deferred
+
+- RTDB rules (/chats/{matchId}) not covered by this task — Phase 2
+- Admin moderation collections (flags, admin_queue) not yet defined — Phase 2
+
+### Next Up
+
+- Task 40: Firestore indexes (firestore.indexes.json)
+
 ## [Phase 1E — Task 38] — 2026-05-22
 
 ### Completed

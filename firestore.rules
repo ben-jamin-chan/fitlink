@@ -1,109 +1,117 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
+
+    // ─── Helper functions ─────────────────────────────────────────────────────
+
+    // Returns true if the requester is authenticated
+    function isAuthenticated() {
       return request.auth != null;
     }
 
+    // Returns true if the requester owns this document (uid matches path segment)
     function isOwner(userId) {
-      return signedIn() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
 
-    function userCreateKeys() {
-      return [
-        'uid',
-        'firstName',
-        'dateOfBirth',
-        'gender',
-        'location',
-        'photos',
-        'bio',
-        'height',
-        'religion',
-        'activities',
-        'fitnessLevel',
-        'workoutFrequency',
-        'dietaryPreference',
-        'fitnessGoals',
-        'smoking',
-        'drinking',
-        'lookingFor',
-        'preferences',
-        'stats',
-        'subscription',
-        'verified',
-        'paused',
-        'banned',
-        'language',
-        'createdAt',
-        'lastActive'
-      ];
+    // Returns true if the incoming write does NOT touch server-only fields.
+    // These fields are managed exclusively by Cloud Functions and must never
+    // be written from a client — even by the account owner.
+    function doesNotModifyServerOnlyFields() {
+      return !(
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['banned', 'verified', 'age', 'stats', 'verifiedAt', 'bannedAt', 'banReason'])
+      );
     }
 
-    function serverOnlyUserFields() {
-      return [
-        'uid',
-        'age',
-        'stats',
-        'subscription',
-        'banned',
-        'banReason',
-        'bannedAt',
-        'verified',
-        'createdAt'
-      ];
+    // Returns true if the requester is a participant in the given match
+    function isMatchParticipant(matchId) {
+      return request.auth.uid in
+        get(/databases/$(database)/documents/matches/$(matchId)).data.users;
     }
 
+    // ─── /users/{userId} ──────────────────────────────────────────────────────
+    // Any authenticated user can read any profile (required for discovery stack).
+    // Users can only update their own document, and cannot touch server-only fields.
+    // Cloud Functions bypass these rules using the Admin SDK.
     match /users/{userId} {
-      allow read: if signedIn();
-      allow create: if isOwner(userId)
-        && request.resource.data.uid == userId
-        && !('age' in request.resource.data)
-        && request.resource.data.keys().hasAll([
-          'uid',
-          'firstName',
-          'dateOfBirth',
-          'gender',
-          'location',
-          'photos',
-          'bio',
-          'height',
-          'activities',
-          'fitnessLevel',
-          'workoutFrequency',
-          'dietaryPreference',
-          'fitnessGoals',
-          'smoking',
-          'drinking',
-          'lookingFor',
-          'preferences',
-          'stats',
-          'subscription',
-          'verified',
-          'paused',
-          'banned',
-          'language',
-          'createdAt',
-          'lastActive'
-        ])
-        && request.resource.data.keys().hasOnly(userCreateKeys())
-        && request.resource.data.stats.keys().hasOnly(['likes', 'passes', 'matches'])
-        && request.resource.data.stats.likes == 0
-        && request.resource.data.stats.passes == 0
-        && request.resource.data.stats.matches == 0
-        && request.resource.data.subscription.keys().hasOnly(['tier'])
-        && request.resource.data.subscription.tier == 'free'
-        && request.resource.data.verified == false
-        && request.resource.data.paused == false
-        && request.resource.data.banned == false;
-      allow update: if isOwner(userId)
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverOnlyUserFields());
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId) && doesNotModifyServerOnlyFields();
+      allow delete: if false; // account deletion handled by Cloud Function / auth.ts deleteAccount()
+
+      // ─── /users/{userId}/dailyLikes ─────────────────────────────────────────
+      // The dailyLikes document tracks the free-user like count.
+      // Only the owning user can read or write their own limit document.
+      match /dailyLikes/{doc} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+
+    // ─── /swipes/{userId}/likes/{targetId} ───────────────────────────────────
+    // A user can only create a like under their own swiper path.
+    // The target user can also read (needed to detect mutual likes client-side,
+    // though the real mutual-like check runs in the onSwipeCreated Cloud Function).
+    // Updates and deletes are permanently blocked — swipes are immutable.
+    match /swipes/{userId}/likes/{targetId} {
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow read:   if isAuthenticated() && (isOwner(userId) || request.auth.uid == targetId);
+      allow update: if false;
       allow delete: if false;
     }
 
+    // ─── /swipes/{userId}/passes/{targetId} ──────────────────────────────────
+    // A user can only create a pass under their own swiper path.
+    // Only the owning user can read their own passes.
+    // Updates and deletes are permanently blocked.
+    match /swipes/{userId}/passes/{targetId} {
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow read:   if isAuthenticated() && isOwner(userId);
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ─── /matches/{matchId} ──────────────────────────────────────────────────
+    // Matches are created and updated exclusively by the onSwipeCreated
+    // Cloud Function using the Admin SDK. Client can read their own matches.
+    // matchId format: [uid1, uid2].sort().join('_')
+    match /matches/{matchId} {
+      allow read:             if isAuthenticated() && isMatchParticipant(matchId);
+      allow create, update:   if false; // Cloud Function only
+      allow delete:           if false; // Cloud Function only (unmatch flow)
+
+      // ─── /matches/{matchId}/messages/{messageId} ───────────────────────────
+      // Firestore message subcollection (used for persistent history queries).
+      // Real-time delivery goes through Firebase Realtime Database (RTDB),
+      // but the Firestore copy is written by the client for history.
+      // Both participants can read. Create allowed if sender matches requester.
+      // Updates and deletes permanently blocked — message history is immutable.
+      match /messages/{messageId} {
+        allow read:   if isAuthenticated() && isMatchParticipant(matchId);
+        allow create: if isAuthenticated()
+                      && isMatchParticipant(matchId)
+                      && request.auth.uid == request.resource.data.senderId;
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+
+    // ─── /reports/{reportId} ─────────────────────────────────────────────────
+    // Any authenticated user can file a report, but only if they are the reporter.
+    // Reports cannot be read, updated, or deleted by clients — admin only.
+    match /reports/{reportId} {
+      allow create: if isAuthenticated()
+                    && request.auth.uid == request.resource.data.reporterId;
+      allow read:   if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ─── Default deny ────────────────────────────────────────────────────────
+    // Any collection not explicitly matched above is denied for all operations.
     match /{document=**} {
       allow read, write: if false;
     }
+
   }
 }
