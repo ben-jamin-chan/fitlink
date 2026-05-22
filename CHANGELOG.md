@@ -4,6 +4,36 @@
 
 ---
 
+## [Phase 1F — Task 40] — 2026-05-22
+
+### Completed
+
+- Task 40: Firestore composite indexes defined for all Phase 1 collection queries
+- Users discovery index: location.city + banned + paused + lastActive DESC (critical for getDiscoveryStack performance)
+- Matches index: users ARRAY_CONTAINS + lastMessageAt DESC (powers matchStore real-time listener)
+- Reports index: reportedUserId + reportedAt ASC (powers checkReportThreshold range query)
+- Likes subcollection field override: createdAt ASC + DESC, COLLECTION_GROUP scope
+
+### Files Created / Modified
+
+- firestore.indexes.json: replaced stub with 3 composite indexes + 1 field override
+
+### Architecture Decisions
+
+- Nested field path `location.city` confirmed valid in Firestore index fieldPath — no flattening needed
+- Boolean equality filters (banned, paused) placed before orderBy field (lastActive) per Firestore composite index ordering requirements
+- COLLECTION_GROUP scope on likes/createdAt future-proofs cross-user swipe queries
+- Reports range filter on reportedAt placed last in index per Firestore range-field rule
+
+### Known Issues / Deferred
+
+- Index build time in production (with real user data) may be 10–30+ minutes — monitor in Firebase Console before going live
+- RTDB indexes (chat message ordering) are not Firestore indexes and are not in scope here
+
+### Next Up
+
+- Task 41: LoadingOverlay, ErrorBoundary, Toast components (UI polish)
+
 ## [Phase 1F — Task 39B] — 2026-05-22
 
 ### Completed

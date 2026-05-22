@@ -5,11 +5,37 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "location.city", "order": "ASCENDING" },
-        { "fieldPath": "banned", "order": "ASCENDING" },
-        { "fieldPath": "paused", "order": "ASCENDING" },
-        { "fieldPath": "lastActive", "order": "DESCENDING" }
+        { "fieldPath": "banned",        "order": "ASCENDING" },
+        { "fieldPath": "paused",        "order": "ASCENDING" },
+        { "fieldPath": "lastActive",    "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "matches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "users",          "arrayConfig": "CONTAINS" },
+        { "fieldPath": "lastMessageAt",  "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "reportedUserId", "order": "ASCENDING" },
+        { "fieldPath": "reportedAt",     "order": "ASCENDING" }
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "likes",
+      "queryScope": "COLLECTION_GROUP",
+      "fieldPath": "createdAt",
+      "indexes": [
+        { "order": "ASCENDING",  "queryScope": "COLLECTION" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION" }
+      ]
+    }
+  ]
 }
