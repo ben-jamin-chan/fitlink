@@ -13,6 +13,8 @@ import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
 import EditProfileScreen from '@/app/profile/EditProfileScreen'
 import ProfileScreen from '@/app/profile/ProfileScreen'
+import DeleteAccountScreen from '@/app/settings/DeleteAccountScreen'
+import SettingsScreen from '@/app/settings/SettingsScreen'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
@@ -27,11 +29,16 @@ export type ProfileStackParamList = {
   Settings: undefined
 }
 
+export type SettingsStackParamList = {
+  Settings: undefined
+  DeleteAccount: undefined
+}
+
 export type MainTabParamList = {
   Discover: undefined
   Matches: NavigatorScreenParams<MatchesStackParamList> | undefined
   Profile: NavigatorScreenParams<ProfileStackParamList> | undefined
-  Settings: undefined
+  Settings: NavigatorScreenParams<SettingsStackParamList> | undefined
 }
 
 interface PlaceholderScreenProps {
@@ -41,6 +48,7 @@ interface PlaceholderScreenProps {
 const Tab = createBottomTabNavigator<MainTabParamList>()
 const MatchesStack = createStackNavigator<MatchesStackParamList>()
 const ProfileStack = createStackNavigator<ProfileStackParamList>()
+const SettingsStack = createStackNavigator<SettingsStackParamList>()
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name']
 
@@ -73,7 +81,7 @@ export const MainTabNavigator = (): React.JSX.Element => (
     <Tab.Screen name="Discover" component={DiscoveryScreen} />
     <Tab.Screen name="Matches" component={MatchesNavigator} />
     <Tab.Screen name="Profile" component={ProfileStackNavigator} />
-    <Tab.Screen name="Settings" component={SettingsPlaceholder} />
+    <Tab.Screen name="Settings" component={SettingsStackNavigator} />
   </Tab.Navigator>
 )
 
@@ -96,6 +104,16 @@ const ProfileStackNavigator = (): React.JSX.Element => (
   </ProfileStack.Navigator>
 )
 
+const SettingsStackNavigator = (): React.JSX.Element => (
+  <SettingsStack.Navigator screenOptions={settingsStackScreenOptions}>
+    <SettingsStack.Screen name="Settings" component={SettingsScreen} />
+    <SettingsStack.Screen
+      name="DeleteAccount"
+      component={DeleteAccountScreen}
+    />
+  </SettingsStack.Navigator>
+)
+
 const SettingsPlaceholder = (): React.JSX.Element => {
   const { t } = useTranslation()
 
@@ -115,6 +133,10 @@ const matchesStackScreenOptions = {
 }
 
 const profileStackScreenOptions = {
+  headerShown: false,
+}
+
+const settingsStackScreenOptions = {
   headerShown: false,
 }
 

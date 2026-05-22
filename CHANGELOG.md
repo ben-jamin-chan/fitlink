@@ -4,6 +4,49 @@
 
 ---
 
+## [Phase 1E — Task 38] — 2026-05-22
+
+### Completed
+
+- Task 38: SettingsScreen — 7 sections: account, discovery, notifications, privacy, subscription, support, danger zone
+- DeleteAccountScreen — typed DELETE gate, storage + Firestore + Auth deletion chain
+- SettingsSection + SettingsRow shared components (navigate / toggle / destructive / info variants)
+- Language picker modal — i18n.changeLanguage + profileStore.updateProfile
+- Discovery preference modals (age range, distance, gender pref, looking for)
+- Notification prefs in AsyncStorage (pushEnabled, newMatches, newMessages)
+- deleteAccount() added to services/firebase/auth.ts
+
+### Files Created / Modified
+
+- app/settings/SettingsScreen.tsx: full 7-section settings screen
+- app/settings/DeleteAccountScreen.tsx: DELETE confirmation gate, deletion chain
+- components/settings/SettingsSection.tsx: section wrapper with optional danger styling
+- components/settings/SettingsRow.tsx: navigate / toggle / destructive / info variants
+- app/navigation/MainTabNavigator.tsx: Settings tab replaced with SettingsStackNavigator (Settings → DeleteAccount)
+- services/firebase/auth.ts: deleteAccount() added (Storage + Firestore + Auth)
+- services/notifications.ts: notification permission helper added for Settings toggle
+- i18n/en.json, my.json, zh.json, ta.json: settings.* keys added
+- i18n/index.ts: `ms` resource alias added for Bahasa Melayu language selection
+
+### Architecture Decisions
+
+- Single `activeModal` string state manages all discovery preference modals — no nested discovery Modals
+- Notification prefs stored in AsyncStorage only (device-local, not Firestore)
+- deleteAccount() order: Storage (best-effort) → Firestore → Firebase Auth — Auth last to preserve uid access
+- Language change applies immediately via i18n.changeLanguage before modal close
+- SettingsStack wraps Settings tab so DeleteAccount pushes without dismissing tab bar
+
+### Known Issues / Deferred
+
+- Match/swipe/chat cleanup on account deletion deferred to Phase 2 onUserDeleted Cloud Function
+- Photo drag-to-reorder not in scope (Phase 2)
+- Subscription management (Stripe portal) is a stub — Phase 2
+- Blocked users management is a Phase 1 stub
+
+### Next Up
+
+- Task 39: Firestore security rules
+
 ## [Phase 1E — Task 37] — 2026-05-21
 
 ### Completed

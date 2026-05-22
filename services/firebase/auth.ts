@@ -1,4 +1,13 @@
 import {
+  deleteDoc,
+  doc,
+} from 'firebase/firestore'
+import {
+  deleteObject,
+  listAll,
+  ref,
+} from 'firebase/storage'
+import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -9,7 +18,7 @@ import {
 } from 'firebase/auth'
 import type { ConfirmationResult, User, UserCredential } from 'firebase/auth'
 
-import { auth } from '@/services/firebase/config'
+import { auth, db, storage } from '@/services/firebase/config'
 import { isFirebaseError, mapFirebaseError } from '@/utils/errorUtils'
 
 // Module-level store for ConfirmationResult.
@@ -115,6 +124,37 @@ export const signOut = async (): Promise<void> => {
   try {
     await firebaseSignOut(auth)
   } catch (error) {
+    throw toAppError(error)
+  }
+}
+
+export const deleteAccount = async (): Promise<void> => {
+  const user = auth.currentUser
+
+  if (user === null) {
+    throw {
+      code: 'errors.auth.userNotFound',
+      raw: 'auth/no-user',
+    } satisfies AppError
+  }
+
+  const uid = user.uid
+
+  try {
+    const storageRef = ref(storage, `users/${uid}/photos`)
+    const photoList = await listAll(storageRef)
+    await Promise.all(
+      photoList.items.map((itemRef): Promise<void> => deleteObject(itemRef))
+    )
+  } catch {
+    // Best-effort only; missing Storage objects should not block account deletion.
+  }
+
+  try {
+    // TODO Phase 2: onUserDeleted Cloud Function cleans up matches, swipes, chats.
+    await deleteDoc(doc(db, 'users', uid))
+    await user.delete()
+  } catch (error: unknown) {
     throw toAppError(error)
   }
 }

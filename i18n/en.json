@@ -583,28 +583,94 @@
     }
   },
   "settings": {
-    "sections": {
-      "account": "Account",
-      "discovery": "Discovery",
-      "notifications": "Notifications",
-      "privacy": "Privacy",
-      "subscription": "Subscription",
-      "support": "Support",
-      "legal": "Legal",
-      "dangerZone": "Danger Zone"
-    },
-    "editProfile": "Edit Profile",
-    "changePhone": "Change Phone Number",
-    "pauseProfile": "Pause Profile",
-    "pauseProfileSubtitle": "Hide your profile from discovery",
-    "logout": "Log Out",
-    "deleteAccount": "Delete Account",
-    "deleteAccountConfirm": "Are you sure? This cannot be undone.",
-    "upgradePremium": "Upgrade to Premium",
-    "faq": "FAQ",
-    "contactUs": "Contact Us",
+    "title": "Settings",
+    "listSeparator": ", ",
     "terms": "Terms of Service",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "languages": {
+      "en": "English",
+      "ms": "Bahasa Melayu",
+      "zh": "中文",
+      "ta": "தமிழ்"
+    },
+    "account": {
+      "title": "Account",
+      "phone": "Phone Number",
+      "email": "Email",
+      "noPhone": "Not set",
+      "noEmail": "Not set",
+      "language": "Language",
+      "logout": "Log Out",
+      "logoutConfirm": "Are you sure you want to log out?",
+      "logoutTitle": "Log Out"
+    },
+    "discovery": {
+      "title": "Discovery",
+      "pause": "Pause Profile",
+      "pausedOn": "Profile paused — you're hidden from discovery",
+      "pausedOff": "Profile visible — you're back in discovery",
+      "ageRange": "Age Range",
+      "distance": "Distance",
+      "genderPref": "Gender Preference",
+      "lookingFor": "Looking For",
+      "km": "{{value}} km",
+      "ageRangeValue": "{{min}} – {{max}}",
+      "done": "Done"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "push": "Push Notifications",
+      "matches": "New Matches",
+      "messages": "New Messages",
+      "permissionDenied": "Enable notifications in your device Settings to receive alerts.",
+      "openSettings": "Open Settings"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "showMe": "Show Me on fitlink",
+      "blockedUsers": "Blocked Users",
+      "blockedCount": "{{count}} blocked",
+      "noBlocked": "No blocked users"
+    },
+    "subscription": {
+      "title": "Subscription",
+      "upgrade": "Upgrade to Premium",
+      "upgradeSubtitle": "Unlimited likes, see who liked you, and more.",
+      "upgradeButton": "Upgrade Now",
+      "benefit1": "Unlimited likes",
+      "benefit2": "See who liked you",
+      "benefit3": "Priority discovery",
+      "plan": "Plan",
+      "planPremium": "Premium",
+      "renews": "Renews",
+      "manage": "Manage Subscription",
+      "comingSoon": "Subscription management coming soon."
+    },
+    "support": {
+      "title": "Support",
+      "helpCentre": "Help Centre",
+      "contactUs": "Contact Us",
+      "rate": "Rate fitlink",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "version": "App Version"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "deleteAccount": "Delete Account",
+      "deleteTitle": "Delete Account?",
+      "deleteMessage": "This will permanently delete your profile, matches, and messages. This action cannot be undone.",
+      "deleteScreen": {
+        "title": "Delete Your Account",
+        "whatDeleted": "The following will be permanently deleted:",
+        "item1": "Your profile and photos",
+        "item2": "All your matches and messages",
+        "item3": "Your subscription (non-refundable)",
+        "typeToConfirm": "Type DELETE to confirm",
+        "confirmButton": "Permanently Delete Account",
+        "placeholder": "Type DELETE here"
+      }
+    }
   },
   "errors": {
     "required": "This field is required",

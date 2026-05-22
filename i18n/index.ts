@@ -10,7 +10,7 @@ import zh from '@/i18n/zh.json'
 
 const deviceLocale = getLocales()[0]?.languageCode ?? 'en'
 
-const supportedLanguages = ['en', 'my', 'zh', 'ta']
+const supportedLanguages = ['en', 'ms', 'my', 'zh', 'ta']
 const detectedLanguage = supportedLanguages.includes(deviceLocale)
   ? deviceLocale
   : 'en'
@@ -20,6 +20,7 @@ const detectedLanguage = supportedLanguages.includes(deviceLocale)
 const i18nInitOptions = {
   resources: {
     en: { translation: en },
+    ms: { translation: my },
     my: { translation: my },
     zh: { translation: zh },
     ta: { translation: ta },
