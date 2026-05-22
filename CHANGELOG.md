@@ -4,6 +4,44 @@
 
 ---
 
+## [Phase 1F — Task 41] — 2026-05-23
+
+### Completed
+
+- Task 41: LoadingOverlay, ErrorBoundary, and Toast global UI utilities built
+- toastStore singleton — showToast() callable from stores and services without prop-drilling
+- Toast auto-dismisses after 3s, slide-in from top, success/error/info variants
+- LoadingOverlay uses Modal for reliable cross-navigator overlay on iOS + Android
+- ErrorBoundary class component wraps entire app in App.tsx — catches all render errors
+- App.tsx updated with correct nesting: ErrorBoundary > GestureHandlerRootView > SafeAreaProvider > Toast + NavigationContainer
+
+### Files Created / Modified
+
+- store/toastStore.ts: Zustand toast state + showToast() imperative singleton export
+- components/ui/Toast.tsx: animated toast renderer, Animated.timing slide-in, 3s auto-dismiss, timer reset on rapid calls
+- components/ui/LoadingOverlay.tsx: Modal-based full-screen overlay, ActivityIndicator, optional message
+- components/ui/ErrorBoundary.tsx: class component, getDerivedStateFromError + componentDidCatch, __DEV__ error detail guard
+- App.tsx: ErrorBoundary outermost, Toast inside SafeAreaProvider above NavigationContainer
+- i18n/en.json, my.json, zh.json, ta.json: ui.* keys added
+
+### Architecture Decisions
+
+- showToast() is a plain function (useToastStore.getState().showToast) — not a hook — so services and catch blocks can call it without React context
+- Toast uses React Native Animated (not Reanimated) — no gesture involvement, worklet overhead unwarranted
+- LoadingOverlay uses Modal not absolute position — reliable above all nested navigators
+- ErrorBoundary hardcodes English — class component cannot use useTranslation(); acceptable for last-resort fallback
+- __DEV__ guard prevents raw error messages leaking to production users
+
+### Known Issues / Deferred
+
+- ErrorBoundary does not call Crashlytics yet — console.error placeholder, Crashlytics integration deferred to Phase 2
+- Toast does not support action buttons (e.g., "Retry") — deferred to Phase 2 if needed
+- LoadingOverlay progress percentage prop not added — binary visible/hidden for Phase 1
+
+### Next Up
+
+- Task 42: Push notification registration (services/notifications.ts, hooks/useNotifications.ts, deep link handling)
+
 ## [Phase 1F — Task 40] — 2026-05-22
 
 ### Completed

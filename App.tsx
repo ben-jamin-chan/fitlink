@@ -8,6 +8,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { useAuthStore } from '@/store/authStore'
 
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { Toast } from '@/components/ui/Toast'
+
 import { RootNavigator } from '@/app/navigation/RootNavigator'
 
 import '@/i18n/index'
@@ -22,13 +25,16 @@ export default function App(): React.JSX.Element {
   }, [initialise])
 
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={styles.root}>
+        <SafeAreaProvider>
+          <Toast />
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   )
 }
 

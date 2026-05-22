@@ -673,6 +673,20 @@
       }
     }
   },
+  "ui": {
+    "loading": "Loading...",
+    "errorTitle": "Something went wrong",
+    "errorSubtitle": "The app hit an unexpected error. Please try again.",
+    "tryAgain": "Try Again",
+    "toast": {
+      "profileSaved": "Profile updated",
+      "photoUploaded": "Photo uploaded",
+      "photoRemoved": "Photo removed",
+      "loggedOut": "You've been logged out",
+      "networkError": "Network error. Please try again.",
+      "genericError": "Something went wrong."
+    }
+  },
   "errors": {
     "required": "This field is required",
     "network": "Network error. Please try again.",
