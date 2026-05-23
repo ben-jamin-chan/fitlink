@@ -320,6 +320,21 @@
       "superLike": "Super Like",
       "like": "Like",
       "info": "View Profile"
+    },
+    "limit": {
+      "outOfLikes": "You're Out of Likes",
+      "premiumFeature": "Premium Feature",
+      "upgradeSubtitle": "Upgrade to Premium and unlock the full fitlink experience.",
+      "upgradeCta": "Upgrade Now",
+      "maybeLater": "Maybe Later",
+      "comingSoon": "Premium subscriptions coming soon!",
+      "benefits": {
+        "unlimitedLikes": "Unlimited Likes every day",
+        "superLikes": "5 Super Likes per week",
+        "seeWhoLiked": "See who liked you",
+        "rewind": "Rewind your last swipe",
+        "priority": "Priority profile in discovery"
+      }
     }
   },
   "matches": {

@@ -190,11 +190,6 @@ export const FullProfileModal = ({
       : t('profile.bioTruncated', {
           bio: bio.slice(0, BIO_TRUNCATE_LENGTH),
         })
-  const isPremium =
-    viewerProfile?.subscription.tier === 'premium' &&
-    (viewerProfile.subscription.expiresAt === undefined ||
-      viewerProfile.subscription.expiresAt.toMillis() > Date.now())
-
   const closeAfterAction = (): void => {
     onClose()
     onActionComplete()
@@ -205,8 +200,8 @@ export const FullProfileModal = ({
       return
     }
 
-    void swipeRight(userId, profile.uid, isPremium).then((result) => {
-      if (result === 'ok') {
+    void swipeRight(profile.uid).then(() => {
+      if (!useDiscoveryStore.getState().isUpsellVisible) {
         closeAfterAction()
       }
     })
@@ -225,16 +220,10 @@ export const FullProfileModal = ({
       return
     }
 
-    void swipeSuperLike(userId, profile.uid, isPremium).then((result) => {
-      if (result === 'ok') {
+    void swipeSuperLike(profile.uid).then(() => {
+      if (!useDiscoveryStore.getState().isUpsellVisible) {
         closeAfterAction()
-        return
       }
-
-      Alert.alert(
-        t('discovery.upsell.superLike'),
-        t('discovery.upsell.comingSoonMsg'),
-      )
     })
   }
 

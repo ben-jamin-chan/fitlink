@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 
-import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAuthStore } from '@/store/authStore'
@@ -15,10 +14,7 @@ import { EmptyState } from '@/components/discovery/EmptyState'
 import { FullProfileModal } from '@/components/discovery/FullProfileModal'
 import { MatchCelebrationModal } from '@/components/discovery/MatchCelebrationModal'
 import { SwipeCard } from '@/components/discovery/SwipeCard'
-import {
-  UpsellModal,
-  type UpsellTrigger,
-} from '@/components/discovery/UpsellModal'
+import { UpsellModal } from '@/components/discovery/UpsellModal'
 
 import type { UserProfile } from '@/types/user'
 
@@ -27,29 +23,25 @@ import { colors, spacing } from '@/constants/theme'
 const STACK_SIZE = 3
 
 const DiscoveryScreen = (): React.JSX.Element | null => {
-  const { t } = useTranslation()
   const userId = useAuthStore((state) => state.user?.uid)
   const stack = useDiscoveryStore((state) => state.stack)
   const currentIndex = useDiscoveryStore((state) => state.currentIndex)
   const isLoading = useDiscoveryStore((state) => state.isLoading)
   const isRefetching = useDiscoveryStore((state) => state.isRefetching)
-  const dailyLimitReached = useDiscoveryStore(
-    (state) => state.dailyLimitReached,
-  )
+  const isUpsellVisible = useDiscoveryStore((state) => state.isUpsellVisible)
   const fetchStack = useDiscoveryStore((state) => state.fetchStack)
   const swipeRight = useDiscoveryStore((state) => state.swipeRight)
   const swipeLeft = useDiscoveryStore((state) => state.swipeLeft)
   const swipeSuperLike = useDiscoveryStore((state) => state.swipeSuperLike)
   const advanceStack = useDiscoveryStore((state) => state.advanceStack)
+  const showUpsell = useDiscoveryStore((state) => state.showUpsell)
+  const hideUpsell = useDiscoveryStore((state) => state.hideUpsell)
   const newMatchIds = useMatchStore((state) => state.newMatchIds)
   const matches = useMatchStore((state) => state.matches)
   const clearNewMatch = useMatchStore((state) => state.clearNewMatch)
   const profile = useProfileStore((state) => state.profile)
   const fetchProfile = useProfileStore((state) => state.fetchProfile)
 
-  const [upsellVisible, setUpsellVisible] = useState(false)
-  const [upsellTrigger, setUpsellTrigger] =
-    useState<UpsellTrigger>('super_like')
   const [modalProfile, setModalProfile] = useState<UserProfile | null>(null)
 
   const visibleStack = useMemo(
@@ -62,7 +54,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       ? matches.find((match) => match.id === pendingMatchId) ?? null
       : null
   const currentUserPhoto = profile?.photos[0] ?? ''
-  const isPremium = false
+  const isPremium = profile?.subscription?.tier === 'premium'
 
   useEffect(() => {
     if (userId && profile?.uid !== userId) {
@@ -82,13 +74,6 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
     }
   }, [fetchStack, isRefetching, userId])
 
-  useEffect(() => {
-    if (dailyLimitReached) {
-      setUpsellTrigger('daily_limit')
-      setUpsellVisible(true)
-    }
-  }, [dailyLimitReached])
-
   if (!userId) {
     return null
   }
@@ -100,11 +85,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       return
     }
 
-    void swipeRight(userId, target.uid, isPremium).then((result) => {
-      if (result === 'ok') {
-        advanceStack()
-      }
-    })
+    void swipeRight(target.uid)
   }
 
   const handleSwipeLeft = (): void => {
@@ -120,42 +101,22 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   }
 
   const handleSuperLike = (): void => {
-    if (!isPremium) {
-      setUpsellTrigger('super_like')
-      setUpsellVisible(true)
-      return
-    }
-
     const target = visibleStack[0]
 
     if (!target) {
       return
     }
 
-    void swipeSuperLike(userId, target.uid, isPremium).then((result) => {
-      if (result === 'ok') {
-        advanceStack()
-      }
-    })
+    void swipeSuperLike(target.uid)
   }
 
   const handleRewind = (): void => {
     if (!isPremium) {
-      setUpsellTrigger('rewind')
-      setUpsellVisible(true)
+      showUpsell()
       return
     }
 
-    // TODO: Phase 2 — implement undo stack
-  }
-
-  const handleUpgrade = (): void => {
-    Alert.alert(
-      t('discovery.upsell.comingSoon'),
-      t('discovery.upsell.comingSoonMsg'),
-    )
-    setUpsellVisible(false)
-    // TODO: Phase 2 — navigate to PremiumScreen
+    // TODO: Phase 2 - implement undo stack
   }
 
   const handleTapInfo = (user: UserProfile): void => {
@@ -167,7 +128,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   }
 
   const handleEditPreferences = (): void => {
-    // TODO: Task 38 — navigate to Settings preferences
+    // TODO: Task 38 - navigate to Settings preferences
   }
 
   const handleTopInfo = (): void => {
@@ -230,10 +191,9 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       />
 
       <UpsellModal
-        visible={upsellVisible}
-        trigger={upsellTrigger}
-        onDismiss={() => setUpsellVisible(false)}
-        onUpgrade={handleUpgrade}
+        visible={isUpsellVisible}
+        onDismiss={hideUpsell}
+        reason="likes"
       />
 
       <FullProfileModal

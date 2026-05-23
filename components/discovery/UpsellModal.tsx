@@ -1,101 +1,105 @@
 import React from 'react'
 
-import { Modal, StyleSheet, Text, View } from 'react-native'
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
+
+import { showToast } from '@/store/toastStore'
 
 import { Button } from '@/components/ui/Button'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
-const HERO_ICON_SIZE = 48
-const BENEFIT_ICON_SIZE = 20
-const HANDLE_WIDTH = 42
-const HANDLE_HEIGHT = 5
-
-export type UpsellTrigger = 'super_like' | 'rewind' | 'daily_limit'
+const HERO_ICON_SIZE = spacing.xxl - spacing.sm
+const BENEFIT_ICON_SIZE = spacing.lg - spacing.xs
 
 interface UpsellModalProps {
   visible: boolean
-  trigger: UpsellTrigger
   onDismiss: () => void
-  onUpgrade: () => void
+  reason: 'likes' | 'superLike'
 }
+
+const BENEFITS: Array<{ icon: keyof typeof Ionicons.glyphMap; key: string }> = [
+  { icon: 'heart-outline', key: 'unlimitedLikes' },
+  { icon: 'star-outline', key: 'superLikes' },
+  { icon: 'eye-outline', key: 'seeWhoLiked' },
+  { icon: 'arrow-undo-outline', key: 'rewind' },
+  { icon: 'flash-outline', key: 'priority' },
+]
 
 export const UpsellModal = ({
   visible,
-  trigger,
   onDismiss,
-  onUpgrade,
+  reason,
 }: UpsellModalProps): React.JSX.Element => {
   const { t } = useTranslation()
 
-  const getHeadline = (): string => {
-    if (trigger === 'daily_limit') {
-      return t('discovery.upsell.outOfLikes')
-    }
-
-    if (trigger === 'rewind') {
-      return t('discovery.upsell.rewind')
-    }
-
-    return t('discovery.upsell.superLike')
+  const handleUpgrade = (): void => {
+    // TODO: Phase 2 will navigate to PremiumScreen.
+    showToast(t('discovery.limit.comingSoon'), 'info')
+    onDismiss()
   }
-
-  const benefits = [
-    t('discovery.upsell.benefit1'),
-    t('discovery.upsell.benefit2'),
-    t('discovery.upsell.benefit3'),
-    t('discovery.upsell.benefit4'),
-  ]
-
-  const heroIcon = trigger === 'daily_limit' ? 'heart' : 'star'
 
   return (
     <Modal
       visible={visible}
+      transparent
       animationType="slide"
-      presentationStyle="pageSheet"
       onRequestClose={onDismiss}
     >
-      <View style={styles.container}>
-        <View style={styles.handle} />
-        <View style={styles.heroIcon}>
-          <Ionicons
-            name={heroIcon}
-            size={HERO_ICON_SIZE}
-            color={trigger === 'daily_limit' ? colors.primary : colors.secondary}
-          />
-        </View>
-        <Text style={styles.title}>{getHeadline()}</Text>
+      <View style={styles.backdrop}>
+        <View style={styles.sheet}>
+          <View style={styles.header}>
+            <Ionicons
+              name="flash"
+              size={HERO_ICON_SIZE}
+              color={colors.warning}
+            />
+            <Text style={styles.headline}>
+              {reason === 'likes'
+                ? t('discovery.limit.outOfLikes')
+                : t('discovery.limit.premiumFeature')}
+            </Text>
+            <Text style={styles.subheadline}>
+              {t('discovery.limit.upgradeSubtitle')}
+            </Text>
+          </View>
 
-        <View style={styles.benefits}>
-          {benefits.map((benefit) => (
-            <View key={benefit} style={styles.benefitRow}>
-              <Ionicons
-                name="checkmark-circle"
-                size={BENEFIT_ICON_SIZE}
-                color={colors.primary}
-              />
-              <Text style={styles.benefitText}>{benefit}</Text>
-            </View>
-          ))}
-        </View>
+          <View style={styles.benefits}>
+            {BENEFITS.map((benefit) => (
+              <View key={benefit.key} style={styles.benefitRow}>
+                <Ionicons
+                  name={benefit.icon}
+                  size={BENEFIT_ICON_SIZE}
+                  color={colors.primary}
+                  style={styles.benefitIcon}
+                />
+                <Text style={styles.benefitText}>
+                  {t(`discovery.limit.benefits.${benefit.key}`)}
+                </Text>
+              </View>
+            ))}
+          </View>
 
-        <View style={styles.actions}>
-          <Button
-            label={t('discovery.upsell.upgradeCta')}
-            onPress={onUpgrade}
-            variant="primary"
-            fullWidth
-          />
-          <Button
-            label={t('discovery.upsell.maybeLater')}
-            onPress={onDismiss}
-            variant="ghost"
-            fullWidth
-          />
+          <View style={styles.actions}>
+            <Button
+              label={t('discovery.limit.upgradeCta')}
+              onPress={handleUpgrade}
+              variant="primary"
+            />
+            <TouchableOpacity onPress={onDismiss} style={styles.dismissButton}>
+              <Text style={styles.dismissText}>
+                {t('discovery.limit.maybeLater')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -105,60 +109,58 @@ export const UpsellModal = ({
 const styles = StyleSheet.create({
   actions: {
     gap: spacing.sm,
-    marginTop: spacing.xl,
-    width: '100%',
+  },
+  backdrop: {
+    backgroundColor: colors.overlay,
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  benefitIcon: {
+    marginRight: spacing.md,
   },
   benefitRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   benefitText: {
-    color: colors.gray[800],
-    flex: 1,
+    color: colors.gray[700],
     fontSize: typography.sizes.md,
-    fontWeight: typography.weights.medium,
   },
   benefits: {
-    gap: spacing.md,
-    marginTop: spacing.xl,
-    width: '100%',
-  },
-  container: {
-    alignItems: 'center',
-    backgroundColor: colors.background,
-    flex: 1,
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
-  },
-  handle: {
-    backgroundColor: colors.gray[300],
-    borderRadius: borderRadius.full,
-    height: HANDLE_HEIGHT,
     marginBottom: spacing.xl,
-    width: HANDLE_WIDTH,
   },
-  heroIcon: {
+  dismissButton: {
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.full,
-    elevation: 2,
-    height: spacing.xxxl,
-    justifyContent: 'center',
-    shadowColor: colors.black,
-    shadowOffset: {
-      height: spacing.xs,
-      width: 0,
-    },
-    shadowOpacity: 0.12,
-    shadowRadius: spacing.sm,
-    width: spacing.xxxl,
+    paddingVertical: spacing.sm,
   },
-  title: {
-    color: colors.gray[900],
+  dismissText: {
+    color: colors.gray[500],
+    fontSize: typography.sizes.md,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  headline: {
+    color: colors.gray[800],
     fontSize: typography.sizes.xl,
     fontWeight: typography.weights.bold,
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
+    textAlign: 'center',
+  },
+  sheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    paddingBottom: spacing.xxxl,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+  },
+  subheadline: {
+    color: colors.gray[600],
+    fontSize: typography.sizes.md,
+    marginTop: spacing.sm,
     textAlign: 'center',
   },
 })

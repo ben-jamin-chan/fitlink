@@ -4,6 +4,44 @@
 
 ---
 
+## [Phase 1F — Task 44] — 2026-05-23
+
+### Completed
+
+- Task 44: Daily like limit enforcement — free users capped at 50 likes/day
+- getDailyLikesDoc() reads, resets, and creates the dailyLikes subcollection doc
+- incrementDailyLikes() increments count after a successful swipeRight
+- swipeRight() checks cap before writing like; blocks and shows upsell if at limit
+- swipeSuperLike() gates non-premium users behind upsell modal
+- UpsellModal component created — informational Phase 1 stub, "Upgrade Now" shows toast
+- DiscoveryScreen mounts UpsellModal driven by discoveryStore.isUpsellVisible
+
+### Files Created / Modified
+
+- services/firebase/firestore.ts: getDailyLikesDoc, incrementDailyLikes added
+- store/discoveryStore.ts: isUpsellVisible state, showUpsell/hideUpsell actions, swipeRight and swipeSuperLike rewritten with limit enforcement
+- components/discovery/UpsellModal.tsx: modal with reason prop, benefits list, stub upgrade CTA
+- app/discovery/DiscoveryScreen.tsx: UpsellModal mounted, wired to store
+- i18n/en.json, my.json, zh.json, ta.json: discovery.limit.* keys added
+
+### Architecture Decisions
+
+- Daily likes doc stored at users/{userId}/dailyLikes/doc (single-doc subcollection pattern)
+- Reset logic uses local midnight comparison — resets at local midnight as spec'd
+- No FieldValue.increment client-side — read-then-write pattern; race condition safe for Phase 1
+- Premium check reads from profileStore.profile.subscription.tier
+- Upsell reason fixed to 'likes' in DiscoveryScreen for Phase 1 simplicity
+
+### Known Issues / Deferred
+
+- Server-side cap enforcement (Cloud Function transaction) deferred to Phase 2
+- Upsell reason differentiation (likes vs superLike headline) deferred to Phase 2
+- "Upgrade Now" CTA is a stub — Stripe PremiumScreen navigation deferred to Phase 2
+
+### Next Up
+
+- Task 45: lastActive heartbeat (useLastActive hook, AppState listener, 5-min interval)
+
 ## [Phase 1F — Task 43] — 2026-05-23
 
 ### Completed

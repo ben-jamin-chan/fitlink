@@ -4,7 +4,6 @@ import {
   collection,
   doc,
   getDoc,
-  increment,
   onSnapshot,
   orderBy,
   query,
@@ -22,6 +21,7 @@ import type { Match } from '@/types/match'
 import type { LookingFor, UserProfile } from '@/types/user'
 
 const FIRESTORE_WRITE_TIMEOUT_MS = 20000
+const DAILY_LIKE_CAP = 50
 
 const sortMatchesByActivity = (first: Match, second: Match): number => {
   const firstLastMessageAt =
@@ -242,75 +242,58 @@ export const resetUnreadCount = async (
   })
 }
 
-/** Shape of the dailyLikes sub-document at /users/{userId}/dailyLikes/doc */
-export interface DailyLikesDoc {
+interface DailyLikesDoc {
   count: number
   resetAt: Timestamp
 }
 
-const getTodayMidnight = (): Date => {
-  const todayMidnight = new Date()
-  todayMidnight.setHours(0, 0, 0, 0)
-  return todayMidnight
-}
-
 /**
- * Returns the current dailyLikes doc for a user.
- * Missing or stale counters are treated as reset to 0 for today.
+ * Returns { count, remaining } for the user's daily like quota.
+ * Resets the Firestore doc to { count: 0 } if resetAt is before today midnight.
+ * Creates the doc with count: 0 if it does not exist yet.
  */
 export const getDailyLikesDoc = async (
   userId: string
-): Promise<DailyLikesDoc> => {
+): Promise<{ count: number; remaining: number }> => {
   const ref = doc(db, 'users', userId, 'dailyLikes', 'doc')
   const snap = await getDoc(ref)
-  const todayMidnight = getTodayMidnight()
+
+  const todayMidnight = new Date()
+  todayMidnight.setHours(0, 0, 0, 0)
 
   if (!snap.exists()) {
-    return { count: 0, resetAt: Timestamp.fromDate(todayMidnight) }
+    await setDoc(ref, {
+      count: 0,
+      resetAt: Timestamp.fromDate(todayMidnight),
+    })
+    return { count: 0, remaining: DAILY_LIKE_CAP }
   }
 
-  const data = snap.data()
-  const count = typeof data.count === 'number' ? data.count : 0
-  const resetAt =
-    data.resetAt instanceof Timestamp
-      ? data.resetAt
-      : Timestamp.fromDate(todayMidnight)
+  // Firestore document data is untyped at the service boundary.
+  const data = snap.data() as DailyLikesDoc
+  const resetAtDate = data.resetAt.toDate()
 
-  if (resetAt.toDate() < todayMidnight) {
-    return { count: 0, resetAt: Timestamp.fromDate(todayMidnight) }
+  if (resetAtDate < todayMidnight) {
+    await setDoc(ref, {
+      count: 0,
+      resetAt: Timestamp.fromDate(todayMidnight),
+    })
+    return { count: 0, remaining: DAILY_LIKE_CAP }
   }
 
-  return { count, resetAt }
+  const remaining = Math.max(0, DAILY_LIKE_CAP - data.count)
+  return { count: data.count, remaining }
 }
 
 /**
  * Increments the daily like count by 1.
- * Missing or stale counters are reset first, then counted as today's first like.
+ * Must be called AFTER getDailyLikesDoc confirms the action is permitted.
+ * Does NOT re-check the cap - caller is responsible for the guard.
  */
 export const incrementDailyLikes = async (userId: string): Promise<void> => {
   const ref = doc(db, 'users', userId, 'dailyLikes', 'doc')
   const snap = await getDoc(ref)
-  const todayMidnight = getTodayMidnight()
-  const nextMidnight = new Date(todayMidnight)
-  nextMidnight.setDate(nextMidnight.getDate() + 1)
-
-  const resetAt = snap.exists() ? snap.data().resetAt : undefined
-  const isStale =
-    !(resetAt instanceof Timestamp) || resetAt.toDate() < todayMidnight
-
-  if (!snap.exists() || isStale) {
-    await setDoc(
-      ref,
-      {
-        count: 1,
-        resetAt: Timestamp.fromDate(nextMidnight),
-      },
-      { merge: true }
-    )
-    return
-  }
-
-  await updateDoc(ref, {
-    count: increment(1),
-  })
+  // Firestore document data is untyped at the service boundary.
+  const current = snap.exists() ? (snap.data() as DailyLikesDoc).count : 0
+  await updateDoc(ref, { count: current + 1 })
 }

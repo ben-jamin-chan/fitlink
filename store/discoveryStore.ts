@@ -7,6 +7,8 @@ import {
   getDailyLikesDoc,
   incrementDailyLikes,
 } from '@/services/firebase/firestore'
+import { useAuthStore } from '@/store/authStore'
+import { useProfileStore } from '@/store/profileStore'
 
 import type { UserProfile } from '@/types/user'
 
@@ -26,24 +28,19 @@ interface DiscoveryState {
   isLimitReached: boolean
   dailyLimitReached: boolean
   isRefetching: boolean
+  isUpsellVisible: boolean
 }
 
 interface DiscoveryActions {
   fetchStack: (userId: string) => Promise<void>
-  swipeRight: (
-    userId: string,
-    targetId: string,
-    isPremium: boolean
-  ) => Promise<'ok' | 'limit_reached'>
+  swipeRight: (targetId: string) => Promise<void>
   swipeLeft: (userId: string, targetId: string) => Promise<void>
-  swipeSuperLike: (
-    userId: string,
-    targetId: string,
-    isPremium: boolean
-  ) => Promise<'ok' | 'premium_required'>
+  swipeSuperLike: (targetId: string) => Promise<void>
   checkDailyLimit: (userId: string) => Promise<void>
   advanceStack: () => void
   clearError: () => void
+  showUpsell: () => void
+  hideUpsell: () => void
   reset: () => void
 }
 
@@ -58,6 +55,7 @@ const initialState: DiscoveryState = {
   isLimitReached: false,
   dailyLimitReached: false,
   isRefetching: false,
+  isUpsellVisible: false,
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -141,58 +139,69 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
     }
   },
 
-  swipeRight: async (
-    userId: string,
-    targetId: string,
-    isPremium: boolean
-  ): Promise<'ok' | 'limit_reached'> => {
-    let nextDailyLikesCount = get().dailyLikesCount
+  swipeRight: async (targetId: string): Promise<void> => {
+    try {
+      const { user } = useAuthStore.getState()
+      const { profile } = useProfileStore.getState()
 
-    if (!isPremium) {
-      try {
-        const dailyLikes = await getDailyLikesDoc(userId)
-        nextDailyLikesCount = dailyLikes.count
+      if (user === null) {
+        return
+      }
 
-        if (dailyLikes.count >= FREE_DAILY_LIKE_LIMIT) {
+      const isPremium = profile?.subscription?.tier === 'premium'
+      let dailyLikesCount = get().dailyLikesCount
+
+      if (!isPremium) {
+        const { count, remaining } = await getDailyLikesDoc(user.uid)
+        dailyLikesCount = count
+
+        if (remaining <= 0) {
           set({
-            dailyLikesCount: dailyLikes.count,
+            dailyLikesCount: count,
             isLimitReached: true,
             dailyLimitReached: true,
+            isUpsellVisible: true,
           })
-          return 'limit_reached'
+          return
         }
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Daily limit check failed'
-        set({ error: message })
-        return 'limit_reached'
       }
-    }
 
-    try {
-      const swipeRef = doc(db, 'swipes', userId, 'likes', targetId)
-      await setDoc(swipeRef, {
-        swiperId: userId,
+      const likeRef = doc(db, 'swipes', user.uid, 'likes', targetId)
+      await setDoc(likeRef, {
+        swiperId: user.uid,
         targetId,
         isSuperLike: false,
         createdAt: serverTimestamp(),
       })
 
       if (!isPremium) {
-        await incrementDailyLikes(userId)
-        nextDailyLikesCount += 1
-        set({
-          dailyLikesCount: nextDailyLikesCount,
-          isLimitReached: nextDailyLikesCount >= FREE_DAILY_LIKE_LIMIT,
-          dailyLimitReached: nextDailyLikesCount >= FREE_DAILY_LIKE_LIMIT,
-        })
+        await incrementDailyLikes(user.uid)
       }
 
-      return 'ok'
+      set((state) => {
+        const nextStack = state.stack.filter(
+          (userProfile) => userProfile.uid !== targetId
+        )
+        const nextDailyLikesCount = isPremium
+          ? state.dailyLikesCount
+          : dailyLikesCount + 1
+        const remaining = nextStack.length - state.currentIndex
+        const shouldRefetch =
+          remaining <= REFETCH_THRESHOLD && !state.isLoading
+
+        return {
+          dailyLikesCount: nextDailyLikesCount,
+          dailyLimitReached:
+            !isPremium && nextDailyLikesCount >= FREE_DAILY_LIKE_LIMIT,
+          isLimitReached:
+            !isPremium && nextDailyLikesCount >= FREE_DAILY_LIKE_LIMIT,
+          isRefetching: shouldRefetch ? true : state.isRefetching,
+          stack: nextStack,
+        }
+      })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Swipe failed'
       set({ error: message })
-      return 'ok'
     }
   },
 
@@ -210,29 +219,47 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
     }
   },
 
-  swipeSuperLike: async (
-    userId: string,
-    targetId: string,
-    isPremium: boolean
-  ): Promise<'ok' | 'premium_required'> => {
-    if (!isPremium) {
-      return 'premium_required'
-    }
-
+  swipeSuperLike: async (targetId: string): Promise<void> => {
     try {
-      const swipeRef = doc(db, 'swipes', userId, 'likes', targetId)
-      await setDoc(swipeRef, {
-        swiperId: userId,
+      const { user } = useAuthStore.getState()
+      const { profile } = useProfileStore.getState()
+
+      if (user === null) {
+        return
+      }
+
+      const isPremium = profile?.subscription?.tier === 'premium'
+
+      if (!isPremium) {
+        set({ isUpsellVisible: true })
+        return
+      }
+
+      const likeRef = doc(db, 'swipes', user.uid, 'likes', targetId)
+      await setDoc(likeRef, {
+        swiperId: user.uid,
         targetId,
         isSuperLike: true,
         createdAt: serverTimestamp(),
       })
-      return 'ok'
+
+      set((state) => {
+        const nextStack = state.stack.filter(
+          (userProfile) => userProfile.uid !== targetId
+        )
+        const remaining = nextStack.length - state.currentIndex
+        const shouldRefetch =
+          remaining <= REFETCH_THRESHOLD && !state.isLoading
+
+        return {
+          isRefetching: shouldRefetch ? true : state.isRefetching,
+          stack: nextStack,
+        }
+      })
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Super like failed'
       set({ error: message })
-      return 'ok'
     }
   },
 
@@ -241,8 +268,8 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
       const data = await getDailyLikesDoc(userId)
       set({
         dailyLikesCount: data.count,
-        isLimitReached: data.count >= FREE_DAILY_LIKE_LIMIT,
-        dailyLimitReached: data.count >= FREE_DAILY_LIKE_LIMIT,
+        isLimitReached: data.remaining <= 0,
+        dailyLimitReached: data.remaining <= 0,
       })
     } catch (error) {
       const message =
@@ -270,6 +297,14 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
 
   clearError: (): void => {
     set({ error: null })
+  },
+
+  showUpsell: (): void => {
+    set({ isUpsellVisible: true })
+  },
+
+  hideUpsell: (): void => {
+    set({ isUpsellVisible: false })
   },
 
   reset: (): void => {
