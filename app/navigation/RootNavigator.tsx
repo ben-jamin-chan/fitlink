@@ -18,7 +18,7 @@ import { colors } from '@/constants/theme'
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>
-  Main: NavigatorScreenParams<MainTabParamList>
+  MainTabs: NavigatorScreenParams<MainTabParamList>
   Onboarding: undefined
 }
 
@@ -42,7 +42,7 @@ export const RootNavigator = (): React.JSX.Element => {
       ) : !hasCompletedOnboarding ? (
         <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
       ) : (
-        <Stack.Screen name="Main" component={MainTabNavigator} />
+        <Stack.Screen name="MainTabs" component={MainTabNavigator} />
       )}
     </Stack.Navigator>
   )

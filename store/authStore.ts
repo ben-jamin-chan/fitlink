@@ -7,6 +7,7 @@ import {
   signOut as firebaseSignOut,
   subscribeToAuthState,
 } from '@/services/firebase/auth'
+import { unregisterPushNotifications } from '@/services/notifications'
 import { useProfileStore } from '@/store/profileStore'
 
 import type { AppError } from '@/services/firebase/auth'
@@ -70,6 +71,14 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async (): Promise<void> => {
         try {
+          const currentUserId = get().user?.uid
+
+          if (currentUserId !== undefined) {
+            await unregisterPushNotifications(currentUserId).catch(() => {
+              return undefined
+            })
+          }
+
           await firebaseSignOut()
           useProfileStore.getState().reset()
           set({

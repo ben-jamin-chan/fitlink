@@ -672,6 +672,12 @@
       }
     }
   },
+  "notifications": {
+    "newMessage": "You have a new message",
+    "newMatch": "You have a new match!",
+    "permissionDenied": "Enable notifications in Settings to get match and message alerts",
+    "permissionDeniedTitle": "Notifications Disabled"
+  },
   "ui": {
     "loading": "Loading...",
     "errorTitle": "Something went wrong",

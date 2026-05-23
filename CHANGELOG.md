@@ -4,6 +4,46 @@
 
 ---
 
+## [Phase 1F — Task 42] — 2026-05-23
+
+### Completed
+
+- Task 42: Push notification registration and deep link handling
+- registerForPushNotifications() saves expoPushToken to Firestore on first auth + onboarding completion
+- unregisterPushNotifications() nulls token on logout (prevents post-logout push delivery)
+- useNotifications() hook wires foreground toast display and tap-to-navigate deep links
+- App.tsx refactored with AppRoot inner component to satisfy hook-above-navigator constraint
+- NavigationContainerRef passed into useNotifications for imperative navigation on notification tap
+- Cold-start (quit state) notification response handled via getLastNotificationResponseAsync
+
+### Files Created / Modified
+
+- services/notifications.ts: extended with registerForPushNotifications, unregisterPushNotifications, setNotificationHandler at module scope
+- hooks/useNotifications.ts: registration effect, foreground listener, response listener, cold-start handler
+- App.tsx: AppRoot inner component, navigationRef, useNotifications() call
+- app/navigation/RootNavigator.tsx: root main route renamed to MainTabs for notification deep links
+- store/authStore.ts: unregisterPushNotifications() call added to logout()
+- i18n/en.json, my.json, zh.json, ta.json: notifications.* keys added
+
+### Architecture Decisions
+
+- useNotifications receives navigationRef param (not useNavigation hook) — hook called above navigator provider scope
+- setNotificationHandler at module scope in notifications.ts — registered before any notification arrives
+- Physical device check via expo-constants Constants.isDevice — simulator runs skip silently
+- setTimeout delays (100ms/500ms) for deep link navigation timing — pragmatic for Phase 1
+- expoPushToken nulled on logout before Firebase sign-out via client Firestore update — prevents ghost notifications post sign-out
+- Existing Settings notification toggle kept compatible with registerForPushNotifications() no-argument permission helper overload
+
+### Known Issues / Deferred
+
+- Granular notification preference toggles (matches vs messages) stored in AsyncStorage (Task 38) are not yet wired to suppress specific notification types client-side — Cloud Function sends all; client-side filtering deferred to Phase 2
+- Notification badge count reset on app open deferred to Phase 2
+- Background fetch / background notification handling (iOS background modes) deferred to Phase 2
+
+### Next Up
+
+- Task 43: Biometric authentication (useBiometric hook, BiometricPrompt screen)
+
 ## [Phase 1F — Task 41] — 2026-05-23
 
 ### Completed
