@@ -4,6 +4,43 @@
 
 ---
 
+## [Phase 1F — Task 43] — 2026-05-23
+
+### Completed
+
+- Task 43: Biometric authentication — useBiometric hook, BiometricPromptScreen, RootNavigator gate
+- One-time enable/skip Alert shown after first successful login (AsyncStorage flag)
+- Cold-start gate: BiometricPromptScreen shown when isAuthenticated + biometricEnabled + !biometricVerified
+- biometricVerified excluded from Zustand persist — resets on every cold start by design
+- Device without biometric support (simulator, unenrolled) skips silently via setBiometricVerified(true)
+- "Use Password" fallback calls logout() and routes user back to AuthNavigator
+
+### Files Created / Modified
+
+- hooks/useBiometric.ts: checkBiometricSupport, getBiometricEnabled, setBiometricEnabled, getBiometricPromptShown, markBiometricPromptShown, authenticateWithBiometric, useBiometric hook
+- app/auth/BiometricPromptScreen.tsx: full-screen gate, auto-triggers on mount, fail state with retry + fallback
+- app/navigation/RootNavigator.tsx: BiometricPrompt added to stack, biometricReady guard, one-time Alert, routing logic updated
+- store/authStore.ts: biometricVerified state + setBiometricVerified action added, excluded from persist
+- i18n/en.json, my.json, zh.json, ta.json: biometric.* keys added
+
+### Architecture Decisions
+
+- biometricVerified not persisted — intentional cold-start re-verification gate
+- disableDeviceFallback: true — full control over "Use Password" UX, no OS PIN fallback
+- gestureEnabled: false on BiometricPrompt screen — prevents swipe-back bypass
+- Alert.alert for enable/skip prompt — custom modal deferred to Phase 2
+- No Firestore writes — biometric preference is device-local only (AsyncStorage)
+
+### Known Issues / Deferred
+
+- Custom enable/skip modal UI (replace Alert) deferred to Phase 2
+- Biometric lockout state (too many failures, hardware disabled) not specially handled — falls through to hasFailed state
+- Android-specific biometric type display (fingerprint vs face) not differentiated in UI — generic icon used
+
+### Next Up
+
+- Task 44: Daily like limit enforcement (discoveryStore + firestore dailyLikes doc)
+
 ## [Phase 1F — Task 42] — 2026-05-23
 
 ### Completed

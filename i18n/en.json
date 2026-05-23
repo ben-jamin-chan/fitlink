@@ -64,6 +64,20 @@
       "skipButton": "Not now"
     }
   },
+  "biometric": {
+    "promptTitle": "Verify It's You",
+    "promptSubtitle": "Use your biometric to continue",
+    "promptCancelLabel": "Use Password",
+    "enableTitle": "Enable Biometric Login?",
+    "enableSubtitle": "Use Face ID or Touch ID to unlock fitlink faster next time.",
+    "enableConfirm": "Enable",
+    "enableSkip": "Not Now",
+    "fallbackTitle": "Biometric Failed",
+    "fallbackMessage": "We couldn't verify your identity. Please log in with your password.",
+    "fallbackAction": "Log In",
+    "notSupported": "Biometric authentication is not available on this device.",
+    "notEnrolled": "No biometrics enrolled. Please set up Face ID or Touch ID in your device settings."
+  },
   "onboarding": {
     "step": "Step {{current}} of {{total}}",
     "completeProfile": "Complete Profile",

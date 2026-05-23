@@ -18,11 +18,13 @@ interface AuthState {
   isLoading: boolean
   error: string | null
   hasCompletedOnboarding: boolean
+  biometricVerified: boolean
   setUser: (user: User | null) => void
   setIsLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
   setHasCompletedOnboarding: (completed: boolean) => void
+  setBiometricVerified: (verified: boolean) => void
   logout: () => Promise<void>
   initialise: () => () => void
 }
@@ -44,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: true,
       error: null,
       hasCompletedOnboarding: false,
+      biometricVerified: false,
 
       setUser: (user: User | null): void => {
         set({
@@ -67,6 +70,10 @@ export const useAuthStore = create<AuthState>()(
 
       setHasCompletedOnboarding: (completed: boolean): void => {
         set({ hasCompletedOnboarding: completed })
+      },
+
+      setBiometricVerified: (verified: boolean): void => {
+        set({ biometricVerified: verified })
       },
 
       logout: async (): Promise<void> => {
