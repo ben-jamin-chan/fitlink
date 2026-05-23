@@ -36,7 +36,7 @@ interface ProfileState {
 }
 
 interface ProfileActions {
-  fetchProfile: (userId: string) => Promise<void>
+  fetchProfile: (userId: string) => Promise<UserProfile | null>
   updateProfile: (partial: EditableProfileUpdate) => Promise<void>
   uploadPhoto: (uri: string, index: number) => Promise<void>
   deletePhoto: (index: number) => Promise<void>
@@ -56,14 +56,16 @@ const initialState: ProfileState = {
 export const useProfileStore = create<ProfileStore>()((set, get) => ({
   ...initialState,
 
-  fetchProfile: async (userId: string): Promise<void> => {
+  fetchProfile: async (userId: string): Promise<UserProfile | null> => {
     set({ isLoading: true, error: null })
 
     try {
       const profile = await getUserProfile(userId)
       set({ profile, isLoading: false, error: null })
+      return profile
     } catch {
       set({ isLoading: false, error: 'profile.errors.fetchFailed' })
+      return null
     }
   },
 

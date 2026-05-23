@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import Constants, { AppOwnership, ExecutionEnvironment } from 'expo-constants'
 import * as LocalAuthentication from 'expo-local-authentication'
 
 const BIOMETRIC_ENABLED_KEY = 'biometric_enabled'
@@ -17,8 +18,28 @@ export interface BiometricAuthResult {
   error?: string
 }
 
+export const isBiometricUnavailableError = (error?: string): boolean => {
+  return (
+    error === 'not_available' ||
+    error === 'not_enrolled' ||
+    error === 'passcode_not_set' ||
+    error === 'invalid_context'
+  )
+}
+
+export const isBiometricRuntimeSupported = (): boolean => {
+  return (
+    Constants.executionEnvironment !== ExecutionEnvironment.StoreClient &&
+    Constants.appOwnership !== AppOwnership.Expo
+  )
+}
+
 export const checkBiometricSupport =
   async (): Promise<BiometricSupportResult> => {
+    if (!isBiometricRuntimeSupported()) {
+      return { isSupported: false, isEnrolled: false, biometricType: [] }
+    }
+
     const isSupported = await LocalAuthentication.hasHardwareAsync()
 
     if (!isSupported) {

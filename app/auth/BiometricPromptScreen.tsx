@@ -9,7 +9,12 @@ import { useAuthStore } from '@/store/authStore'
 
 import { Button } from '@/components/ui/Button'
 
-import { authenticateWithBiometric } from '@/hooks/useBiometric'
+import {
+  authenticateWithBiometric,
+  isBiometricRuntimeSupported,
+  isBiometricUnavailableError,
+  setBiometricEnabled,
+} from '@/hooks/useBiometric'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
@@ -21,6 +26,12 @@ export default function BiometricPromptScreen(): React.JSX.Element {
   const [hasFailed, setHasFailed] = useState(false)
 
   const triggerBiometric = useCallback(async (): Promise<void> => {
+    if (!isBiometricRuntimeSupported()) {
+      await setBiometricEnabled(false)
+      setBiometricVerified(true)
+      return
+    }
+
     setIsAuthenticating(true)
     setHasFailed(false)
 
@@ -32,6 +43,12 @@ export default function BiometricPromptScreen(): React.JSX.Element {
     setIsAuthenticating(false)
 
     if (result.success) {
+      setBiometricVerified(true)
+      return
+    }
+
+    if (isBiometricUnavailableError(result.error)) {
+      await setBiometricEnabled(false)
       setBiometricVerified(true)
       return
     }

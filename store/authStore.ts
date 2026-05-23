@@ -11,6 +11,7 @@ import { unregisterPushNotifications } from '@/services/notifications'
 import { useProfileStore } from '@/store/profileStore'
 
 import type { AppError } from '@/services/firebase/auth'
+import type { UserProfile } from '@/types/user'
 
 interface AuthState {
   user: User | null
@@ -102,11 +103,34 @@ export const useAuthStore = create<AuthState>()(
 
       initialise: (): (() => void) => {
         const unsubscribe = subscribeToAuthState((user: User | null): void => {
-          get().setUser(user)
-
-          if (user !== null) {
-            void useProfileStore.getState().fetchProfile(user.uid)
+          if (user === null) {
+            useProfileStore.getState().reset()
+            set({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+              hasCompletedOnboarding: false,
+              error: null,
+            })
+            return
           }
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: true,
+            error: null,
+          })
+
+          void useProfileStore
+            .getState()
+            .fetchProfile(user.uid)
+            .then((profile: UserProfile | null): void => {
+              set({
+                hasCompletedOnboarding: profile !== null,
+                isLoading: false,
+              })
+            })
         })
 
         return unsubscribe
