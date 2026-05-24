@@ -4,6 +4,60 @@
 
 ---
 
+## [Phase 1F — Task 45] — 2026-05-24
+
+### Completed
+
+- Task 45: lastActive heartbeat — useLastActive hook wired into AppRoot
+- Writes serverTimestamp() to /users/{uid}.lastActive on app foreground and every 5 minutes
+- Final write on background/inactive, interval restarted on return to foreground
+- Auth guard prevents writes for unauthenticated sessions
+- AppState subscription and interval ref cleaned up on unmount / auth change
+
+### Files Created / Modified
+
+- hooks/useLastActive.ts: AppState listener, setInterval heartbeat, updateDoc serverTimestamp, silent error handling
+- App.tsx: useLastActive() called inside AppRoot alongside useNotifications()
+
+### Architecture Decisions
+
+- Direct updateDoc to Firestore — bypasses profileStore.updateProfile() to avoid loading state pollution
+- serverTimestamp() enforced — no client Date objects
+- Interval restarts with immediate write on foreground — prevents stale lastActive after long backgrounds
+- AppState.addEventListener subscription object stored in ref, .remove() called on cleanup
+
+### Known Issues / Deferred
+
+- Background fetch / silent push to trigger lastActive update when app is fully quit — deferred to Phase 2
+- lastActive write on app quit (not just background) not guaranteed on iOS — OS may kill app before write completes; acceptable for Phase 1
+
+### Next Up
+
+- Task 46: Final app wiring audit (App.tsx provider order, tsc --noEmit, hardcoded string grep, splash screen)
+
+## [Phase 1F — Post-Task 44 Fixes] — 2026-05-23
+
+### Completed
+
+- Fixed Expo Go / iOS Code Scanner biometric loop by treating Expo Go as unsupported for biometric auth
+- Added expo-local-authentication config plugin with Face ID permission for dev builds and standalone builds
+- BiometricPromptScreen now disables local biometric preference and proceeds when biometrics are unavailable in the current runtime
+- Fixed existing email-account login routing to wait for Firestore profile lookup before deciding onboarding vs main app
+- profileStore.fetchProfile() now returns UserProfile | null so authStore can set hasCompletedOnboarding from profile doc existence
+
+### Files Created / Modified
+
+- app.json: expo-local-authentication plugin and faceIDPermission added
+- hooks/useBiometric.ts: Expo Go runtime detection, unavailable-error helper, support check guard
+- app/auth/BiometricPromptScreen.tsx: unsupported-runtime and unavailable-auth skip handling
+- store/authStore.ts: auth listener waits for fetchProfile() and sets hasCompletedOnboarding from profile existence
+- store/profileStore.ts: fetchProfile() returns loaded profile or null
+
+### Verification
+
+- npx tsc --noEmit passes
+- app.json parses successfully
+
 ## [Phase 1F — Task 44] — 2026-05-23
 
 ### Completed

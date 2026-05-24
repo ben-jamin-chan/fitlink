@@ -13,6 +13,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { Toast } from '@/components/ui/Toast'
 
 import { RootNavigator } from '@/app/navigation/RootNavigator'
+import { useLastActive } from '@/hooks/useLastActive'
 import { useNotifications } from '@/hooks/useNotifications'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
@@ -25,6 +26,7 @@ const AppRoot = (): React.JSX.Element => {
   const initialise = useAuthStore((state) => state.initialise)
 
   useNotifications(navigationRef)
+  useLastActive()
 
   useEffect(() => {
     const unsubscribe = initialise()
