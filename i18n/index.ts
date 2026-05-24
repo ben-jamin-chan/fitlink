@@ -27,8 +27,12 @@ const i18nInitOptions = {
   },
   lng: detectedLanguage,
   fallbackLng: 'en',
+  initImmediate: false,
   interpolation: {
     escapeValue: false,
+  },
+  react: {
+    useSuspense: false,
   },
   compatibilityJSON: 'v3',
 } as unknown as InitOptions

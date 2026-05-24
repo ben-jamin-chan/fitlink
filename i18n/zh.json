@@ -712,6 +712,7 @@
     "loading": "Loading...",
     "errorTitle": "Something went wrong",
     "errorSubtitle": "The app hit an unexpected error. Please try again.",
+    "restartApp": "Restart App",
     "tryAgain": "Try Again",
     "toast": {
       "profileSaved": "Profile updated",

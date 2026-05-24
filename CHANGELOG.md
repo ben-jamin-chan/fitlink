@@ -4,6 +4,60 @@
 
 ---
 
+## [Phase 1F — Task 46] — 2026-05-24
+
+### Completed
+
+- Task 46: Final app wiring audit — Phase 1 MVP complete
+- App.tsx provider order confirmed and fixed where needed
+- SplashScreen.hideAsync() wired correctly to onAuthStateChanged first fire
+- i18n and Firebase config import order verified
+- GestureHandlerRootView confirmed to appear only once (App.tsx)
+- useNotifications and useLastActive confirmed inside AppRoot only
+- ErrorBoundary confirmed as class component wrapping NavigationContainer
+- npx tsc --noEmit passes with zero errors
+- Zero `any` usage across all client-side files
+- Zero console.log in app/, components/, store/, hooks/, services/, utils/
+- Zero relative imports — all use @/ alias
+- Zero inline styles in JSX (except GestureHandlerRootView in App.tsx)
+- Zero hardcoded user-visible strings — all through t()
+- Toast singleton confirmed rendering in AppRoot
+- Navigation types confirmed across all screens
+- firestore.rules and firestore.indexes.json confirmed complete
+
+### Files Created / Modified
+
+- App.tsx: fixed provider order, moved navigationRef to module scope, added Firebase/i18n side-effect imports, added splash preventAutoHideAsync, rendered Toast from AppRoot
+- store/authStore.ts: added SplashScreen.hideAsync after first auth state resolution and profile fetch completion
+- i18n/index.ts: forced synchronous i18next initialisation and disabled React suspense
+- components/ui/ErrorBoundary.tsx: kept class boundary, moved fallback text to i18n, reset button labelled Restart App
+- components/discovery/PhotoViewer.tsx: removed extra GestureHandlerRootView
+- hooks/useLastActive.ts: removed console.log from heartbeat error path
+- app/profile/ProfileScreen.tsx: removed Phase 2 stub console.log calls
+- i18n/en.json, i18n/my.json, i18n/zh.json, i18n/ta.json: added ui.restartApp key
+- package.json, package-lock.json: added Expo-compatible expo-splash-screen dependency
+
+### Architecture Decisions
+
+- SplashScreen hides inside onAuthStateChanged callback — guarantees no flash of wrong screen
+- ErrorBoundary outside NavigationContainer — catches navigation-level errors
+- Toast singleton uses Zustand module-level helper pattern — avoids context threading through navigator
+
+### Known Issues / Deferred
+
+- Background silent push for lastActive update — deferred to Phase 2
+- Crashlytics integration (replace console.error in ErrorBoundary) — deferred to Phase 2
+- "Upgrade Now" CTA in UpsellModal — stub, wired to Stripe in Phase 2
+
+### Phase 1 MVP Status
+
+✅ COMPLETE — All 46 tasks done. Ready for TestFlight + Android internal testing beta.
+
+### Next Up
+
+- Generate TASKS_PHASE2.md (premium/subscriptions, photo verification, fitness integrations)
+- EAS Build configuration for TestFlight submission
+
 ## [Phase 1F — Task 45] — 2026-05-24
 
 ### Completed

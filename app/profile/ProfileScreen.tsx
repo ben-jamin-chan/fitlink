@@ -106,12 +106,10 @@ export default function ProfileScreen(): React.JSX.Element {
 
   const handleVerifyProfile = (): void => {
     // TODO Phase 2: navigate to photo verification flow.
-    console.log('TODO: navigate to verification flow')
   }
 
   const handleGetPremium = (): void => {
     // TODO Phase 2: navigate to PremiumScreen.
-    console.log('TODO: navigate to PremiumScreen')
   }
 
   if (error !== null && profile === null && !isLoading) {

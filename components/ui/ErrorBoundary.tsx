@@ -10,6 +10,8 @@ import {
 
 import { Ionicons } from '@expo/vector-icons'
 
+import i18n from '@/i18n'
+
 import { colors, spacing, typography } from '@/constants/theme'
 
 const ICON_SIZE = 56
@@ -50,13 +52,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   render(): ReactNode {
     if (this.state.hasError) {
+      const title = i18n.t('ui.errorTitle')
+      const subtitle = i18n.t('ui.errorSubtitle')
+      const restartLabel = i18n.t('ui.restartApp')
+
       return (
         <View style={styles.container}>
           <Ionicons name="warning-outline" size={ICON_SIZE} color={colors.danger} />
-          <Text style={styles.title}>Something went wrong</Text>
-          <Text style={styles.subtitle}>
-            The app hit an unexpected error. Please try again.
-          </Text>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{subtitle}</Text>
           {__DEV__ && this.state.errorMessage.length > 0 && (
             <Text style={styles.devMessage}>{this.state.errorMessage}</Text>
           )}
@@ -65,7 +69,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             onPress={this.handleReset}
             activeOpacity={BUTTON_ACTIVE_OPACITY}
           >
-            <Text style={styles.buttonLabel}>Try Again</Text>
+            <Text style={styles.buttonLabel}>{restartLabel}</Text>
           </TouchableOpacity>
         </View>
       )

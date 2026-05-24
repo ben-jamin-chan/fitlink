@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as SplashScreen from 'expo-splash-screen'
 import type { User } from 'firebase/auth'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
@@ -102,6 +103,18 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initialise: (): (() => void) => {
+        let hasHiddenSplash = false
+        const hideSplash = (): void => {
+          if (hasHiddenSplash) {
+            return
+          }
+
+          hasHiddenSplash = true
+          void SplashScreen.hideAsync().catch(() => {
+            return undefined
+          })
+        }
+
         const unsubscribe = subscribeToAuthState((user: User | null): void => {
           if (user === null) {
             useProfileStore.getState().reset()
@@ -112,6 +125,7 @@ export const useAuthStore = create<AuthState>()(
               hasCompletedOnboarding: false,
               error: null,
             })
+            hideSplash()
             return
           }
 
@@ -130,6 +144,16 @@ export const useAuthStore = create<AuthState>()(
                 hasCompletedOnboarding: profile !== null,
                 isLoading: false,
               })
+            })
+            .catch((): void => {
+              set({
+                hasCompletedOnboarding: false,
+                isLoading: false,
+                error: 'errors.generic',
+              })
+            })
+            .finally((): void => {
+              hideSplash()
             })
         })
 

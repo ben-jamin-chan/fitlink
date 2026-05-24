@@ -26,6 +26,7 @@
     "expo-local-authentication": "~17.0.8",
     "expo-localization": "~17.0.8",
     "expo-notifications": "~0.32.17",
+    "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "firebase": "^12.12.1",
     "i18next": "^26.0.8",

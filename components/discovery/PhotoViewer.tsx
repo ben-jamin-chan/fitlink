@@ -6,13 +6,13 @@ import {
   Modal,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import {
   Gesture,
   GestureDetector,
-  GestureHandlerRootView,
 } from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,
@@ -106,7 +106,7 @@ export const PhotoViewer = ({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <GestureHandlerRootView style={styles.backdrop}>
+      <View style={styles.backdrop}>
         <TouchableOpacity
           style={styles.closeButton}
           onPress={handleClose}
@@ -124,7 +124,7 @@ export const PhotoViewer = ({
             />
           </Animated.View>
         </GestureDetector>
-      </GestureHandlerRootView>
+      </View>
     </Modal>
   )
 }

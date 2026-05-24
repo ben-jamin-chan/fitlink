@@ -31,10 +31,8 @@ export const useLastActive = (): void => {
         await updateDoc(doc(db, 'users', uid), {
           lastActive: serverTimestamp(),
         })
-      } catch (error: unknown) {
-        if (__DEV__) {
-          console.log('[useLastActive] write failed:', error)
-        }
+      } catch {
+        return undefined
       }
     }
 
