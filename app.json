@@ -14,6 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.fitlink.app",
+      "buildNumber": "1",
       "supportsTablet": true,
       "entitlements": {
         "com.apple.developer.applesignin": [
@@ -22,6 +24,8 @@
       }
     },
     "android": {
+      "package": "com.fitlink.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

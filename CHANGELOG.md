@@ -4,6 +4,39 @@
 
 ---
 
+## [Phase 2A — Task 49] — 2026-05-25
+
+### Completed
+
+- Task 49: EAS build configuration complete
+- eas.json: development, preview, production build profiles created
+- app.json: bundle identifiers set (com.fitlink.app iOS + Android), version 1.0.0, buildNumber 1, versionCode 1
+- BUILD.md: full replacement — prerequisites, env vars table, build/submit commands, Stripe webhook setup, Strava OAuth docs, emulator commands, version bump checklist
+- .gitignore: google-play-key.json and .eas/ added
+
+### Files Created / Modified
+
+- eas.json: created — three build profiles, submit configuration with placeholder Apple credentials
+- app.json: ios.bundleIdentifier, ios.buildNumber, android.package, android.versionCode, expo.version added
+- BUILD.md: full replacement with comprehensive build reference
+- .gitignore: two new entries
+
+### Architecture Decisions
+
+- eas.json committed to git — contains no secrets; all secret values use eas secret:create
+- autoIncrement only on production profile — development and preview builds don't consume build numbers
+- google-play-key.json gitignored — service account private key, never committed
+- Bundle ID com.fitlink.app used in both platforms for consistency
+
+### Known Issues / Deferred
+
+- eas.json submit block has placeholder Apple credentials — developer fills in before first production submission
+- google-play-key.json not yet created — developer downloads from Google Play Console before first Android submission
+
+### Next Up
+
+- Task 50: Stripe Cloud Functions (createStripeCheckout, stripeWebhook)
+
 ## [Phase 2A — Task 48] — 2026-05-25
 
 ### Completed

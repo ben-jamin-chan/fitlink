@@ -53,6 +53,12 @@ dist/
 web-build/
 expo-env.d.ts
 
+# EAS / Play Store credentials
+google-play-key.json
+
+# EAS local overrides (if any)
+.eas/
+
 # Native
 .kotlin/
 *.orig.*
