@@ -41,6 +41,7 @@
 ### Known Issues / Deferred
 
 - None — this task is purely types and migration, no new runtime behaviour
+- functions/src/getDiscoveryStack.ts still reads candidate.subscription.tier and candidate.verified — not migrated here per task scope; will be resolved when Cloud Functions are rewritten in Tasks 50 and 55.
 
 ### Next Up
 
