@@ -5,7 +5,9 @@ import '@/i18n'
 
 import { NavigationContainer } from '@react-navigation/native'
 import type { NavigationContainerRef } from '@react-navigation/native'
+import { StripeProvider } from '@stripe/stripe-react-native'
 import * as SplashScreen from 'expo-splash-screen'
+import { StyleSheet } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
@@ -47,14 +49,26 @@ const AppRoot = (): React.JSX.Element => {
 
 export default function App(): React.JSX.Element {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <ErrorBoundary>
-          <NavigationContainer ref={navigationRef}>
-            <AppRoot />
-          </NavigationContainer>
-        </ErrorBoundary>
+        <StripeProvider
+          publishableKey={
+            process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''
+          }
+        >
+          <ErrorBoundary>
+            <NavigationContainer ref={navigationRef}>
+              <AppRoot />
+            </NavigationContainer>
+          </ErrorBoundary>
+        </StripeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   )
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+})

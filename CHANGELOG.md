@@ -4,6 +4,40 @@
 
 ---
 
+## [Phase 2A — Task 48] — 2026-05-25
+
+### Completed
+
+- Task 48: Phase 2 dependencies installed, StripeProvider wired in App.tsx
+- Installed: @stripe/stripe-react-native, expo-camera, expo-linking, expo-web-browser,
+  expo-auth-session, expo-crypto, @invertase/react-native-apple-authentication
+- app.json: three plugins added, scheme "fitlink" confirmed
+- App.tsx: StripeProvider wraps NavigationContainer with publishable key from env
+- BUILD.md: created with build commands, feature requirements, Stripe webhook setup
+
+### Files Created / Modified
+
+- package.json: seven new Phase 2 dependencies added
+- app.json: @stripe/stripe-react-native, expo-camera, @invertase/react-native-apple-authentication plugins added; scheme: "fitlink" confirmed
+- App.tsx: StripeProvider imported and added to provider tree
+- .env.example: EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY placeholder added
+- BUILD.md: created — build commands, development-build-only feature list, Stripe webhook and Strava redirect URI docs
+
+### Architecture Decisions
+
+- StripeProvider placed inside SafeAreaProvider but outside NavigationContainer — available
+  to all screens without needing navigation context
+- publishableKey falls back to empty string if env not populated — logs a Stripe warning
+  but does not crash; acceptable for development before .env is configured
+
+### Known Issues / Deferred
+
+- None — this is a pure installation task, no runtime behaviour changes
+
+### Next Up
+
+- Task 49: EAS Build configuration (eas.json, app.json bundle identifiers, BUILD.md commands)
+
 ## [Phase 2A — Task 47] — 2026-05-25
 
 ### Completed
