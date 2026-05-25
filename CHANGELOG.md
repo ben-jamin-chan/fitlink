@@ -11,14 +11,14 @@
 - Task 48: Phase 2 dependencies installed, StripeProvider wired in App.tsx
 - Installed: @stripe/stripe-react-native, expo-camera, expo-linking, expo-web-browser,
   expo-auth-session, expo-crypto, @invertase/react-native-apple-authentication
-- app.json: three plugins added, scheme "fitlink" confirmed
+- app.json: Stripe and camera plugins added, Apple Sign-In entitlement configured, scheme "fitlink" confirmed
 - App.tsx: StripeProvider wraps NavigationContainer with publishable key from env
 - BUILD.md: created with build commands, feature requirements, Stripe webhook setup
 
 ### Files Created / Modified
 
 - package.json: seven new Phase 2 dependencies added
-- app.json: @stripe/stripe-react-native, expo-camera, @invertase/react-native-apple-authentication plugins added; scheme: "fitlink" confirmed
+- app.json: @stripe/stripe-react-native and expo-camera plugins added; Apple Sign-In entitlement configured for @invertase/react-native-apple-authentication; scheme: "fitlink" confirmed
 - App.tsx: StripeProvider imported and added to provider tree
 - .env.example: EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY placeholder added
 - BUILD.md: created — build commands, development-build-only feature list, Stripe webhook and Strava redirect URI docs
@@ -29,6 +29,9 @@
   to all screens without needing navigation context
 - publishableKey falls back to empty string if env not populated — logs a Stripe warning
   but does not crash; acceptable for development before .env is configured
+- @invertase/react-native-apple-authentication does not ship an Expo config plugin; iOS
+  capability is configured through `ios.entitlements` instead so Expo config evaluation
+  remains valid
 
 ### Known Issues / Deferred
 

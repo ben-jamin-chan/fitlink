@@ -51,17 +51,17 @@ export default function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <StripeProvider
-          publishableKey={
-            process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''
-          }
-        >
-          <ErrorBoundary>
+        <ErrorBoundary>
+          <StripeProvider
+            publishableKey={
+              process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''
+            }
+          >
             <NavigationContainer ref={navigationRef}>
               <AppRoot />
             </NavigationContainer>
-          </ErrorBoundary>
-        </StripeProvider>
+          </StripeProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   )

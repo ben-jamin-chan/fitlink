@@ -14,7 +14,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "entitlements": {
+        "com.apple.developer.applesignin": [
+          "Default"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -41,11 +46,7 @@
         "@stripe/stripe-react-native",
         {}
       ],
-      "expo-camera",
-      [
-        "@invertase/react-native-apple-authentication",
-        {}
-      ]
+      "expo-camera"
     ]
   }
 }
