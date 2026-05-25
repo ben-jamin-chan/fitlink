@@ -344,7 +344,7 @@ export const FullProfileModal = ({
                   <Text style={styles.name}>
                     {profile.firstName}, {profile.age}
                   </Text>
-                  {profile.verified && (
+                  {profile.photoVerified && (
                     <Ionicons
                       name="checkmark-circle"
                       size={22}

@@ -28,7 +28,7 @@ import type { OnboardingStackParamList } from '@/app/onboarding/OnboardingNaviga
 import { createUserProfile } from '@/services/firebase/firestore'
 import { uploadAllProfilePhotos } from '@/services/firebase/storage'
 import { mapFirebaseError } from '@/utils/errorUtils'
-import type { LookingFor, UserLocation } from '@/types/user'
+import type { LookingFor, UserProfile } from '@/types/user'
 
 import {
   MIN_PHOTOS,
@@ -132,7 +132,10 @@ const getDeviceLanguage = (): string => {
   return language !== '' ? language : FALLBACK_LANGUAGE
 }
 
-const buildLocation = (city: string, country: string): UserLocation => ({
+const buildLocation = (
+  city: string,
+  country: string
+): UserProfile['location'] => ({
   city,
   country,
   coordinates: new GeoPoint(0, 0),
@@ -373,6 +376,7 @@ export default function Step6Screen(): React.JSX.Element {
           ageRange: { min: ageMin, max: ageMax },
           distanceKm,
           genders: genderPreference,
+          lookingFor,
         },
         language: getDeviceLanguage(),
       })

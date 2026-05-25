@@ -634,10 +634,10 @@ export default function SettingsScreen(): React.JSX.Element {
   const lookingForValue = formatListValue(
     valuesToLabels(profile.lookingFor, lookingForOptions)
   )
-  const subscriptionTier = profile.subscription.tier
+  const isPremium = profile.premium.active === true
   const renewalDate =
-    profile.subscription.expiresAt !== undefined
-      ? profile.subscription.expiresAt.toDate().toLocaleDateString()
+    profile.premium.expiresAt !== null
+      ? profile.premium.expiresAt.toDate().toLocaleDateString()
       : t('profile.notSpecified')
   const appVersion = Constants.expoConfig?.version ?? '1.0.0'
 
@@ -780,7 +780,7 @@ export default function SettingsScreen(): React.JSX.Element {
           />
         </SettingsSection>
 
-        {subscriptionTier === 'premium' ? (
+        {isPremium ? (
           <SettingsSection title={t('settings.subscription.title')}>
             <SettingsRow
               label={t('settings.subscription.plan')}

@@ -21,9 +21,11 @@ type EditableProfileUpdate = Partial<
     | 'uid'
     | 'age'
     | 'stats'
-    | 'subscription'
+    | 'premium'
     | 'banned'
-    | 'verified'
+    | 'photoVerified'
+    | 'verifiedAt'
+    | 'stripeCustomerId'
     | 'createdAt'
     | 'lastActive'
   >

@@ -168,7 +168,7 @@ export const MatchCard = ({
           <Text style={styles.name} numberOfLines={1}>
             {otherUser.firstName}
           </Text>
-          {otherUser.verified && (
+          {otherUser.photoVerified && (
             <Ionicons
               name="checkmark-circle"
               size={spacing.md - spacing.xs / 2}

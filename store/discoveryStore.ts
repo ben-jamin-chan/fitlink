@@ -148,7 +148,7 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         return
       }
 
-      const isPremium = profile?.subscription?.tier === 'premium'
+      const isPremium = profile?.premium?.active === true
       let dailyLikesCount = get().dailyLikesCount
 
       if (!isPremium) {
@@ -228,7 +228,7 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         return
       }
 
-      const isPremium = profile?.subscription?.tier === 'premium'
+      const isPremium = profile?.premium?.active === true
 
       if (!isPremium) {
         set({ isUpsellVisible: true })

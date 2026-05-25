@@ -54,7 +54,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       ? matches.find((match) => match.id === pendingMatchId) ?? null
       : null
   const currentUserPhoto = profile?.photos[0] ?? ''
-  const isPremium = profile?.subscription?.tier === 'premium'
+  const isPremium = profile?.premium?.active === true
 
   useEffect(() => {
     if (userId && profile?.uid !== userId) {

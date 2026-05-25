@@ -18,6 +18,7 @@ import type { FieldValue } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 
 import type { Match } from '@/types/match'
+import type { PremiumStatus } from '@/types/subscription'
 import type { LookingFor, UserProfile } from '@/types/user'
 
 const FIRESTORE_WRITE_TIMEOUT_MS = 20000
@@ -76,9 +77,11 @@ export type UserProfileUpdateInput = Partial<
     | 'uid'
     | 'age'
     | 'stats'
-    | 'subscription'
+    | 'premium'
     | 'banned'
-    | 'verified'
+    | 'photoVerified'
+    | 'verifiedAt'
+    | 'stripeCustomerId'
     | 'createdAt'
     | 'lastActive'
   >
@@ -132,8 +135,13 @@ export const createUserProfile = async (
     lookingFor: input.lookingFor,
     preferences: input.preferences,
     stats: { likes: 0, passes: 0, matches: 0 },
-    subscription: { tier: 'free' },
-    verified: false,
+    premium: {
+      active: false,
+      tier: null,
+      subscriptionId: null,
+      expiresAt: null,
+    } satisfies PremiumStatus,
+    photoVerified: false,
     paused: false,
     banned: false,
     language: input.language,

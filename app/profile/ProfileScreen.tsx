@@ -197,7 +197,7 @@ export default function ProfileScreen(): React.JSX.Element {
               <Text style={styles.heroName}>
                 {profile.firstName}, {profile.age}
               </Text>
-              {profile.verified && (
+              {profile.photoVerified && (
                 <Ionicons
                   name="checkmark-circle"
                   size={spacing.lg}
@@ -229,7 +229,7 @@ export default function ProfileScreen(): React.JSX.Element {
             <PhotoGrid photoUris={profile.photos} readOnly={true} />
           </View>
 
-          {profile.verified === false && (
+          {profile.photoVerified === false && (
             <View style={styles.verificationCard}>
               <View style={styles.verificationIcon}>
                 <Ionicons
@@ -352,7 +352,7 @@ export default function ProfileScreen(): React.JSX.Element {
               onPress={handleSettings}
               variant="outline"
             />
-            {profile.subscription.tier === 'free' && (
+            {profile.premium.active === false && (
               <TouchableOpacity
                 style={styles.premiumButton}
                 onPress={handleGetPremium}

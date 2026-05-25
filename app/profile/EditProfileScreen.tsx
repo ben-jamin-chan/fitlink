@@ -323,6 +323,7 @@ export default function EditProfileScreen(): React.JSX.Element {
 
   const onSave = async (data: EditProfileForm): Promise<void> => {
     setIsSaving(true)
+    const lookingFor = getValidLookingFor(data.lookingFor)
 
     try {
       if (photosDirty) {
@@ -341,11 +342,12 @@ export default function EditProfileScreen(): React.JSX.Element {
         fitnessGoals: data.fitnessGoals,
         smoking: data.smoking,
         drinking: data.drinking,
-        lookingFor: getValidLookingFor(data.lookingFor),
+        lookingFor,
         preferences: {
           ageRange: { min: data.ageRangeMin, max: data.ageRangeMax },
           distanceKm: data.distanceKm,
           genders: data.genders,
+          lookingFor,
         },
       })
 

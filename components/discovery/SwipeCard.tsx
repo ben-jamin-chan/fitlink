@@ -273,7 +273,7 @@ export const SwipeCard = ({
           </View>
         </View>
 
-        {user.verified && (
+        {user.photoVerified && (
           <View style={styles.verifiedBadge}>
             <Ionicons
               name="checkmark-circle"

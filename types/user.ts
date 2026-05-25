@@ -1,4 +1,5 @@
-import { GeoPoint, Timestamp } from 'firebase/firestore'
+import type { Timestamp, GeoPoint } from 'firebase/firestore'
+import type { PremiumStatus, FitnessTracking } from '@/types/subscription'
 
 export type Gender = 'male' | 'female' | 'non-binary'
 
@@ -10,16 +11,11 @@ export type SmokingStatus = 'yes' | 'no' | 'occasionally'
 
 export type DrinkingStatus = 'yes' | 'no' | 'socially'
 
-export interface UserLocation {
-  city: string
-  country: string
-  coordinates: GeoPoint
-}
-
 export interface UserPreferences {
   ageRange: { min: number; max: number }
   distanceKm: number
   genders: string[]
+  lookingFor: LookingFor[]
 }
 
 export interface UserStats {
@@ -28,21 +24,20 @@ export interface UserStats {
   matches: number
 }
 
-export interface UserSubscription {
-  tier: 'free' | 'premium'
-  expiresAt?: Timestamp
-}
-
 export interface UserProfile {
   uid: string
   firstName: string
   dateOfBirth: Timestamp
-  age: number
+  age: number                          // calculated server-side - never trust client
   gender: Gender
-  location: UserLocation
-  photos: string[]
-  bio: string
-  height: number
+  location: {
+    city: string
+    country: string
+    coordinates: GeoPoint
+  }
+  photos: string[]                     // Cloud Storage URLs; index 0 = primary photo
+  bio: string                          // 50-500 chars
+  height: number                       // cm
   religion?: string
   activities: string[]
   fitnessLevel: FitnessLevel
@@ -54,17 +49,15 @@ export interface UserProfile {
   lookingFor: LookingFor[]
   preferences: UserPreferences
   stats: UserStats
-  subscription: UserSubscription
-  verified: boolean
+  premium: PremiumStatus               // replaces subscription - Phase 2
+  photoVerified: boolean               // replaces verified - Phase 2
+  verifiedAt?: Timestamp
+  stripeCustomerId?: string
+  fitnessTracking?: FitnessTracking
   paused: boolean
   banned: boolean
   expoPushToken?: string
   language: string
   createdAt: Timestamp
   lastActive: Timestamp
-}
-
-export interface DailyLikes {
-  count: number
-  resetAt: Timestamp
 }

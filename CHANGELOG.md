@@ -4,6 +4,48 @@
 
 ---
 
+## [Phase 2A — Task 47] — 2026-05-25
+
+### Completed
+
+- Task 47: TypeScript types updated for Phase 2 schema
+- types/user.ts: `verified` → `photoVerified`, `subscription` → `premium: PremiumStatus`, added `verifiedAt?`, `stripeCustomerId?`, `fitnessTracking?: FitnessTracking`
+- types/subscription.ts: full rewrite — added PremiumTier, PremiumStatus, StripePrice, FitnessTrackingSource, WorkoutSession, TodayStats, FitnessSourceConnection, StravaConnection, FitnessTracking
+- All references to `user.verified` / `profile.verified` migrated to `photoVerified`
+- All references to `subscription.tier === 'premium'` migrated to `premium.active === true`
+- createUserProfile() updated to write `premium` and `photoVerified` fields
+- Step6Screen and EditProfileScreen updated to include `preferences.lookingFor` required by the Phase 2 user preferences type
+
+### Files Created / Modified
+
+- types/user.ts: schema updated per Phase 2 spec
+- types/subscription.ts: full rewrite with Phase 2 premium + fitness types
+- store/discoveryStore.ts: premium gate migrated
+- store/profileStore.ts: server-controlled premium and verification fields excluded from profile edits
+- services/firebase/firestore.ts: createUserProfile() initial write updated
+- components/discovery/SwipeCard.tsx: verified → photoVerified
+- components/discovery/FullProfileModal.tsx: verified → photoVerified
+- components/chat/MatchCard.tsx: verified → photoVerified
+- app/discovery/DiscoveryScreen.tsx: premium gate migrated
+- app/profile/ProfileScreen.tsx: verified + subscription migrated
+- app/profile/EditProfileScreen.tsx: preferences payload updated for Phase 2 type shape
+- app/settings/SettingsScreen.tsx: subscription display migrated
+- app/onboarding/Step6Screen.tsx: createUserProfile() preferences payload updated for Phase 2 type shape
+
+### Architecture Decisions
+
+- PremiumStatus is the single source of truth for all premium gates — tier is display-only
+- FitnessTracking is optional on UserProfile — Phase 1 users have no fitness data
+- StravaConnection.refreshToken is a server-only encrypted field — client never reads it
+
+### Known Issues / Deferred
+
+- None — this task is purely types and migration, no new runtime behaviour
+
+### Next Up
+
+- Task 48: Install Phase 2 dependencies (Stripe, expo-camera, expo-auth-session, etc.)
+
 ## [Phase 1F — Task 46] — 2026-05-24
 
 ### Completed
