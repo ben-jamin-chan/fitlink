@@ -17,10 +17,41 @@ service cloud.firestore {
     // Returns true if the incoming write does NOT touch server-only fields.
     // These fields are managed exclusively by Cloud Functions and must never
     // be written from a client — even by the account owner.
+    function doesNotSetServerOnlyFieldsOnCreate() {
+      return !(
+        request.resource.data.keys()
+          .hasAny([
+            'age',
+            'banned',
+            'bannedAt',
+            'banReason',
+            'premium',
+            'photoVerified',
+            'stats',
+            'stripeCustomerId',
+            'subscription',
+            'verified',
+            'verifiedAt',
+          ])
+      );
+    }
+
     function doesNotModifyServerOnlyFields() {
       return !(
         request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(['banned', 'verified', 'age', 'stats', 'verifiedAt', 'bannedAt', 'banReason'])
+          .hasAny([
+            'age',
+            'banned',
+            'bannedAt',
+            'banReason',
+            'premium',
+            'photoVerified',
+            'stats',
+            'stripeCustomerId',
+            'subscription',
+            'verified',
+            'verifiedAt',
+          ])
       );
     }
 
@@ -36,7 +67,9 @@ service cloud.firestore {
     // Cloud Functions bypass these rules using the Admin SDK.
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated()
+                    && isOwner(userId)
+                    && doesNotSetServerOnlyFieldsOnCreate();
       allow update: if isAuthenticated() && isOwner(userId) && doesNotModifyServerOnlyFields();
       allow delete: if false; // account deletion handled by Cloud Function / auth.ts deleteAccount()
 

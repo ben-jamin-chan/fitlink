@@ -4,6 +4,46 @@
 
 ---
 
+## [Phase 2B — Task 50] — 2026-05-26
+
+### Completed
+
+- Task 50: Stripe Cloud Functions implemented
+- createStripeCheckout: 2nd gen callable function, creates Stripe subscription, returns clientSecret
+- stripeWebhook: 2nd gen HTTP function, verifies Stripe signature, handles subscription lifecycle events
+- stripe npm package installed in functions/
+- functions/.env.example updated with all 8 Stripe env var keys
+
+### Files Created / Modified
+
+- functions/src/createStripeCheckout.ts: created — onCall function, price allowlist validation, get/create Stripe customer, create subscription, return clientSecret
+- functions/src/stripeWebhook.ts: created — onRequest function, signature verification via req.rawBody, handles created/updated/deleted subscription events
+- functions/src/onUserCreated.ts: server-managed default premium/status fields added for new users
+- functions/src/index.ts: two new exports added
+- functions/package.json: stripe added to dependencies
+- functions/.env.example: 8 Stripe env var key placeholders added
+- services/firebase/firestore.ts: removed client-side initialization of server-managed premium/status fields
+- firestore.rules: user create/update rules now block premium, stripeCustomerId, photo verification, and legacy subscription fields from client writes
+- BUILD.md: emulator command for Functions + Firestore documented
+
+### Architecture Decisions
+
+- getTierFromPriceId compares against env var values, not string patterns — price IDs are opaque
+- findUserByCustomerId uses a Firestore query (not a cache) — ensures correctness over performance for low-frequency webhook events
+- Both files guard admin.initializeApp() with apps.length check — safe for multi-function bundle
+- Stripe Secret Manager values are declared in each v2 function's `secrets` option so production secrets are available only to the functions that need them
+- New user premium defaults are initialized server-side in onUserCreated; clients cannot create or mutate premium status fields
+- stripeWebhook acknowledges unknown event types with HTTP 200 to prevent Stripe retry storms
+
+### Known Issues / Deferred
+
+- Stripe webhook URL must be registered in Stripe Dashboard after first Functions deployment (documented in BUILD.md)
+- functions/.env must be populated with real Stripe test keys before emulator testing
+
+### Next Up
+
+- Task 51: Subscription Store (store/subscriptionStore.ts, services/stripe.ts)
+
 ## [Phase 2A — Task 49] — 2026-05-25
 
 ### Completed

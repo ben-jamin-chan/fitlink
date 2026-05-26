@@ -43,13 +43,15 @@ Copy `.env.example` → `.env` and fill in all values before running any build:
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS` | Google Sign-In (iOS) | From Google Cloud Console |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID` | Google Sign-In (Android) | From Google Cloud Console |
 
-EAS secret env vars (set via `eas secret:create` — not in `.env`):
+Firebase Functions secrets (set with Firebase CLI, never exposed to the Expo client bundle):
 
 ```bash
-eas secret:create --scope project --name STRIPE_SECRET_KEY --value sk_live_xxxx
-eas secret:create --scope project --name STRAVA_CLIENT_SECRET --value xxxx
-eas secret:create --scope project --name STRAVA_TOKEN_ENCRYPTION_KEY --value xxxx
+firebase functions:secrets:set STRIPE_SECRET_KEY
+firebase functions:secrets:set STRIPE_WEBHOOK_SECRET
 ```
+
+Stripe price IDs are non-secret server-side Functions env vars. Keep them in `functions/.env`
+for local emulator work and in the Functions deploy environment for production.
 
 ---
 
@@ -157,6 +159,24 @@ The following features **cannot be tested in Expo Go**. Always use a development
 
 ## Stripe Setup
 
+### Local Emulator
+Copy the Functions env template and fill in at minimum `STRIPE_SECRET_KEY` and
+the six `STRIPE_PRICE_*` values before calling `createStripeCheckout` locally:
+
+```bash
+cp functions/.env.example functions/.env
+firebase emulators:start --only functions,firestore
+```
+
+When testing webhooks locally, forward Stripe events to the Functions emulator:
+
+```bash
+stripe listen --forward-to http://127.0.0.1:5001/YOUR_PROJECT_ID/asia-southeast1/stripeWebhook
+```
+
+Copy the printed `whsec_...` value into `functions/.env` as
+`STRIPE_WEBHOOK_SECRET`.
+
 ### Webhook Endpoint
 After deploying Cloud Functions, register the webhook in the Stripe Dashboard:
 
@@ -194,6 +214,12 @@ The Strava redirect URI must match exactly what is registered in the Strava API 
 ---
 
 ## Firebase Emulator (Local Development)
+
+For Task 50 Stripe Cloud Functions work, run Functions with Firestore:
+
+```bash
+firebase emulators:start --only functions,firestore
+```
 
 Run the full emulator suite before testing Cloud Functions locally:
 

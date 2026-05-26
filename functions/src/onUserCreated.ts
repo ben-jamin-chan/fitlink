@@ -8,6 +8,25 @@ if (admin.apps.length === 0) {
 
 const db = admin.firestore();
 
+const getServerManagedUserDefaults = (
+  age: number,
+  banned: boolean
+): Record<string, unknown> => {
+  return {
+    age,
+    stats: {likes: 0, passes: 0, matches: 0},
+    premium: {
+      active: false,
+      tier: null,
+      subscriptionId: null,
+      expiresAt: null,
+    },
+    photoVerified: false,
+    banned,
+    lastActive: FieldValue.serverTimestamp(),
+  };
+};
+
 /**
  * Triggered when a new user document is created in /users/{uid} at
  * onboarding Step 6 completion.
@@ -48,11 +67,9 @@ export const onUserCreated = onDocumentCreated(
 
     if (age < 18) {
       await db.doc(`users/${uid}`).update({
-        age,
-        banned: true,
+        ...getServerManagedUserDefaults(age, true),
         banReason: "UNDERAGE",
         bannedAt: FieldValue.serverTimestamp(),
-        lastActive: FieldValue.serverTimestamp(),
       });
 
       console.warn(
@@ -72,8 +89,7 @@ export const onUserCreated = onDocumentCreated(
     }
 
     await db.doc(`users/${uid}`).update({
-      age,
-      lastActive: FieldValue.serverTimestamp(),
+      ...getServerManagedUserDefaults(age, false),
     });
 
     console.log(`onUserCreated: uid=${uid} age=${age} written successfully.`);

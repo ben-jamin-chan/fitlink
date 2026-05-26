@@ -18,7 +18,6 @@ import type { FieldValue } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 
 import type { Match } from '@/types/match'
-import type { PremiumStatus } from '@/types/subscription'
 import type { LookingFor, UserProfile } from '@/types/user'
 
 const FIRESTORE_WRITE_TIMEOUT_MS = 20000
@@ -134,16 +133,7 @@ export const createUserProfile = async (
     drinking: input.drinking,
     lookingFor: input.lookingFor,
     preferences: input.preferences,
-    stats: { likes: 0, passes: 0, matches: 0 },
-    premium: {
-      active: false,
-      tier: null,
-      subscriptionId: null,
-      expiresAt: null,
-    } satisfies PremiumStatus,
-    photoVerified: false,
     paused: false,
-    banned: false,
     language: input.language,
     createdAt: serverTimestamp(),
     lastActive: serverTimestamp(),
