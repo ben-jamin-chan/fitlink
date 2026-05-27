@@ -188,6 +188,27 @@ export const getUserProfile = async (
   return snap.data() as UserProfile
 }
 
+export const subscribeToUserProfile = (
+  userId: string,
+  onUpdate: (profile: UserProfile | null) => void,
+  onError: (error: Error) => void
+): Unsubscribe => {
+  return onSnapshot(
+    doc(db, 'users', userId),
+    (snapshot): void => {
+      if (!snapshot.exists()) {
+        onUpdate(null)
+        return
+      }
+
+      // Firestore returns untyped document data; users/{uid} is guarded by schema
+      // and security rules, so this is the service boundary cast.
+      onUpdate(snapshot.data() as UserProfile)
+    },
+    onError
+  )
+}
+
 /**
  * Subscribe to all matches for a given userId.
  * Calls onUpdate every time the collection changes.

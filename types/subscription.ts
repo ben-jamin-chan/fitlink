@@ -16,6 +16,7 @@ export interface PremiumStatus {
 export interface StripePrice {
   priceId: string
   amount: number                       // in smallest currency unit (e.g. cents for MYR)
+  amountDisplay: string                // formatted display string (e.g. RM 29.90)
   currency: string                     // ISO 4217 (e.g. 'MYR', 'SGD')
   interval: 'month' | '3month' | '6month'
 }

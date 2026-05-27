@@ -140,6 +140,8 @@ export const useAuthStore = create<AuthState>()(
             .getState()
             .fetchProfile(user.uid)
             .then((profile: UserProfile | null): void => {
+              useProfileStore.getState().startProfileListener(user.uid)
+
               set({
                 hasCompletedOnboarding: profile !== null,
                 isLoading: false,

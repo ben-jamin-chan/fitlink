@@ -701,6 +701,29 @@
       }
     }
   },
+  "subscription": {
+    "errors": {
+      "noClientSecret": "Failed to initialise payment. Please try again.",
+      "paymentFailed": "Payment failed. Please check your details and try again.",
+      "priceNotConfigured": "Pricing is not available at the moment. Please try again later.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "restore": "Restore Purchases",
+    "restoring": "Restoring...",
+    "tier": {
+      "plus": "Plus",
+      "pro": "Pro"
+    },
+    "interval": {
+      "month": "Monthly",
+      "3month": "3 Months",
+      "6month": "6 Months"
+    },
+    "savings": {
+      "3month": "Save 10%",
+      "6month": "Save 20%"
+    }
+  },
   "notifications": {
     "newMessage": "You have a new message",
     "newMatch": "You have a new match!",

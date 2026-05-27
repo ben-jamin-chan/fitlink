@@ -4,6 +4,42 @@
 
 ---
 
+## [Phase 2B — Task 51] — 2026-05-27
+
+### Completed
+
+- Task 51: Subscription store and Stripe service layer implemented
+- services/stripe.ts: getCurrency, getStripePrices, createSubscription, getPrice — all 6 SEA currencies, prices from env vars
+- store/subscriptionStore.ts: selectedTier/interval UI state, beginSubscription() stores clientSecret in state, isPremium() derives from profileStore
+- profileStore/authStore: live user profile listener wired so stripeWebhook premium updates reach client state
+
+### Files Created / Modified
+
+- services/stripe.ts: created — hardcoded pricing table for MYR/SGD/THB/PHP/IDR/VND, Cloud Function caller
+- store/subscriptionStore.ts: created — purchase flow state machine, isPremium() gate
+- types/subscription.ts: StripePrice.amountDisplay field added
+- i18n/en.json: subscription.* keys added
+- i18n/my.json, zh.json, ta.json: subscription.* keys mirrored with English placeholders
+- .env.example: 6 EXPO_PUBLIC_STRIPE_PRICE_* keys appended
+- services/firebase/firestore.ts, store/profileStore.ts, store/authStore.ts: profile subscription support added
+
+### Architecture Decisions
+
+- clientSecret surfaced via pendingClientSecret state (not function return) — required because useStripe() hook must be called from PremiumScreen component, not from the store
+- isPremium() reads profileStore.profile.premium directly — no duplication of premium state in subscriptionStore, with profileStore listening to users/{uid} for webhook updates
+- PRICING_TABLE hardcoded per PRD 5.12 — no Stripe API call to fetch prices
+- Price IDs in EXPO_PUBLIC_ env vars — public Stripe identifiers, not secrets
+- No persist on subscriptionStore — selectedTier/selectedInterval are ephemeral UI state
+
+### Known Issues / Deferred
+
+- restorePurchases() is a stub with TODO Phase 3 comment
+- EXPO_PUBLIC_STRIPE_PRICE_* in .env.example are empty placeholders — developer populates from Stripe Dashboard before testing PremiumScreen (Tasks 52/53)
+
+### Next Up
+
+- Task 52: Premium Screen UI (app/settings/PremiumScreen.tsx, components/ui/PremiumBadge.tsx)
+
 ## [Phase 2B — Task 50] — 2026-05-26
 
 ### Completed

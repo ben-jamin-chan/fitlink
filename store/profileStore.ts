@@ -1,9 +1,11 @@
 import { create } from 'zustand'
 import { serverTimestamp } from 'firebase/firestore'
+import type { Unsubscribe } from 'firebase/firestore'
 
 import {
   getUserProfile,
   removePhotoFromProfile,
+  subscribeToUserProfile,
   updateUserProfile,
 } from '@/services/firebase/firestore'
 import { deleteProfilePhoto, uploadProfilePhoto } from '@/services/firebase/storage'
@@ -39,6 +41,8 @@ interface ProfileState {
 
 interface ProfileActions {
   fetchProfile: (userId: string) => Promise<UserProfile | null>
+  startProfileListener: (userId: string) => void
+  stopProfileListener: () => void
   updateProfile: (partial: EditableProfileUpdate) => Promise<void>
   uploadPhoto: (uri: string, index: number) => Promise<void>
   deletePhoto: (index: number) => Promise<void>
@@ -55,6 +59,15 @@ const initialState: ProfileState = {
   error: null,
 }
 
+let profileUnsubscribe: Unsubscribe | null = null
+let subscribedProfileUserId: string | null = null
+
+const stopProfileSubscription = (): void => {
+  profileUnsubscribe?.()
+  profileUnsubscribe = null
+  subscribedProfileUserId = null
+}
+
 export const useProfileStore = create<ProfileStore>()((set, get) => ({
   ...initialState,
 
@@ -69,6 +82,29 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
       set({ isLoading: false, error: 'profile.errors.fetchFailed' })
       return null
     }
+  },
+
+  startProfileListener: (userId: string): void => {
+    if (subscribedProfileUserId === userId) {
+      return
+    }
+
+    stopProfileSubscription()
+    subscribedProfileUserId = userId
+
+    profileUnsubscribe = subscribeToUserProfile(
+      userId,
+      (profile: UserProfile | null): void => {
+        set({ profile, isLoading: false, error: null })
+      },
+      (): void => {
+        set({ isLoading: false, error: 'profile.errors.fetchFailed' })
+      }
+    )
+  },
+
+  stopProfileListener: (): void => {
+    stopProfileSubscription()
   },
 
   updateProfile: async (partial: EditableProfileUpdate): Promise<void> => {
@@ -193,10 +229,12 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
   },
 
   reset: (): void => {
+    stopProfileSubscription()
     set(initialState)
   },
 
   clearProfile: (): void => {
+    stopProfileSubscription()
     set(initialState)
   },
 }))
