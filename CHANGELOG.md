@@ -4,6 +4,42 @@
 
 ---
 
+## [Phase 2B — Task 52] — 2026-05-27
+
+### Completed
+
+- Task 52: Premium Screen UI and PremiumBadge component implemented
+- PremiumBadge: named export, plus (blue) and pro (gold) variants, sm/md sizes
+- PremiumScreen: free-user plan selector (tier + interval), plan cards with feature lists, subscribe button, existing-premium status view, manage subscription link
+- RootNavigator: Premium screen registered in stack and RootStackParamList
+- UpsellModal: "Upgrade Now" CTA wired to navigate to Premium (Phase 1 deferred resolved)
+
+### Files Created / Modified
+
+- components/ui/PremiumBadge.tsx: created — PremiumBadge named export, plus/pro/sm/md variants
+- app/settings/PremiumScreen.tsx: created — full premium upsell UI, free and premium-user views
+- app/navigation/RootNavigator.tsx: Premium added to RootStackParamList and stack
+- components/discovery/UpsellModal.tsx: Upgrade Now handler wired to navigation
+- i18n/en.json: subscription.* keys expanded (hero, interval, tier, features, legal, activePlan, error)
+- i18n/my.json, zh.json, ta.json: new keys mirrored with English placeholders
+
+### Architecture Decisions
+
+- No Stripe sheet code in PremiumScreen — Task 53 adds useEffect watching pendingClientSecret
+- PremiumScreen calls beginSubscription() only; sheet lifecycle deferred to Task 53
+- expo-linear-gradient not used — solid colors from constants/colors.ts approximate gradients
+- useNavigation() hook used in UpsellModal to avoid prop drilling
+
+### Known Issues / Deferred
+
+- Stripe payment sheet not yet wired — PremiumScreen subscribe button calls beginSubscription() but sheet presentation is Task 53
+- Stripe Customer Portal URL is a placeholder — production URL requires a Cloud Function that returns a portal session URL (deferred to Phase 3)
+- Lottie animation in hero section is a placeholder (static icon) — upgrade to Lottie in Phase 3
+
+### Next Up
+
+- Task 53: Stripe Payment Sheet Integration (add useEffect to PremiumScreen watching pendingClientSecret, initPaymentSheet, presentPaymentSheet, success modal, deep link return)
+
 ## [Phase 2B — Task 51] — 2026-05-27
 
 ### Completed

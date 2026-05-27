@@ -9,11 +9,15 @@ import {
 } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
+import type { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 
-import { showToast } from '@/store/toastStore'
+import { useDiscoveryStore } from '@/store/discoveryStore'
 
 import { Button } from '@/components/ui/Button'
+
+import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
@@ -40,11 +44,12 @@ export const UpsellModal = ({
   reason,
 }: UpsellModalProps): React.JSX.Element => {
   const { t } = useTranslation()
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
+  const hideUpsell = useDiscoveryStore((state) => state.hideUpsell)
 
   const handleUpgrade = (): void => {
-    // TODO: Phase 2 will navigate to PremiumScreen.
-    showToast(t('discovery.limit.comingSoon'), 'info')
-    onDismiss()
+    hideUpsell()
+    navigation.navigate('Premium')
   }
 
   return (

@@ -12,6 +12,7 @@ import BiometricPromptScreen from '@/app/auth/BiometricPromptScreen'
 import { AuthNavigator } from '@/app/navigation/AuthNavigator'
 import { MainTabNavigator } from '@/app/navigation/MainTabNavigator'
 import { OnboardingNavigator } from '@/app/onboarding/OnboardingNavigator'
+import PremiumScreen from '@/app/settings/PremiumScreen'
 
 import {
   checkBiometricSupport,
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>
   Onboarding: undefined
   BiometricPrompt: undefined
+  Premium: undefined
 }
 
 const Stack = createStackNavigator<RootStackParamList>()
@@ -137,7 +139,18 @@ export const RootNavigator = (): React.JSX.Element | null => {
           options={biometricScreenOptions}
         />
       ) : (
-        <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+        <>
+          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+          <Stack.Screen
+            name="Premium"
+            component={PremiumScreen}
+            options={{
+              headerBackTitle: '',
+              headerShown: true,
+              title: t('subscription.screenTitle'),
+            }}
+          />
+        </>
       )}
     </Stack.Navigator>
   )

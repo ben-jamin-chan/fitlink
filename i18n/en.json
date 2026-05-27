@@ -8,6 +8,7 @@
     "done": "Done",
     "loading": "Loading...",
     "retry": "Retry",
+    "tryAgain": "Try Again",
     "close": "Close",
     "confirm": "Confirm",
     "delete": "Delete",
@@ -702,26 +703,79 @@
     }
   },
   "subscription": {
+    "screenTitle": "Go Premium",
+    "hero": {
+      "headline": "Unlock Your Full Potential",
+      "subheadline": "Find your perfect match faster"
+    },
+    "badge": {
+      "plus": "PLUS",
+      "pro": "PRO"
+    },
     "errors": {
       "noClientSecret": "Failed to initialise payment. Please try again.",
       "paymentFailed": "Payment failed. Please check your details and try again.",
       "priceNotConfigured": "Pricing is not available at the moment. Please try again later.",
       "generic": "Something went wrong. Please try again."
     },
+    "error": {
+      "title": "Subscription Error",
+      "generic": "Something went wrong. Please try again."
+    },
     "restore": "Restore Purchases",
     "restoring": "Restoring...",
     "tier": {
       "plus": "Plus",
-      "pro": "Pro"
+      "pro": "Pro",
+      "mostPopular": "Most Popular"
     },
     "interval": {
       "month": "Monthly",
       "3month": "3 Months",
       "6month": "6 Months"
     },
+    "save": "Save {{percent}}",
+    "savingsPercent": {
+      "3month": "10%",
+      "6month": "20%"
+    },
     "savings": {
       "3month": "Save 10%",
       "6month": "Save 20%"
+    },
+    "billedMonthly": "Billed monthly",
+    "billed": "Billed",
+    "billedEveryPeriod": "Billed {{amount}} {{period}}",
+    "billedEvery3Months": "every 3 months",
+    "billedEvery6Months": "every 6 months",
+    "features": {
+      "unlimitedLikes": "Unlimited Likes",
+      "seeWhoLiked": "See Who Liked You",
+      "fiveSuperLikes": "5 Super Likes per week",
+      "advancedFilters": "Advanced Filters",
+      "rewind": "Rewind Last Swipe",
+      "noAds": "No Ads",
+      "everythingInPlus": "Everything in Plus",
+      "priorityProfile": "Priority Profile (2× visibility)",
+      "readReceipts": "Read Receipts",
+      "unlimitedSuperLikes": "Unlimited Super Likes",
+      "incognito": "Incognito Mode",
+      "monthlyBoost": "Monthly Profile Boost"
+    },
+    "subscribeFor": "Subscribe for {{price}}",
+    "subscribe": "Subscribe",
+    "loading": "Processing...",
+    "readyToPay": "Payment is ready for secure checkout.",
+    "priceUnavailable": "Unavailable",
+    "legal": {
+      "autoRenews": "Auto-renews each period. Cancel anytime.",
+      "cancelAnytime": "You can cancel your subscription anytime from the manage page."
+    },
+    "activePlan": {
+      "title": "You're a Premium Member",
+      "planName": "fitlink {{tier}}",
+      "renewsOn": "Renews on {{date}}",
+      "manage": "Manage Subscription"
     }
   },
   "notifications": {
