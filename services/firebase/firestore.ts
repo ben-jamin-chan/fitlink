@@ -18,10 +18,22 @@ import type { FieldValue } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 
 import type { Match } from '@/types/match'
-import type { LookingFor, UserProfile } from '@/types/user'
+import type { PremiumStatus, PremiumTier } from '@/types/subscription'
+import type { LookingFor, UserProfile, UserStats } from '@/types/user'
 
 const FIRESTORE_WRITE_TIMEOUT_MS = 20000
 const DAILY_LIKE_CAP = 50
+const DEFAULT_PREMIUM_STATUS: PremiumStatus = {
+  active: false,
+  tier: null,
+  subscriptionId: null,
+  expiresAt: null,
+}
+const DEFAULT_USER_STATS: UserStats = {
+  likes: 0,
+  passes: 0,
+  matches: 0,
+}
 
 const sortMatchesByActivity = (first: Match, second: Match): number => {
   const firstLastMessageAt =
@@ -86,6 +98,97 @@ export type UserProfileUpdateInput = Partial<
   >
 > & {
   lastActive?: UserProfile['lastActive'] | FieldValue
+}
+
+interface UserProfileDocument extends UserProfile {
+  subscription?: unknown
+  verified?: unknown
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null
+}
+
+const isPremiumTier = (value: unknown): value is PremiumTier => {
+  return value === 'plus' || value === 'pro'
+}
+
+const getNullableTimestamp = (value: unknown): Timestamp | null => {
+  return value instanceof Timestamp ? value : null
+}
+
+const getNullableString = (value: unknown): string | null => {
+  return typeof value === 'string' ? value : null
+}
+
+const getNormalizedStats = (value: unknown): UserStats => {
+  if (!isRecord(value)) {
+    return { ...DEFAULT_USER_STATS }
+  }
+
+  return {
+    likes: typeof value.likes === 'number' ? value.likes : 0,
+    passes: typeof value.passes === 'number' ? value.passes : 0,
+    matches: typeof value.matches === 'number' ? value.matches : 0,
+  }
+}
+
+const getNormalizedPremiumStatus = (
+  data: UserProfileDocument
+): PremiumStatus => {
+  const premium = data.premium
+
+  if (isRecord(premium)) {
+    return {
+      active:
+        typeof premium.active === 'boolean'
+          ? premium.active
+          : DEFAULT_PREMIUM_STATUS.active,
+      tier: isPremiumTier(premium.tier) ? premium.tier : null,
+      subscriptionId: getNullableString(premium.subscriptionId),
+      expiresAt: getNullableTimestamp(premium.expiresAt),
+    }
+  }
+
+  const legacySubscription = data.subscription
+
+  if (isRecord(legacySubscription)) {
+    const isLegacyPremium = legacySubscription.tier === 'premium'
+
+    return {
+      active: isLegacyPremium,
+      tier: isLegacyPremium ? 'plus' : null,
+      subscriptionId: null,
+      expiresAt: getNullableTimestamp(legacySubscription.expiresAt),
+    }
+  }
+
+  return { ...DEFAULT_PREMIUM_STATUS }
+}
+
+const getNormalizedPhotoVerified = (
+  data: UserProfileDocument
+): boolean => {
+  if (typeof data.photoVerified === 'boolean') {
+    return data.photoVerified
+  }
+
+  if (typeof data.verified === 'boolean') {
+    return data.verified
+  }
+
+  return false
+}
+
+const normalizeUserProfile = (data: UserProfileDocument): UserProfile => {
+  return {
+    ...data,
+    stats: getNormalizedStats(data.stats),
+    premium: getNormalizedPremiumStatus(data),
+    photoVerified: getNormalizedPhotoVerified(data),
+    paused: typeof data.paused === 'boolean' ? data.paused : false,
+    banned: typeof data.banned === 'boolean' ? data.banned : false,
+  }
 }
 
 const withWriteTimeout = async (operation: Promise<void>): Promise<void> => {
@@ -185,7 +288,7 @@ export const getUserProfile = async (
 
   // Firestore returns untyped document data; users/{uid} is guarded by schema
   // and security rules, so this is the service boundary cast.
-  return snap.data() as UserProfile
+  return normalizeUserProfile(snap.data() as UserProfileDocument)
 }
 
 export const subscribeToUserProfile = (
@@ -203,7 +306,7 @@ export const subscribeToUserProfile = (
 
       // Firestore returns untyped document data; users/{uid} is guarded by schema
       // and security rules, so this is the service boundary cast.
-      onUpdate(snapshot.data() as UserProfile)
+      onUpdate(normalizeUserProfile(snapshot.data() as UserProfileDocument))
     },
     onError
   )

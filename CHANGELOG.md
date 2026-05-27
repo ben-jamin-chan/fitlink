@@ -4,6 +4,31 @@
 
 ---
 
+## [Phase 2B — Post-Task 52 Fix] — 2026-05-27
+
+### Completed
+
+- Fixed Profile tab crash when older or partial user profile documents did not include the Phase 2 `premium` object
+- User profile Firestore reads now normalize server-managed fields at the service boundary before screens and stores consume them
+- Legacy Phase 1 `subscription` and `verified` fields are mapped to Phase 2 `premium` and `photoVerified` client shapes
+
+### Files Created / Modified
+
+- services/firebase/firestore.ts: added user profile normalization for `premium`, legacy `subscription`, `stats`, `photoVerified`, legacy `verified`, `paused`, and `banned`
+
+### Architecture Decisions
+
+- No client-side Firestore backfill was added because premium, stats, verification, and ban fields are server-managed
+- Normalization happens only on read, preserving security rules that block client writes to server-controlled fields
+
+### Verification
+
+- npx tsc --noEmit passes
+
+### Next Up
+
+- Task 53: Stripe Payment Sheet Integration (add useEffect to PremiumScreen watching pendingClientSecret, initPaymentSheet, presentPaymentSheet, success modal, deep link return)
+
 ## [Phase 2B — Task 52] — 2026-05-27
 
 ### Completed
