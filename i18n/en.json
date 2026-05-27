@@ -719,8 +719,22 @@
       "generic": "Something went wrong. Please try again."
     },
     "error": {
-      "title": "Subscription Error",
-      "generic": "Something went wrong. Please try again."
+      "title": "Payment Error",
+      "generic": "Something went wrong. Please try again.",
+      "initFailed": "Could not prepare payment. Please try again.",
+      "retry": "Try Again"
+    },
+    "sheet": {
+      "loading": "Preparing payment..."
+    },
+    "success": {
+      "headline": "Welcome to Premium!",
+      "subheadline": "Your subscription is now active. Enjoy the full fitlink experience.",
+      "feature1": "Unlimited likes",
+      "feature2": "See who liked you",
+      "feature3": "Super Likes & Rewind",
+      "feature4": "Advanced filters",
+      "cta": "Start Exploring"
     },
     "restore": "Restore Purchases",
     "restoring": "Restoring...",

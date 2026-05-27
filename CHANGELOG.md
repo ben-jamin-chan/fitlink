@@ -4,6 +4,45 @@
 
 ---
 
+## [Phase 2B — Task 53] — 2026-05-27
+
+### Completed
+
+- Task 53: Stripe payment sheet fully integrated into PremiumScreen
+- useEffect watches pendingClientSecret from subscriptionStore; triggers initPaymentSheet → presentPaymentSheet lifecycle
+- Canceled sheet handled silently; non-canceled errors show Alert with retry
+- initPaymentSheet failure shows Alert and exits early
+- Success modal shown on sheet resolution (slides up from bottom, checkmark icon, feature list, Start Exploring CTA)
+- Deep link handler for fitlink://payment-complete covers 3D Secure redirect flows
+- LoadingOverlay shown during sheet initialisation phase
+- subscription.sheet.*, subscription.success.*, subscription.error.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- app/settings/PremiumScreen.tsx: useStripe hook, two useEffects (pendingClientSecret + deep link), success modal JSX + styles, LoadingOverlay wired
+- i18n/en.json: subscription.sheet.loading, subscription.success.*, subscription.error.* added
+- i18n/my.json, zh.json, ta.json: same keys mirrored with English placeholders
+
+### Architecture Decisions
+
+- Sheet lifecycle driven by pendingClientSecret state (not beginSubscription return value) — required because useStripe() is a hook and must be called at component top level
+- clearPendingClientSecret() called after presentPaymentSheet resolves in all branches — prevents useEffect re-trigger
+- profileStore Firestore listener handles premium state propagation — no manual Firestore read after payment
+- Success modal appears immediately on sheet resolution; premium feature unlock follows asynchronously via webhook
+
+### Known Issues / Deferred
+
+- Stripe Customer Portal URL remains a placeholder — production portal session requires a Cloud Function (deferred Phase 3)
+- Lottie animation in success modal is a static icon placeholder
+
+### Verification
+
+- npx tsc --noEmit passes
+
+### Next Up
+
+- Task 54: Premium Feature Gates (replace all subscription.tier checks with isPremium(), wire upsell reasons, read receipts, unlimited likes)
+
 ## [Phase 2B — Post-Task 52 Fix] — 2026-05-27
 
 ### Completed
