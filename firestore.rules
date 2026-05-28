@@ -75,33 +75,29 @@ service cloud.firestore {
 
       // ─── /users/{userId}/dailyLikes ─────────────────────────────────────────
       // The dailyLikes document tracks the free-user like count.
-      // Only the owning user can read or write their own limit document.
+      // Only the owning user can read their own limit document.
+      // All writes are managed by recordSwipe through the Admin SDK.
       match /dailyLikes/{doc} {
-        allow read, write: if isAuthenticated() && isOwner(userId);
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow write: if false;
       }
     }
 
     // ─── /swipes/{userId}/likes/{targetId} ───────────────────────────────────
-    // A user can only create a like under their own swiper path.
+    // Client writes are blocked; recordSwipe writes through the Admin SDK.
     // The target user can also read (needed to detect mutual likes client-side,
     // though the real mutual-like check runs in the onSwipeCreated Cloud Function).
-    // Updates and deletes are permanently blocked — swipes are immutable.
     match /swipes/{userId}/likes/{targetId} {
-      allow create: if isAuthenticated() && isOwner(userId);
       allow read:   if isAuthenticated() && (isOwner(userId) || request.auth.uid == targetId);
-      allow update: if false;
-      allow delete: if false;
+      allow write:  if false;
     }
 
     // ─── /swipes/{userId}/passes/{targetId} ──────────────────────────────────
-    // A user can only create a pass under their own swiper path.
+    // Client writes are blocked; recordSwipe writes through the Admin SDK.
     // Only the owning user can read their own passes.
-    // Updates and deletes are permanently blocked.
     match /swipes/{userId}/passes/{targetId} {
-      allow create: if isAuthenticated() && isOwner(userId);
       allow read:   if isAuthenticated() && isOwner(userId);
-      allow update: if false;
-      allow delete: if false;
+      allow write:  if false;
     }
 
     // ─── /matches/{matchId} ──────────────────────────────────────────────────

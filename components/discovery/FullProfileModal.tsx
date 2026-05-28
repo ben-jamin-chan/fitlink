@@ -201,11 +201,13 @@ export const FullProfileModal = ({
       return
     }
 
-    void swipeRight(profile.uid).then(() => {
-      if (!useSubscriptionStore.getState().upsellVisible) {
-        closeAfterAction()
-      }
-    })
+    void swipeRight(profile.uid)
+      .then(() => {
+        if (!useSubscriptionStore.getState().upsellVisible) {
+          closeAfterAction()
+        }
+      })
+      .catch(() => undefined)
   }
 
   const handlePass = (): void => {
@@ -213,7 +215,9 @@ export const FullProfileModal = ({
       return
     }
 
-    void swipeLeft(userId, profile.uid).then(closeAfterAction)
+    void swipeLeft(userId, profile.uid)
+      .then(closeAfterAction)
+      .catch(() => undefined)
   }
 
   const handleSuperLike = (): void => {
@@ -221,11 +225,13 @@ export const FullProfileModal = ({
       return
     }
 
-    void swipeSuperLike(profile.uid).then(() => {
-      if (!useSubscriptionStore.getState().upsellVisible) {
-        closeAfterAction()
-      }
-    })
+    void swipeSuperLike(profile.uid)
+      .then(() => {
+        if (!useSubscriptionStore.getState().upsellVisible) {
+          closeAfterAction()
+        }
+      })
+      .catch(() => undefined)
   }
 
   const handleReport = (_category: ReportCategory): void => {

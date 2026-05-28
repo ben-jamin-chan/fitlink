@@ -371,8 +371,7 @@ interface DailyLikesDoc {
 
 /**
  * Returns { count, remaining } for the user's daily like quota.
- * Resets the Firestore doc to { count: 0 } if resetAt is before today midnight.
- * Creates the doc with count: 0 if it does not exist yet.
+ * Read-only display helper; recordSwipe owns create/reset/increment writes.
  */
 export const getDailyLikesDoc = async (
   userId: string
@@ -380,42 +379,21 @@ export const getDailyLikesDoc = async (
   const ref = doc(db, 'users', userId, 'dailyLikes', 'doc')
   const snap = await getDoc(ref)
 
-  const todayMidnight = new Date()
-  todayMidnight.setHours(0, 0, 0, 0)
-
   if (!snap.exists()) {
-    await setDoc(ref, {
-      count: 0,
-      resetAt: Timestamp.fromDate(todayMidnight),
-    })
     return { count: 0, remaining: DAILY_LIKE_CAP }
   }
 
   // Firestore document data is untyped at the service boundary.
   const data = snap.data() as DailyLikesDoc
-  const resetAtDate = data.resetAt.toDate()
 
-  if (resetAtDate < todayMidnight) {
-    await setDoc(ref, {
-      count: 0,
-      resetAt: Timestamp.fromDate(todayMidnight),
-    })
+  if (
+    !(data.resetAt instanceof Timestamp) ||
+    data.resetAt.toMillis() <= Date.now()
+  ) {
     return { count: 0, remaining: DAILY_LIKE_CAP }
   }
 
-  const remaining = Math.max(0, DAILY_LIKE_CAP - data.count)
-  return { count: data.count, remaining }
-}
-
-/**
- * Increments the daily like count by 1.
- * Must be called AFTER getDailyLikesDoc confirms the action is permitted.
- * Does NOT re-check the cap - caller is responsible for the guard.
- */
-export const incrementDailyLikes = async (userId: string): Promise<void> => {
-  const ref = doc(db, 'users', userId, 'dailyLikes', 'doc')
-  const snap = await getDoc(ref)
-  // Firestore document data is untyped at the service boundary.
-  const current = snap.exists() ? (snap.data() as DailyLikesDoc).count : 0
-  await updateDoc(ref, { count: current + 1 })
+  const count = typeof data.count === 'number' ? data.count : 0
+  const remaining = Math.max(0, DAILY_LIKE_CAP - count)
+  return { count, remaining }
 }

@@ -1,14 +1,14 @@
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import type { Functions, HttpsCallable } from 'firebase/functions'
 import { create } from 'zustand'
 
+import i18n from '@/i18n'
 import { db } from '@/services/firebase/config'
-import {
-  getDailyLikesDoc,
-  incrementDailyLikes,
-} from '@/services/firebase/firestore'
+import { getDailyLikesDoc } from '@/services/firebase/firestore'
 import { useAuthStore } from '@/store/authStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
+import { showToast } from '@/store/toastStore'
 
 import type { UserProfile } from '@/types/user'
 
@@ -17,6 +17,18 @@ const REFETCH_THRESHOLD = 3
 
 interface GetDiscoveryStackResponse {
   stack: string[]
+}
+
+type SwipeDirection = 'like' | 'pass' | 'superlike'
+
+interface RecordSwipeRequest {
+  targetId: string
+  direction: SwipeDirection
+}
+
+interface RecordSwipeResponse {
+  success: boolean
+  remainingLikes: number
 }
 
 interface DiscoveryState {
@@ -57,6 +69,41 @@ const initialState: DiscoveryState = {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
+
+const getCallableFunctions = (): Functions =>
+  getFunctions(undefined, 'asia-southeast1')
+
+const getRecordSwipeFn = (): HttpsCallable<
+  RecordSwipeRequest,
+  RecordSwipeResponse
+> =>
+  httpsCallable<RecordSwipeRequest, RecordSwipeResponse>(
+    getCallableFunctions(),
+    'recordSwipe'
+  )
+
+const getDailyLikesCountFromRemaining = (remainingLikes: number): number =>
+  Math.max(0, FREE_DAILY_LIKE_LIMIT - remainingLikes)
+
+const getErrorCode = (error: unknown): string | null => {
+  if (!isRecord(error) || typeof error.code !== 'string') {
+    return null
+  }
+
+  return error.code
+}
+
+const isDailyLimitError = (error: unknown): boolean =>
+  getErrorCode(error) === 'functions/resource-exhausted'
+
+const logUnexpectedSwipeError = (action: string, error: unknown): void => {
+  // TODO Task 67: replace with crashlytics.logError
+  console.error(`[discoveryStore] ${action} error:`, error)
+}
+
+const showSwipeErrorToast = (): void => {
+  showToast(i18n.t('errors.generic'), 'error')
+}
 
 const isUserProfile = (value: unknown): value is UserProfile => {
   if (!isRecord(value)) {
@@ -113,11 +160,10 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
     set({ isLoading: true, error: null, dailyLimitReached: false })
 
     try {
-      const functions = getFunctions(undefined, 'asia-southeast1')
       const getStack = httpsCallable<
         Record<string, never>,
         GetDiscoveryStackResponse
-      >(functions, 'getDiscoveryStack')
+      >(getCallableFunctions(), 'getDiscoveryStack')
       const result = await getStack({})
       const profiles = await resolveProfiles(result.data.stack)
 
@@ -154,29 +200,14 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
 
       const subscriptionStore = useSubscriptionStore.getState()
       const isPremium = subscriptionStore.isPremium()
-      let dailyLikesCount = get().dailyLikesCount
 
-      if (!isPremium) {
-        const remaining = await get().checkDailyLimit(user.uid)
-        dailyLikesCount = get().dailyLikesCount
-
-        if (remaining <= 0) {
-          subscriptionStore.showUpsell('likes')
-          return
-        }
+      if (!isPremium && get().dailyLikesCount >= FREE_DAILY_LIKE_LIMIT) {
+        subscriptionStore.showUpsell('likes')
+        return
       }
 
-      const likeRef = doc(db, 'swipes', user.uid, 'likes', targetId)
-      await setDoc(likeRef, {
-        swiperId: user.uid,
-        targetId,
-        isSuperLike: false,
-        createdAt: serverTimestamp(),
-      })
-
-      if (!isPremium) {
-        await incrementDailyLikes(user.uid)
-      }
+      const recordSwipe = getRecordSwipeFn()
+      const result = await recordSwipe({ targetId, direction: 'like' })
 
       set((state) => {
         const nextStack = state.stack.filter(
@@ -184,7 +215,7 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         )
         const nextDailyLikesCount = isPremium
           ? state.dailyLikesCount
-          : dailyLikesCount + 1
+          : getDailyLikesCountFromRemaining(result.data.remainingLikes)
         const remaining = nextStack.length - state.currentIndex
         const shouldRefetch =
           remaining <= REFETCH_THRESHOLD && !state.isLoading
@@ -199,23 +230,41 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
           stack: nextStack,
         }
       })
-    } catch (error) {
+    } catch (error: unknown) {
+      if (isDailyLimitError(error)) {
+        useSubscriptionStore.getState().showUpsell('likes')
+        set({
+          dailyLikesCount: FREE_DAILY_LIKE_LIMIT,
+          dailyLimitReached: true,
+          isLimitReached: true,
+        })
+        return
+      }
+
+      logUnexpectedSwipeError('swipeRight', error)
       const message = error instanceof Error ? error.message : 'Swipe failed'
       set({ error: message })
+      showSwipeErrorToast()
+      throw error instanceof Error ? error : new Error(message)
     }
   },
 
   swipeLeft: async (userId: string, targetId: string): Promise<void> => {
     try {
-      const passRef = doc(db, 'swipes', userId, 'passes', targetId)
-      await setDoc(passRef, {
-        swiperId: userId,
-        targetId,
-        createdAt: serverTimestamp(),
-      })
-    } catch (error) {
+      const { user } = useAuthStore.getState()
+
+      if (user === null || user.uid !== userId) {
+        throw new Error('Pass failed')
+      }
+
+      const recordSwipe = getRecordSwipeFn()
+      await recordSwipe({ targetId, direction: 'pass' })
+    } catch (error: unknown) {
+      logUnexpectedSwipeError('swipeLeft', error)
       const message = error instanceof Error ? error.message : 'Pass failed'
       set({ error: message })
+      showSwipeErrorToast()
+      throw error instanceof Error ? error : new Error(message)
     }
   },
 
@@ -227,18 +276,15 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         return
       }
 
-      if (!useSubscriptionStore.getState().isPremium()) {
-        useSubscriptionStore.getState().showUpsell('superLike')
+      const subscriptionStore = useSubscriptionStore.getState()
+
+      if (!subscriptionStore.isPremium()) {
+        subscriptionStore.showUpsell('superLike')
         return
       }
 
-      const likeRef = doc(db, 'swipes', user.uid, 'likes', targetId)
-      await setDoc(likeRef, {
-        swiperId: user.uid,
-        targetId,
-        isSuperLike: true,
-        createdAt: serverTimestamp(),
-      })
+      const recordSwipe = getRecordSwipeFn()
+      await recordSwipe({ targetId, direction: 'superlike' })
 
       set((state) => {
         const nextStack = state.stack.filter(
@@ -253,10 +299,18 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
           stack: nextStack,
         }
       })
-    } catch (error) {
+    } catch (error: unknown) {
+      if (isDailyLimitError(error)) {
+        useSubscriptionStore.getState().showUpsell('likes')
+        return
+      }
+
+      logUnexpectedSwipeError('swipeSuperLike', error)
       const message =
         error instanceof Error ? error.message : 'Super like failed'
       set({ error: message })
+      showSwipeErrorToast()
+      throw error instanceof Error ? error : new Error(message)
     }
   },
 

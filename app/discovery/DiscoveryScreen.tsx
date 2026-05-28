@@ -86,7 +86,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       return
     }
 
-    void swipeRight(target.uid)
+    void swipeRight(target.uid).catch(() => undefined)
   }
 
   const handleSwipeLeft = (): void => {
@@ -96,9 +96,11 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       return
     }
 
-    void swipeLeft(userId, target.uid).then(() => {
-      advanceStack()
-    })
+    void swipeLeft(userId, target.uid)
+      .then(() => {
+        advanceStack()
+      })
+      .catch(() => undefined)
   }
 
   const handleSuperLike = (): void => {
@@ -108,7 +110,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       return
     }
 
-    void swipeSuperLike(target.uid)
+    void swipeSuperLike(target.uid).catch(() => undefined)
   }
 
   const handleRewind = (): void => {

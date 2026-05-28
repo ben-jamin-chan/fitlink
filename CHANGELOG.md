@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 2B - Task 55] - 2026-05-28
+
+### Completed
+
+- Task 55: Server-side daily likes enforcement via recordSwipe Cloud Function
+- recordSwipe: 2nd gen callable (asia-southeast1), Firestore transaction, daily cap, reset logic
+- discoveryStore: swipeRight(), swipeLeft(), swipeSuperLike() now call recordSwipe - no client writes to /swipes/
+- firestore.rules: /swipes/ client writes denied, /users/{userId}/dailyLikes client writes denied
+- i18n: errors.dailyLimit key added to all 4 language files
+
+### Files Created / Modified
+
+- functions/src/recordSwipe.ts: created - recordSwipe callable, transaction, cap enforcement
+- functions/src/index.ts: recordSwipe export added
+- store/discoveryStore.ts: swipe actions replaced with httpsCallable, resource-exhausted error handling
+- services/firebase/firestore.ts: daily like helper changed to read-only display helper
+- firestore.rules: /swipes/ and /dailyLikes write rules denied
+- i18n/en.json, my.json, zh.json, ta.json: errors.dailyLimit added
+
+### Architecture Decisions
+
+- recordSwipe writes like and superlike documents to swipes/{userId}/likes/{targetId}; superlike remains a like with isSuperLike: true
+- recordSwipe writes the like/superlike document inside the same Firestore transaction as the dailyLikes increment, so quota consumption and swipe creation commit together
+- dailyLikes remains the fixed single-doc subcollection path users/{userId}/dailyLikes/doc, matching the existing Phase 1 path and rules shape
+- discoveryStore keeps the existing swipeLeft caller contract; left swipes still advance through DiscoveryScreen after the callable succeeds, avoiding a card skip
+
+### Known Issues / Deferred
+
+- console.error in discoveryStore swipe actions will be replaced by Crashlytics in Task 67
+- getNextMidnightMs() uses UTC+8 approximation; per-user timezone is Phase 3
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/
+- rg confirms no direct client setDoc/addDoc writes to /swipes/ remain
+
+### Next Up
+
+- Task 56: Photo Verification Cloud Function (verifyProfilePhoto - Cloud Vision face detection)
+
 ## [Phase 2B — Task 54] — 2026-05-28
 
 ### Completed

@@ -834,6 +834,7 @@
     "required": "This field is required",
     "network": "Network error. Please try again.",
     "generic": "Something went wrong. Please try again.",
+    "dailyLimit": "You've reached your daily like limit. Upgrade to Premium for unlimited likes.",
     "auth": {
       "invalidPhone": "Please enter a valid phone number",
       "invalidOtp": "Incorrect code. Please try again.",
