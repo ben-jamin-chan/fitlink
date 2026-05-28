@@ -4,6 +4,8 @@ import type { Timestamp } from 'firebase/firestore'
 
 export type PremiumTier = 'plus' | 'pro'
 
+export type UpsellReason = 'likes' | 'superLike' | 'rewind'
+
 export type SubscriptionStatus = 'active' | 'expired' | 'cancelled'
 
 export interface PremiumStatus {

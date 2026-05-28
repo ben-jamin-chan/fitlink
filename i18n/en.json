@@ -337,8 +337,25 @@
       }
     }
   },
+  "upsell": {
+    "likes": {
+      "headline": "You're Out of Likes",
+      "body": "Upgrade to Premium for unlimited likes every day."
+    },
+    "superLike": {
+      "headline": "Super Like Your Favourites",
+      "body": "Upgrade to Premium to send Super Likes and stand out."
+    },
+    "rewind": {
+      "headline": "Rewind Your Last Swipe",
+      "body": "Upgrade to Premium to undo swipes and get second chances."
+    },
+    "upgradeNow": "Upgrade Now",
+    "maybeLater": "Maybe Later"
+  },
   "matches": {
     "title": "Matches",
+    "searchPlaceholder": "Search matches...",
     "tabs": {
       "matches": "Matches",
       "messages": "Messages"

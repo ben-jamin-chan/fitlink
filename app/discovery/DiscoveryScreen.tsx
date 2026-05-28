@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useDiscoveryStore } from '@/store/discoveryStore'
 import { useMatchStore } from '@/store/matchStore'
 import { useProfileStore } from '@/store/profileStore'
+import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import { ActionButtons } from '@/components/discovery/ActionButtons'
 import { EmptyState } from '@/components/discovery/EmptyState'
@@ -28,19 +29,20 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   const currentIndex = useDiscoveryStore((state) => state.currentIndex)
   const isLoading = useDiscoveryStore((state) => state.isLoading)
   const isRefetching = useDiscoveryStore((state) => state.isRefetching)
-  const isUpsellVisible = useDiscoveryStore((state) => state.isUpsellVisible)
   const fetchStack = useDiscoveryStore((state) => state.fetchStack)
   const swipeRight = useDiscoveryStore((state) => state.swipeRight)
   const swipeLeft = useDiscoveryStore((state) => state.swipeLeft)
   const swipeSuperLike = useDiscoveryStore((state) => state.swipeSuperLike)
+  const rewind = useDiscoveryStore((state) => state.rewind)
   const advanceStack = useDiscoveryStore((state) => state.advanceStack)
-  const showUpsell = useDiscoveryStore((state) => state.showUpsell)
-  const hideUpsell = useDiscoveryStore((state) => state.hideUpsell)
   const newMatchIds = useMatchStore((state) => state.newMatchIds)
   const matches = useMatchStore((state) => state.matches)
   const clearNewMatch = useMatchStore((state) => state.clearNewMatch)
   const profile = useProfileStore((state) => state.profile)
   const fetchProfile = useProfileStore((state) => state.fetchProfile)
+  const upsellVisible = useSubscriptionStore((state) => state.upsellVisible)
+  const upsellReason = useSubscriptionStore((state) => state.upsellReason)
+  const hideUpsell = useSubscriptionStore((state) => state.hideUpsell)
 
   const [modalProfile, setModalProfile] = useState<UserProfile | null>(null)
 
@@ -54,7 +56,6 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
       ? matches.find((match) => match.id === pendingMatchId) ?? null
       : null
   const currentUserPhoto = profile?.photos[0] ?? ''
-  const isPremium = profile?.premium?.active === true
 
   useEffect(() => {
     if (userId && profile?.uid !== userId) {
@@ -111,12 +112,7 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   }
 
   const handleRewind = (): void => {
-    if (!isPremium) {
-      showUpsell()
-      return
-    }
-
-    // TODO: Phase 2 - implement undo stack
+    rewind()
   }
 
   const handleTapInfo = (user: UserProfile): void => {
@@ -186,14 +182,13 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
         onSuperLike={handleSuperLike}
         onRewind={handleRewind}
         onInfo={handleTopInfo}
-        isPremium={isPremium}
         disabled={isLoading || isStackEmpty}
       />
 
       <UpsellModal
-        visible={isUpsellVisible}
+        visible={upsellVisible}
         onDismiss={hideUpsell}
-        reason="likes"
+        reason={upsellReason}
       />
 
       <FullProfileModal

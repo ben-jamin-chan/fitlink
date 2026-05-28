@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import { createSubscription, getPrice } from '@/services/stripe'
 import { useProfileStore } from '@/store/profileStore'
 
-import type { PremiumTier } from '@/types/subscription'
+import type { PremiumTier, UpsellReason } from '@/types/subscription'
 
 type BillingInterval = 'month' | '3month' | '6month'
 
@@ -14,6 +14,8 @@ interface SubscriptionState {
   error: string | null
   pendingClientSecret: string | null
   pendingSubscriptionId: string | null
+  upsellVisible: boolean
+  upsellReason: UpsellReason
 }
 
 interface SubscriptionActions {
@@ -25,6 +27,8 @@ interface SubscriptionActions {
   onPaymentFailed: (errorMessage: string) => void
   restorePurchases: () => Promise<void>
   isPremium: () => boolean
+  showUpsell: (reason: UpsellReason) => void
+  hideUpsell: () => void
 }
 
 type SubscriptionStore = SubscriptionState & SubscriptionActions
@@ -50,6 +54,8 @@ export const useSubscriptionStore = create<SubscriptionStore>()((set, get) => ({
   error: null,
   pendingClientSecret: null,
   pendingSubscriptionId: null,
+  upsellVisible: false,
+  upsellReason: 'likes',
 
   setSelectedTier: (tier: PremiumTier): void => {
     set({ selectedTier: tier })
@@ -126,14 +132,14 @@ export const useSubscriptionStore = create<SubscriptionStore>()((set, get) => ({
   isPremium: (): boolean => {
     const profile = useProfileStore.getState().profile
 
-    if (profile === null || !profile.premium.active) {
-      return false
-    }
+    return profile?.premium.active === true
+  },
 
-    if (profile.premium.expiresAt === null) {
-      return false
-    }
+  showUpsell: (reason: UpsellReason): void => {
+    set({ upsellVisible: true, upsellReason: reason })
+  },
 
-    return profile.premium.expiresAt.toMillis() > Date.now()
+  hideUpsell: (): void => {
+    set({ upsellVisible: false })
   },
 }))

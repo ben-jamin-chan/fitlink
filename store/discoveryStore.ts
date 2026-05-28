@@ -8,7 +8,7 @@ import {
   incrementDailyLikes,
 } from '@/services/firebase/firestore'
 import { useAuthStore } from '@/store/authStore'
-import { useProfileStore } from '@/store/profileStore'
+import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import type { UserProfile } from '@/types/user'
 
@@ -28,7 +28,6 @@ interface DiscoveryState {
   isLimitReached: boolean
   dailyLimitReached: boolean
   isRefetching: boolean
-  isUpsellVisible: boolean
 }
 
 interface DiscoveryActions {
@@ -36,11 +35,10 @@ interface DiscoveryActions {
   swipeRight: (targetId: string) => Promise<void>
   swipeLeft: (userId: string, targetId: string) => Promise<void>
   swipeSuperLike: (targetId: string) => Promise<void>
-  checkDailyLimit: (userId: string) => Promise<void>
+  rewind: () => void
+  checkDailyLimit: (userId: string) => Promise<number>
   advanceStack: () => void
   clearError: () => void
-  showUpsell: () => void
-  hideUpsell: () => void
   reset: () => void
 }
 
@@ -55,7 +53,6 @@ const initialState: DiscoveryState = {
   isLimitReached: false,
   dailyLimitReached: false,
   isRefetching: false,
-  isUpsellVisible: false,
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -124,7 +121,15 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
       const result = await getStack({})
       const profiles = await resolveProfiles(result.data.stack)
 
-      await get().checkDailyLimit(userId)
+      if (useSubscriptionStore.getState().isPremium()) {
+        set({
+          dailyLikesCount: 0,
+          isLimitReached: false,
+          dailyLimitReached: false,
+        })
+      } else {
+        await get().checkDailyLimit(userId)
+      }
 
       set({
         stack: profiles,
@@ -142,26 +147,21 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
   swipeRight: async (targetId: string): Promise<void> => {
     try {
       const { user } = useAuthStore.getState()
-      const { profile } = useProfileStore.getState()
 
       if (user === null) {
         return
       }
 
-      const isPremium = profile?.premium?.active === true
+      const subscriptionStore = useSubscriptionStore.getState()
+      const isPremium = subscriptionStore.isPremium()
       let dailyLikesCount = get().dailyLikesCount
 
       if (!isPremium) {
-        const { count, remaining } = await getDailyLikesDoc(user.uid)
-        dailyLikesCount = count
+        const remaining = await get().checkDailyLimit(user.uid)
+        dailyLikesCount = get().dailyLikesCount
 
         if (remaining <= 0) {
-          set({
-            dailyLikesCount: count,
-            isLimitReached: true,
-            dailyLimitReached: true,
-            isUpsellVisible: true,
-          })
+          subscriptionStore.showUpsell('likes')
           return
         }
       }
@@ -222,16 +222,13 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
   swipeSuperLike: async (targetId: string): Promise<void> => {
     try {
       const { user } = useAuthStore.getState()
-      const { profile } = useProfileStore.getState()
 
       if (user === null) {
         return
       }
 
-      const isPremium = profile?.premium?.active === true
-
-      if (!isPremium) {
-        set({ isUpsellVisible: true })
+      if (!useSubscriptionStore.getState().isPremium()) {
+        useSubscriptionStore.getState().showUpsell('superLike')
         return
       }
 
@@ -263,7 +260,16 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
     }
   },
 
-  checkDailyLimit: async (userId: string): Promise<void> => {
+  rewind: (): void => {
+    if (!useSubscriptionStore.getState().isPremium()) {
+      useSubscriptionStore.getState().showUpsell('rewind')
+      return
+    }
+
+    // TODO Phase 3: implement actual rewind logic (restore last swiped card).
+  },
+
+  checkDailyLimit: async (userId: string): Promise<number> => {
     try {
       const data = await getDailyLikesDoc(userId)
       set({
@@ -271,10 +277,14 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
         isLimitReached: data.remaining <= 0,
         dailyLimitReached: data.remaining <= 0,
       })
+
+      return data.remaining
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Daily limit check failed'
       set({ error: message })
+
+      return 0
     }
   },
 
@@ -297,14 +307,6 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
 
   clearError: (): void => {
     set({ error: null })
-  },
-
-  showUpsell: (): void => {
-    set({ isUpsellVisible: true })
-  },
-
-  hideUpsell: (): void => {
-    set({ isUpsellVisible: false })
   },
 
   reset: (): void => {

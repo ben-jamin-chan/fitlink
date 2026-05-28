@@ -30,6 +30,7 @@ const ONE_DAY_MS = 24 * ONE_HOUR_MS
 interface MessageBubbleProps {
   message: RTDBMessage
   isMine: boolean
+  isPremium: boolean
   showTimestamp: boolean
   onImagePress: (url: string) => void
   onLongPress: (message: RTDBMessage) => void
@@ -82,6 +83,7 @@ const isSameCalendarDay = (first: number, second: number): boolean => {
 export const MessageBubble = ({
   message,
   isMine,
+  isPremium,
   showTimestamp,
   onImagePress,
   onLongPress,
@@ -94,8 +96,8 @@ export const MessageBubble = ({
   }
 
   const timestamp = formatTimestamp(message.timestamp, t)
-  const readReceiptIcon = message.read ? 'checkmark-done' : 'checkmark'
-  const readReceiptColor = message.read ? colors.secondary : colors.gray[400]
+  const readReceiptColor =
+    isPremium && message.read ? colors.secondary : colors.gray[400]
 
   const handleImagePress = (): void => {
     if (message.imageUrl !== null) {
@@ -139,17 +141,17 @@ export const MessageBubble = ({
         )}
       </TouchableOpacity>
 
-      {showTimestamp && (
+      {(showTimestamp || isMine) && (
         <View
           style={[
             styles.timestampRow,
             isMine ? styles.timestampMine : styles.timestampTheirs,
           ]}
         >
-          <Text style={styles.timestamp}>{timestamp}</Text>
+          {showTimestamp && <Text style={styles.timestamp}>{timestamp}</Text>}
           {isMine && (
             <Ionicons
-              name={readReceiptIcon}
+              name="checkmark-done"
               size={READ_RECEIPT_SIZE}
               color={readReceiptColor}
             />

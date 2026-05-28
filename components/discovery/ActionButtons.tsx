@@ -11,8 +11,6 @@ const BUTTON_LG = 56
 const BUTTON_SM = 46
 const ICON_LG = 30
 const ICON_SM = 24
-const LOCK_BADGE_SIZE = 18
-const LOCK_ICON_SIZE = 12
 const SHADOW_ELEVATION = 4
 
 type ActionButtonKind = 'rewind' | 'pass' | 'superLike' | 'like' | 'info'
@@ -24,7 +22,6 @@ interface ActionButtonsProps {
   onSuperLike: () => void
   onRewind: () => void
   onInfo: () => void
-  isPremium: boolean
   disabled: boolean
 }
 
@@ -33,7 +30,6 @@ interface ActionButtonConfig {
   icon: IoniconName
   color: string
   size: 'large' | 'small'
-  isPremiumGated: boolean
   onPress: () => void
 }
 
@@ -43,7 +39,6 @@ export const ActionButtons = ({
   onSuperLike,
   onRewind,
   onInfo,
-  isPremium,
   disabled,
 }: ActionButtonsProps): React.JSX.Element => {
   const triggerHaptics = (kind: ActionButtonKind): void => {
@@ -51,10 +46,6 @@ export const ActionButtons = ({
 
     if (kind === 'pass' || kind === 'like') {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-    }
-
-    if (kind === 'superLike' && isPremium) {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     }
   }
 
@@ -69,7 +60,6 @@ export const ActionButtons = ({
       icon: 'reload-outline',
       color: colors.warning,
       size: 'small',
-      isPremiumGated: true,
       onPress: onRewind,
     },
     {
@@ -77,7 +67,6 @@ export const ActionButtons = ({
       icon: 'close',
       color: colors.danger,
       size: 'large',
-      isPremiumGated: false,
       onPress: onPass,
     },
     {
@@ -85,7 +74,6 @@ export const ActionButtons = ({
       icon: 'star',
       color: colors.secondary,
       size: 'small',
-      isPremiumGated: true,
       onPress: onSuperLike,
     },
     {
@@ -93,7 +81,6 @@ export const ActionButtons = ({
       icon: 'heart',
       color: colors.primary,
       size: 'large',
-      isPremiumGated: false,
       onPress: onLike,
     },
     {
@@ -101,7 +88,6 @@ export const ActionButtons = ({
       icon: 'information-circle-outline',
       color: colors.info,
       size: 'small',
-      isPremiumGated: false,
       onPress: onInfo,
     },
   ]
@@ -110,7 +96,6 @@ export const ActionButtons = ({
     <View style={[styles.container, disabled && styles.disabled]}>
       {buttons.map((button) => {
         const isLarge = button.size === 'large'
-        const showLock = button.isPremiumGated && !isPremium
 
         return (
           <TouchableOpacity
@@ -128,15 +113,6 @@ export const ActionButtons = ({
               size={isLarge ? ICON_LG : ICON_SM}
               color={button.color}
             />
-            {showLock && (
-              <View style={styles.lockBadge}>
-                <Ionicons
-                  name="lock-closed"
-                  size={LOCK_ICON_SIZE}
-                  color={colors.white}
-                />
-              </View>
-            )}
           </TouchableOpacity>
         )
       })}
@@ -179,16 +155,5 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.4,
-  },
-  lockBadge: {
-    alignItems: 'center',
-    backgroundColor: colors.gray[800],
-    borderRadius: LOCK_BADGE_SIZE / 2,
-    height: LOCK_BADGE_SIZE,
-    justifyContent: 'center',
-    position: 'absolute',
-    right: -spacing.xs,
-    top: -spacing.xs,
-    width: LOCK_BADGE_SIZE,
   },
 })

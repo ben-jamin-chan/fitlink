@@ -4,6 +4,56 @@
 
 ---
 
+## [Phase 2B — Task 54] — 2026-05-28
+
+### Completed
+
+- Task 54: Premium feature gates wired across all surfaces
+- UpsellReason type ('likes' | 'superLike' | 'rewind') added to types/subscription.ts
+- subscriptionStore: upsellVisible, upsellReason, showUpsell(), hideUpsell() added
+- discoveryStore: showUpsellModal-style flag removed; premium gates use subscriptionStore.showUpsell(); unlimited likes bypass for premium users; rewind() scaffold added
+- UpsellModal: 'rewind' reason variant added with i18n keys in all 4 language files
+- DiscoveryScreen: upsell state sourced from subscriptionStore
+- ActionButtons: onRewind stays callback-only; premium-status logic removed from the button row
+- MatchesScreen: search row shows PremiumBadge and gates on isPremium()
+- MessageBubble: isPremium prop added; blue double-tick gated; gray double-tick always shown
+- ChatScreen: isPremium passed to MessageBubble from subscriptionStore
+
+### Files Created / Modified
+
+- types/subscription.ts: UpsellReason type added
+- store/subscriptionStore.ts: upsell state and actions added
+- store/discoveryStore.ts: premium gates updated, rewind() added, discovery-owned upsell flag removed
+- components/discovery/UpsellModal.tsx: rewind reason variant, reason-aware content map
+- app/discovery/DiscoveryScreen.tsx: upsell wired to subscriptionStore, onRewind wired to discoveryStore.rewind()
+- components/discovery/ActionButtons.tsx: premium-status logic removed; callbacks remain dumb
+- components/discovery/FullProfileModal.tsx: post-action close check moved to subscriptionStore upsell state
+- app/matches/MatchesScreen.tsx: search row premium gate and PremiumBadge
+- components/chat/MessageBubble.tsx: isPremium prop, read receipt color logic
+- app/chat/ChatScreen.tsx: isPremium from subscriptionStore passed to MessageBubble
+- i18n/en.json: upsell.*, matches.searchPlaceholder added
+- i18n/my.json, zh.json, ta.json: same keys mirrored
+
+### Architecture Decisions
+
+- UpsellModal's existing Upgrade Now navigation to PremiumScreen was preserved; only the hide action now reads from subscriptionStore because discoveryStore no longer owns upsell UI state
+- FullProfileModal was updated even though it was not listed as a primary Task 54 file because it referenced the removed discovery upsell flag
+- MatchesScreen and ChatScreen subscribe to profile premium status for re-rendering, but still compute the gate through subscriptionStore.isPremium()
+
+### Known Issues / Deferred
+
+- rewind() is a no-op for premium users — actual card restoration is Phase 3
+- Matches search/filter modal is Phase 3 — only the gate UI is implemented here
+- Stripe Customer Portal URL remains a placeholder (Task 52 deferred item)
+
+### Verification
+
+- npx tsc --noEmit passes
+
+### Next Up
+
+- Task 55: Server-Side Daily Likes Enforcement (recordSwipe Cloud Function, Firestore transaction, block client writes to /swipes/)
+
 ## [Phase 2B — Task 53] — 2026-05-27
 
 ### Completed

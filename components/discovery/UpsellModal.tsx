@@ -13,11 +13,12 @@ import { useNavigation } from '@react-navigation/native'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 
-import { useDiscoveryStore } from '@/store/discoveryStore'
+import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import { Button } from '@/components/ui/Button'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
+import type { UpsellReason } from '@/types/subscription'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
@@ -27,7 +28,7 @@ const BENEFIT_ICON_SIZE = spacing.lg - spacing.xs
 interface UpsellModalProps {
   visible: boolean
   onDismiss: () => void
-  reason: 'likes' | 'superLike'
+  reason: UpsellReason
 }
 
 const BENEFITS: Array<{ icon: keyof typeof Ionicons.glyphMap; key: string }> = [
@@ -45,7 +46,22 @@ export const UpsellModal = ({
 }: UpsellModalProps): React.JSX.Element => {
   const { t } = useTranslation()
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
-  const hideUpsell = useDiscoveryStore((state) => state.hideUpsell)
+  const hideUpsell = useSubscriptionStore((state) => state.hideUpsell)
+  const upsellContent: Record<UpsellReason, { headline: string; body: string }> = {
+    likes: {
+      headline: t('upsell.likes.headline'),
+      body: t('upsell.likes.body'),
+    },
+    superLike: {
+      headline: t('upsell.superLike.headline'),
+      body: t('upsell.superLike.body'),
+    },
+    rewind: {
+      headline: t('upsell.rewind.headline'),
+      body: t('upsell.rewind.body'),
+    },
+  }
+  const content = upsellContent[reason]
 
   const handleUpgrade = (): void => {
     hideUpsell()
@@ -67,14 +83,8 @@ export const UpsellModal = ({
               size={HERO_ICON_SIZE}
               color={colors.warning}
             />
-            <Text style={styles.headline}>
-              {reason === 'likes'
-                ? t('discovery.limit.outOfLikes')
-                : t('discovery.limit.premiumFeature')}
-            </Text>
-            <Text style={styles.subheadline}>
-              {t('discovery.limit.upgradeSubtitle')}
-            </Text>
+            <Text style={styles.headline}>{content.headline}</Text>
+            <Text style={styles.subheadline}>{content.body}</Text>
           </View>
 
           <View style={styles.benefits}>
@@ -95,14 +105,12 @@ export const UpsellModal = ({
 
           <View style={styles.actions}>
             <Button
-              label={t('discovery.limit.upgradeCta')}
+              label={t('upsell.upgradeNow')}
               onPress={handleUpgrade}
               variant="primary"
             />
             <TouchableOpacity onPress={onDismiss} style={styles.dismissButton}>
-              <Text style={styles.dismissText}>
-                {t('discovery.limit.maybeLater')}
-              </Text>
+              <Text style={styles.dismissText}>{t('upsell.maybeLater')}</Text>
             </TouchableOpacity>
           </View>
         </View>

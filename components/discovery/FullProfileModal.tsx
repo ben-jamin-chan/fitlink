@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useAuthStore } from '@/store/authStore'
 import { useDiscoveryStore } from '@/store/discoveryStore'
+import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import { ActivityBadge } from '@/components/discovery/ActivityBadge'
 import { PhotoViewer } from '@/components/discovery/PhotoViewer'
@@ -201,7 +202,7 @@ export const FullProfileModal = ({
     }
 
     void swipeRight(profile.uid).then(() => {
-      if (!useDiscoveryStore.getState().isUpsellVisible) {
+      if (!useSubscriptionStore.getState().upsellVisible) {
         closeAfterAction()
       }
     })
@@ -221,7 +222,7 @@ export const FullProfileModal = ({
     }
 
     void swipeSuperLike(profile.uid).then(() => {
-      if (!useDiscoveryStore.getState().isUpsellVisible) {
+      if (!useSubscriptionStore.getState().upsellVisible) {
         closeAfterAction()
       }
     })

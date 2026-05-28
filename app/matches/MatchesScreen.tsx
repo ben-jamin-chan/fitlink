@@ -12,35 +12,40 @@ import {
 } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
-import {
-  CompositeNavigationProp,
-  useNavigation,
-} from '@react-navigation/native'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
+import { useNavigation } from '@react-navigation/native'
+import type { CompositeNavigationProp } from '@react-navigation/native'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAuthStore } from '@/store/authStore'
 import { useMatchStore } from '@/store/matchStore'
+import { useProfileStore } from '@/store/profileStore'
+import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import { MatchCard } from '@/components/chat/MatchCard'
 import { MessageListItem } from '@/components/chat/MessageListItem'
 import { Button } from '@/components/ui/Button'
+import { PremiumBadge } from '@/components/ui/PremiumBadge'
 
 import type {
   MainTabParamList,
   MatchesStackParamList,
 } from '@/app/navigation/MainTabNavigator'
+import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { MatchWithProfile } from '@/types/match'
 
-import { colors, spacing, typography } from '@/constants/theme'
+import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
 type ActiveTab = 'matches' | 'messages'
 
 type MatchesNavigationProp = CompositeNavigationProp<
   StackNavigationProp<MatchesStackParamList, 'MatchesList'>,
-  BottomTabNavigationProp<MainTabParamList>
+  CompositeNavigationProp<
+    BottomTabNavigationProp<MainTabParamList>,
+    StackNavigationProp<RootStackParamList>
+  >
 >
 
 const SCREEN_WIDTH = Dimensions.get('window').width
@@ -61,7 +66,13 @@ const MatchesScreen = (): React.JSX.Element | null => {
   )
   const markAsRead = useMatchStore((state) => state.markAsRead)
   const unmatch = useMatchStore((state) => state.unmatch)
+  const premiumStatus = useProfileStore((state) => state.profile?.premium)
+  const getIsPremium = useSubscriptionStore((state) => state.isPremium)
   const [activeTab, setActiveTab] = useState<ActiveTab>('matches')
+  const isPremium = useMemo(
+    () => getIsPremium(),
+    [getIsPremium, premiumStatus]
+  )
 
   const allMatches = useMemo(
     () =>
@@ -133,6 +144,15 @@ const MatchesScreen = (): React.JSX.Element | null => {
     },
     [t, unmatch]
   )
+
+  const handleSearchPress = useCallback((): void => {
+    if (!isPremium) {
+      navigation.navigate('Premium')
+      return
+    }
+
+    // TODO Phase 3: open search/filter modal.
+  }, [isPremium, navigation])
 
   const renderMatch = useCallback(
     ({ item }: { item: MatchWithProfile }): React.JSX.Element => (
@@ -262,6 +282,22 @@ const MatchesScreen = (): React.JSX.Element | null => {
         <Text style={styles.title}>{t('matches.title')}</Text>
       </View>
 
+      <TouchableOpacity
+        style={styles.searchRow}
+        onPress={handleSearchPress}
+        activeOpacity={0.8}
+      >
+        <Ionicons
+          name="search-outline"
+          size={typography.sizes.lg}
+          color={colors.gray[600]}
+        />
+        <Text style={styles.searchPlaceholder}>
+          {t('matches.searchPlaceholder')}
+        </Text>
+        {!isPremium && <PremiumBadge tier="plus" size="sm" />}
+      </TouchableOpacity>
+
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[
@@ -358,6 +394,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[200],
     height: 1,
     marginLeft: AVATAR_SEPARATOR_OFFSET,
+  },
+  searchPlaceholder: {
+    color: colors.gray[600],
+    flex: 1,
+    fontSize: typography.sizes.md,
+  },
+  searchRow: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.gray[200],
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+    marginHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   tabBar: {
     borderBottomColor: colors.gray[200],

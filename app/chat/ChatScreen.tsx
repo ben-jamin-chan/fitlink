@@ -40,6 +40,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuthStore } from '@/store/authStore'
 import { useChatStore } from '@/store/chatStore'
 import { useMatchStore } from '@/store/matchStore'
+import { useProfileStore } from '@/store/profileStore'
+import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import { ChatInput } from '@/components/chat/ChatInput'
 import { MessageBubble } from '@/components/chat/MessageBubble'
@@ -271,6 +273,8 @@ const ChatScreen = (): React.JSX.Element | null => {
   const markChatAsRead = useChatStore((state) => state.markAsRead)
   const flushOfflineQueue = useChatStore((state) => state.flushOfflineQueue)
   const clearError = useChatStore((state) => state.clearError)
+  const premiumStatus = useProfileStore((state) => state.profile?.premium)
+  const getIsPremium = useSubscriptionStore((state) => state.isPremium)
 
   const flatListRef = useRef<FlatList<ChatListItem>>(null)
   const [imageViewerUrl, setImageViewerUrl] = useState<string | null>(null)
@@ -295,6 +299,10 @@ const ChatScreen = (): React.JSX.Element | null => {
   )
   const primaryPhoto = otherUser?.photos[0] ?? null
   const inputDisabled = isUploadingImage || isSendingMessage
+  const isPremium = useMemo(
+    () => getIsPremium(),
+    [getIsPremium, premiumStatus]
+  )
   const icebreakers = useMemo((): string[] => {
     if (otherUser === undefined) {
       return []
@@ -488,13 +496,14 @@ const ChatScreen = (): React.JSX.Element | null => {
         <MessageBubble
           message={item.message}
           isMine={item.message.senderId === userId}
+          isPremium={isPremium}
           showTimestamp={showTimestamp}
           onImagePress={setImageViewerUrl}
           onLongPress={handleLongPressMessage}
         />
       )
     },
-    [expandedTimestampIds, handleLongPressMessage, userId]
+    [expandedTimestampIds, handleLongPressMessage, isPremium, userId]
   )
 
   const renderEmptyState = useCallback((): React.JSX.Element | null => {
