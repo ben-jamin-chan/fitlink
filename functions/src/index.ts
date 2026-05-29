@@ -14,3 +14,4 @@ export { unmatchUser } from "./unmatchUser";
 export { createStripeCheckout } from "./createStripeCheckout";
 export { stripeWebhook } from "./stripeWebhook";
 export { recordSwipe } from "./recordSwipe";
+export { verifyProfilePhoto } from "./verifyProfilePhoto";

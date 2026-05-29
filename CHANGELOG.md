@@ -4,6 +4,50 @@
 
 ---
 
+## [Phase 2C - Task 56] - 2026-05-29
+
+### Completed
+
+- Task 56: verifyProfilePhoto Cloud Function implemented
+- Face detection via Google Cloud Vision on selfie (GCS URI) and profile photo (HTTPS URL)
+- SafeSearch check on selfie rejects adult, violent, or racy content
+- computeFaceMatchScore: simplified confidence-based scorer, 0.75 baseline, Phase 3 TODO for embedding model
+- checkAndIncrementAttempts: Firestore transaction, daily cap (default 3), UTC+8 reset mirrors recordSwipe pattern
+- deleteTempSelfie: called through finally for success, failure, and error paths; errors swallowed
+- @google-cloud/vision installed in functions/
+
+### Files Created / Modified
+
+- functions/src/verifyProfilePhoto.ts: created - verifyProfilePhoto callable, all logic
+- functions/src/index.ts: verifyProfilePhoto export added
+- functions/package.json: @google-cloud/vision added to dependencies
+- functions/package-lock.json: dependency lockfile updated
+- functions/.env: MAX_VERIFICATION_ATTEMPTS_PER_DAY=3 documented locally
+- functions/.env.example: same key added
+
+### Architecture Decisions
+
+- Selfie read via GCS URI (gs://bucket/path); profile photo read via HTTPS download URL
+- selfiePath is constrained to users/{uid}/verification/ before the function will process or delete the object
+- verificationAttempts counter lives at /users/{uid}/verificationAttempts/doc, matching the dailyLikes fixed-document pattern
+- reason field returns snake_case machine codes, not human text, for Task 57 i18n mapping
+- computeFaceMatchScore is intentionally a heuristic placeholder with a TODO comment
+- @google-cloud/vision latest version was checked with npm view and installed as ^5.3.6
+
+### Known Issues / Deferred
+
+- Face matching is a simplified heuristic; real embedding model deferred to Phase 3
+- getNextMidnightMs() uses UTC+8 approximation; per-user timezone is Phase 3
+
+### Verification
+
+- npx tsc --noEmit passes in functions/
+- npx tsc --noEmit passes at project root
+
+### Next Up
+
+- Task 57: Photo Verification UI Flow (PhotoVerificationScreen, SelfieCameraView, 3-step instructions to camera to result, calls verifyProfilePhoto, maps reason codes to i18n)
+
 ## [Phase 2B - Task 55] - 2026-05-28
 
 ### Completed
