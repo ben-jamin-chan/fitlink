@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native'
 
-import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
@@ -26,6 +25,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ActivityBadge } from '@/components/discovery/ActivityBadge'
 import { SwipeLabel } from '@/components/discovery/SwipeLabel'
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
 import type { UserProfile } from '@/types/user'
 
@@ -260,9 +260,12 @@ export const SwipeCard = ({
         <LinearGradient colors={GRADIENT_COLORS} style={styles.gradient} />
 
         <View style={styles.infoContainer}>
-          <Text style={styles.nameText}>
-            {user.firstName}, {user.age}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.nameText}>
+              {user.firstName}, {user.age}
+            </Text>
+            <VerifiedBadge visible={user.photoVerified} size="sm" />
+          </View>
           <Text style={styles.distanceText}>{activeLabel}</Text>
           <Text style={styles.cityText}>{user.location.city}</Text>
           <View style={styles.badgesRow}>
@@ -272,16 +275,6 @@ export const SwipeCard = ({
             <ActivityBadge activity={user.fitnessLevel} />
           </View>
         </View>
-
-        {user.photoVerified && (
-          <View style={styles.verifiedBadge}>
-            <Ionicons
-              name="checkmark-circle"
-              size={24}
-              color={colors.secondary}
-            />
-          </View>
-        )}
 
         <SwipeLabel type="like" opacity={likeOpacity} />
         <SwipeLabel type="nope" opacity={nopeOpacity} />
@@ -348,11 +341,17 @@ const styles = StyleSheet.create({
     left: spacing.md,
     position: 'absolute',
     right: spacing.md,
+    zIndex: 15,
   },
   nameText: {
     color: colors.white,
+    flexShrink: 1,
     fontSize: typography.sizes.xl,
     fontWeight: typography.weights.bold,
+  },
+  nameRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   photo: {
     ...StyleSheet.absoluteFillObject,
@@ -370,11 +369,5 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     flexDirection: 'row',
     zIndex: 10,
-  },
-  verifiedBadge: {
-    position: 'absolute',
-    right: spacing.md,
-    top: spacing.md,
-    zIndex: 5,
   },
 })

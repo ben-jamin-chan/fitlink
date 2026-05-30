@@ -46,11 +46,10 @@ interface FirestoreUser {
   preferences: UserPreferences;
   stats: UserStats;
   subscription: UserSubscription;
-  verified: boolean;
   paused: boolean;
   banned: boolean;
   lastActive: admin.firestore.Timestamp;
-  photoVerified?: boolean;
+  photoVerified: boolean;
 }
 
 interface DiscoveryCandidate {
@@ -181,7 +180,7 @@ function scoreCandidate(caller: FirestoreUser, candidate: FirestoreUser): number
     score += 3;
   }
 
-  if (candidate.photoVerified === true || candidate.verified === true) {
+  if (candidate.photoVerified === true) {
     score += 2;
   }
 
@@ -329,7 +328,7 @@ function toFirestoreUser(
   const dietaryPreference = getString(raw.dietaryPreference);
   const banned = getBoolean(raw.banned);
   const paused = getBoolean(raw.paused);
-  const verified = getBoolean(raw.verified);
+  const photoVerified = getBoolean(raw.photoVerified);
 
   if (
     age === null ||
@@ -339,7 +338,7 @@ function toFirestoreUser(
     dietaryPreference === null ||
     banned === null ||
     paused === null ||
-    verified === null
+    photoVerified === null
   ) {
     return null;
   }
@@ -360,11 +359,10 @@ function toFirestoreUser(
     preferences,
     stats,
     subscription,
-    verified,
+    photoVerified,
     paused,
     banned,
     lastActive: raw.lastActive,
-    photoVerified: getOptionalBoolean(raw.photoVerified),
   };
 }
 
@@ -467,10 +465,6 @@ function getNumber(value: unknown): number | null {
 
 function getBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
-}
-
-function getOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
 }
 
 function getStringArray(value: unknown): string[] {

@@ -161,7 +161,7 @@ const PhotoVerificationScreen = ({
         )
         setResult(verificationResult)
 
-        if (verificationResult.verified) {
+        if (verificationResult['verified']) {
           await updateProfile({ photoVerified: true })
         }
 
@@ -267,7 +267,7 @@ const PhotoVerificationScreen = ({
   )
 
   const renderResult = (): React.JSX.Element => {
-    const isSuccess = result?.verified === true
+    const isSuccess = result?.['verified'] === true
 
     return (
       <View style={styles.resultContainer}>

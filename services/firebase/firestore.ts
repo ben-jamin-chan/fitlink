@@ -102,7 +102,6 @@ export type UserProfileUpdateInput = Partial<
 
 interface UserProfileDocument extends UserProfile {
   subscription?: unknown
-  verified?: unknown
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -171,10 +170,6 @@ const getNormalizedPhotoVerified = (
 ): boolean => {
   if (typeof data.photoVerified === 'boolean') {
     return data.photoVerified
-  }
-
-  if (typeof data.verified === 'boolean') {
-    return data.verified
   }
 
   return false

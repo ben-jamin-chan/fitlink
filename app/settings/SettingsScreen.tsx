@@ -681,7 +681,7 @@ export default function SettingsScreen(): React.JSX.Element {
             label={t('verification.navigationTitle')}
             value={
               profile.photoVerified
-                ? t('profile.verified')
+                ? t('profile.verifiedStatus')
                 : t('profile.verifyNow')
             }
             icon="shield-checkmark-outline"

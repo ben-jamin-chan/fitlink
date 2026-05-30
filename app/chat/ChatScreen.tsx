@@ -46,6 +46,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { MessageBubble } from '@/components/chat/MessageBubble'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
 import type { MatchesStackParamList } from '@/app/navigation/MainTabNavigator'
 import {
@@ -581,9 +582,12 @@ const ChatScreen = (): React.JSX.Element | null => {
           )}
 
           <View style={styles.headerText}>
-            <Text style={styles.headerName} numberOfLines={1}>
-              {otherUser.firstName}
-            </Text>
+            <View style={styles.headerNameRow}>
+              <Text style={styles.headerName} numberOfLines={1}>
+                {otherUser.firstName}
+              </Text>
+              <VerifiedBadge visible={otherUser.photoVerified} size="md" />
+            </View>
             {presenceStatus !== null && (
               <Text
                 style={[
@@ -862,8 +866,13 @@ const styles = StyleSheet.create({
   },
   headerName: {
     color: colors.gray[900],
+    flexShrink: 1,
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
+  },
+  headerNameRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   headerPhoto: {
     backgroundColor: colors.gray[200],

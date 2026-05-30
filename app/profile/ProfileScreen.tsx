@@ -27,6 +27,7 @@ import { PhotoGrid } from '@/components/profile/PhotoGrid'
 import { StatsBadge } from '@/components/profile/StatsBadge'
 import { Button } from '@/components/ui/Button'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { ProfileStackParamList } from '@/app/navigation/MainTabNavigator'
@@ -199,14 +200,7 @@ export default function ProfileScreen(): React.JSX.Element {
               <Text style={styles.heroName}>
                 {profile.firstName}, {profile.age}
               </Text>
-              {profile.photoVerified && (
-                <Ionicons
-                  name="checkmark-circle"
-                  size={spacing.lg}
-                  color={colors.secondary}
-                  style={styles.verifiedIcon}
-                />
-              )}
+              <VerifiedBadge visible={profile.photoVerified} size="md" />
             </View>
             <Text style={styles.heroLocation}>{profile.location.city}</Text>
           </View>
@@ -555,8 +549,5 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
     marginBottom: spacing.xs,
-  },
-  verifiedIcon: {
-    marginLeft: spacing.xs,
   },
 })

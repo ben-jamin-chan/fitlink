@@ -11,12 +11,13 @@ import {
   View,
 } from 'react-native'
 
-import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Timestamp } from 'firebase/firestore'
 import { useTranslation } from 'react-i18next'
 
 import { useMatchStore } from '@/store/matchStore'
+
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
 import type { MatchWithProfile } from '@/types/match'
 
@@ -168,13 +169,7 @@ export const MatchCard = ({
           <Text style={styles.name} numberOfLines={1}>
             {otherUser.firstName}
           </Text>
-          {otherUser.photoVerified && (
-            <Ionicons
-              name="checkmark-circle"
-              size={spacing.md - spacing.xs / 2}
-              color={colors.secondary}
-            />
-          )}
+          <VerifiedBadge visible={otherUser.photoVerified} size="sm" />
         </View>
 
         {online && <View style={styles.onlineDot} />}

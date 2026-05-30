@@ -31,6 +31,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { ActivityBadge } from '@/components/discovery/ActivityBadge'
 import { PhotoViewer } from '@/components/discovery/PhotoViewer'
 import { ProfileSection } from '@/components/profile/ProfileSection'
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
 import type { LookingFor, UserProfile } from '@/types/user'
 
@@ -351,14 +352,7 @@ export const FullProfileModal = ({
                   <Text style={styles.name}>
                     {profile.firstName}, {profile.age}
                   </Text>
-                  {profile.photoVerified && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={22}
-                      color={colors.secondary}
-                      style={styles.verifiedIcon}
-                    />
-                  )}
+                  <VerifiedBadge visible={profile.photoVerified} size="md" />
                 </View>
                 <View style={styles.metaRow}>
                   <Ionicons
@@ -888,8 +882,5 @@ const styles = StyleSheet.create({
   superLikeButton: {
     borderColor: colors.secondary,
     borderWidth: StyleSheet.hairlineWidth,
-  },
-  verifiedIcon: {
-    marginLeft: spacing.xs,
   },
 })

@@ -4,6 +4,54 @@
 
 ---
 
+## [Phase 2C - Task 58] - 2026-05-30
+
+### Completed
+
+- Task 58: Verified badge integration complete - consistent rendering across all five surfaces
+- VerifiedBadge: new named-export primitive, sm (16px) / md (20px) sizes, long-press Alert tooltip
+- SwipeCard: VerifiedBadge sm in name row, reads user.photoVerified
+- FullProfileModal: VerifiedBadge md in Basic Info name row, reads profile.photoVerified
+- MatchCard: VerifiedBadge sm in each match card overlay, reads match.otherUser.photoVerified
+- ChatScreen: VerifiedBadge md inline in header name row, reads otherUser.photoVerified
+- ProfileScreen: VerifiedBadge md in header name row, reads profile.photoVerified
+- i18n: profile.verifiedBadge.tooltip added to all 4 language files
+
+### Files Created / Modified
+
+- components/ui/VerifiedBadge.tsx: created - named export, sm/md sizes, long-press tooltip Alert
+- components/discovery/SwipeCard.tsx: VerifiedBadge sm added to name row
+- components/discovery/FullProfileModal.tsx: VerifiedBadge md added to Basic Info name row
+- components/chat/MatchCard.tsx: VerifiedBadge sm added to match card overlay
+- app/chat/ChatScreen.tsx: VerifiedBadge md added to header name row, headerNameRow style added
+- app/profile/ProfileScreen.tsx: VerifiedBadge md confirmed in header name row
+- app/settings/SettingsScreen.tsx: verification status label moved off profile.verified translation key
+- app/profile/PhotoVerificationScreen.tsx: callable response handling no longer uses dot-access .verified
+- services/firebase/firestore.ts: removed legacy verified fallback from photoVerified normalization
+- functions/src/getDiscoveryStack.ts: discovery scoring now reads only photoVerified
+- i18n/en.json, my.json, zh.json, ta.json: profile.verifiedBadge.tooltip and profile.verifiedStatus added
+
+### Architecture Decisions
+
+- VerifiedBadge has zero store/service dependencies - visibility driven entirely by props
+- Long-press tooltip uses Alert.alert with i18n text and no third-party tooltip library
+- size prop defaults to 'md'; callers only pass size="sm" for compact card surfaces
+- Legacy user/profile verified field fallbacks were removed so photoVerified remains the only canonical profile verification field
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/
+- grep confirms zero local-source .verified references when excluding node_modules; unexcluded grep only reports Stripe dependency type definitions under functions/node_modules
+
+### Next Up
+
+- Task 59: Fitness Tracking Types and Store (types/fitness.ts, store/fitnessStore.ts)
+
 ## [Phase 2C - Task 57] - 2026-05-30
 
 ### Completed

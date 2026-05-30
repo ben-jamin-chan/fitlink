@@ -480,6 +480,10 @@
     "sameCity": "Same city",
     "metaSeparator": "·",
     "verified": "Verified profile",
+    "verifiedStatus": "Verified profile",
+    "verifiedBadge": {
+      "tooltip": "This user's identity has been verified"
+    },
     "readMore": "Read more",
     "showLess": "Show less",
     "bioTruncated": "{{bio}}...",
