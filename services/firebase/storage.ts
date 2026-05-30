@@ -3,9 +3,10 @@ import {
   getDownloadURL,
   ref,
   uploadBytes,
+  uploadBytesResumable,
 } from 'firebase/storage'
 
-import { storage } from '@/services/firebase/config'
+import { auth, storage } from '@/services/firebase/config'
 
 import { compressImage } from '@/utils/imageUtils'
 
@@ -31,6 +32,31 @@ export const uploadProfilePhoto = async (
   onProgress?.(100)
 
   return getDownloadURL(snapshot.ref)
+}
+
+export const uploadVerificationSelfie = async (
+  localUri: string
+): Promise<string> => {
+  const currentUser = auth.currentUser
+
+  if (currentUser === null) {
+    throw new Error('User not authenticated')
+  }
+
+  const storagePath = `users/${currentUser.uid}/verification/selfie_temp.jpg`
+  const storageRef = ref(storage, storagePath)
+  const response = await fetch(localUri)
+  const blob = await response.blob()
+
+  await new Promise<void>((resolve, reject): void => {
+    const task = uploadBytesResumable(storageRef, blob, {
+      contentType: PROFILE_PHOTO_CONTENT_TYPE,
+    })
+
+    task.on('state_changed', undefined, reject, resolve)
+  })
+
+  return storagePath
 }
 
 export const uploadAllProfilePhotos = async (

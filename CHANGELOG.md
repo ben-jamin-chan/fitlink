@@ -4,6 +4,51 @@
 
 ---
 
+## [Phase 2C - Task 57] - 2026-05-30
+
+### Completed
+
+- Task 57: Photo Verification UI Flow implemented
+- SelfieCameraView: front-facing camera with face oval guide, permission handling, capture-only
+- PhotoVerificationScreen: 3-step state machine (instructions -> camera -> result), upload and Cloud Function lifecycle, attempt counter, localized reason-code mapping
+- uploadVerificationSelfie: added to services/firebase/storage.ts - returns GCS storage path, not download URL
+- PhotoVerification registered in RootNavigator; navigate-to wired in ProfileScreen and SettingsScreen
+- All verification.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- components/profile/SelfieCameraView.tsx: created - CameraView, oval overlay, capture/retake controls, permission denied state
+- app/profile/PhotoVerificationScreen.tsx: created - instructions/camera/result state machine, upload lifecycle, reasonToI18nKey mapper
+- services/firebase/storage.ts: uploadVerificationSelfie added
+- storage.rules: verification temp selfie upload path allowed for owner create/update only; client read/delete denied
+- store/profileStore.ts: server-confirmed photoVerified local refresh supported without client Firestore writes
+- app/navigation/RootNavigator.tsx: PhotoVerification added to RootStackParamList and stack
+- app/profile/ProfileScreen.tsx: "Verify Now" wired to navigation.navigate('PhotoVerification')
+- app/settings/SettingsScreen.tsx: verification row wired to navigation.navigate('PhotoVerification')
+- i18n/en.json: verification.* namespace added; common.ok added
+- i18n/my.json, zh.json, ta.json: verification.* mirrored with English placeholders; common.ok added
+
+### Architecture Decisions
+
+- uploadVerificationSelfie returns the GCS storage path, not a download URL; verifyProfilePhoto reads via gs:// URI internally
+- Temp selfie deletion remains the Cloud Function's responsibility only; no client-side delete was added
+- Attempt counter is client-side display state; server enforces the cap and daily_limit_reached is handled from both response reason and callable resource-exhausted errors
+- reasonToI18nKey maps requested Task 57 reason codes plus existing Task 56 aliases to i18n keys before t() call
+- SelfieCameraView is capture-only; all upload and Cloud Function logic is in PhotoVerificationScreen
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/ (no changes to functions)
+
+### Next Up
+
+- Task 58: Verified Badge Integration (ensure photoVerified badge renders consistently across SwipeCard, FullProfileModal, MatchesScreen, ChatScreen header, and ProfileScreen using the photoVerified field)
+
 ## [Phase 2C - Task 56] - 2026-05-29
 
 ### Completed

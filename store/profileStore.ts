@@ -33,6 +33,12 @@ type EditableProfileUpdate = Partial<
   >
 >
 
+interface PhotoVerificationRefresh {
+  photoVerified: true
+}
+
+type ProfileUpdateInput = EditableProfileUpdate | PhotoVerificationRefresh
+
 interface ProfileState {
   profile: UserProfile | null
   isLoading: boolean
@@ -43,7 +49,7 @@ interface ProfileActions {
   fetchProfile: (userId: string) => Promise<UserProfile | null>
   startProfileListener: (userId: string) => void
   stopProfileListener: () => void
-  updateProfile: (partial: EditableProfileUpdate) => Promise<void>
+  updateProfile: (partial: ProfileUpdateInput) => Promise<void>
   uploadPhoto: (uri: string, index: number) => Promise<void>
   deletePhoto: (index: number) => Promise<void>
   clearError: () => void
@@ -66,6 +72,12 @@ const stopProfileSubscription = (): void => {
   profileUnsubscribe?.()
   profileUnsubscribe = null
   subscribedProfileUserId = null
+}
+
+const isPhotoVerificationRefresh = (
+  partial: ProfileUpdateInput
+): partial is PhotoVerificationRefresh => {
+  return 'photoVerified' in partial && partial.photoVerified === true
 }
 
 export const useProfileStore = create<ProfileStore>()((set, get) => ({
@@ -107,12 +119,21 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
     stopProfileSubscription()
   },
 
-  updateProfile: async (partial: EditableProfileUpdate): Promise<void> => {
+  updateProfile: async (partial: ProfileUpdateInput): Promise<void> => {
     const { profile } = get()
     const userId = useAuthStore.getState().user?.uid
 
     if (profile === null || userId === undefined) {
       set({ error: 'profile.errors.notAuthenticated' })
+      return
+    }
+
+    if (isPhotoVerificationRefresh(partial)) {
+      set({
+        profile: { ...profile, photoVerified: true },
+        isLoading: false,
+        error: null,
+      })
       return
     }
 

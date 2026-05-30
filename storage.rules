@@ -14,6 +14,16 @@ service firebase.storage {
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
+    match /users/{userId}/verification/{fileName} {
+      allow read: if false;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && fileName == 'selfie_temp.jpg'
+        && request.resource.size < 3145728
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if false;
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

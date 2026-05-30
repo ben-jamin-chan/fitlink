@@ -17,6 +17,7 @@ import type { ColorValue } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import type { CompositeNavigationProp } from '@react-navigation/native'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import Constants from 'expo-constants'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -32,6 +33,7 @@ import { Button } from '@/components/ui/Button'
 import { MultiSelect } from '@/components/ui/MultiSelect'
 import { Slider } from '@/components/ui/Slider'
 
+import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { SettingsStackParamList } from '@/app/navigation/MainTabNavigator'
 import { registerForPushNotifications } from '@/services/notifications'
 import { mapFirebaseError } from '@/utils/errorUtils'
@@ -39,9 +41,9 @@ import type { LookingFor } from '@/types/user'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
-type SettingsNavigationProp = StackNavigationProp<
-  SettingsStackParamList,
-  'Settings'
+type SettingsNavigationProp = CompositeNavigationProp<
+  StackNavigationProp<SettingsStackParamList, 'Settings'>,
+  StackNavigationProp<RootStackParamList>
 >
 
 type DiscoveryModal = 'ageRange' | 'distance' | 'genderPref' | 'lookingFor'
@@ -468,6 +470,10 @@ export default function SettingsScreen(): React.JSX.Element {
     Alert.alert(t('settings.privacy.blockedUsers'), t('settings.privacy.noBlocked'))
   }
 
+  const handleVerifyProfile = (): void => {
+    navigation.navigate('PhotoVerification')
+  }
+
   const handleUpgradePress = (): void => {
     Alert.alert(
       t('settings.subscription.title'),
@@ -670,6 +676,16 @@ export default function SettingsScreen(): React.JSX.Element {
             onPress={(): void => {
               setIsLanguageModalVisible(true)
             }}
+          />
+          <SettingsRow
+            label={t('verification.navigationTitle')}
+            value={
+              profile.photoVerified
+                ? t('profile.verified')
+                : t('profile.verifyNow')
+            }
+            icon="shield-checkmark-outline"
+            onPress={handleVerifyProfile}
           />
           <SettingsRow
             label={t('settings.account.logout')}

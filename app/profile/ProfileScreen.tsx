@@ -12,6 +12,7 @@ import type { ColorValue } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import type { CompositeNavigationProp } from '@react-navigation/native'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
@@ -27,14 +28,15 @@ import { StatsBadge } from '@/components/profile/StatsBadge'
 import { Button } from '@/components/ui/Button'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 
+import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { ProfileStackParamList } from '@/app/navigation/MainTabNavigator'
 import type { DrinkingStatus, FitnessLevel, SmokingStatus } from '@/types/user'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
-type ProfileNavigationProp = StackNavigationProp<
-  ProfileStackParamList,
-  'Profile'
+type ProfileNavigationProp = CompositeNavigationProp<
+  StackNavigationProp<ProfileStackParamList, 'Profile'>,
+  StackNavigationProp<RootStackParamList>
 >
 
 const BIO_PREVIEW_LENGTH = 200
@@ -105,7 +107,7 @@ export default function ProfileScreen(): React.JSX.Element {
   }
 
   const handleVerifyProfile = (): void => {
-    // TODO Phase 2: navigate to photo verification flow.
+    navigation.navigate('PhotoVerification')
   }
 
   const handleGetPremium = (): void => {

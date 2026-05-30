@@ -7,6 +7,7 @@
     "cancel": "Cancel",
     "done": "Done",
     "loading": "Loading...",
+    "ok": "OK",
     "retry": "Retry",
     "tryAgain": "Try Again",
     "close": "Close",
@@ -807,6 +808,47 @@
       "planName": "fitlink {{tier}}",
       "renewsOn": "Renews on {{date}}",
       "manage": "Manage Subscription"
+    }
+  },
+  "verification": {
+    "navigationTitle": "Verify Profile",
+    "instructions": {
+      "title": "Let's Verify You're Real",
+      "subtitle": "Take a selfie so we can confirm your identity matches your profile photo.",
+      "tip": {
+        "lighting": "Find a well-lit spot — natural light works best",
+        "face": "Make sure your full face is clearly visible",
+        "noGlasses": "Remove sunglasses or hats if wearing them",
+        "solo": "Only you in the frame — no group selfies"
+      },
+      "startButton": "Start Verification"
+    },
+    "camera": {
+      "permissionTitle": "Camera Access Required",
+      "permissionSubtitle": "We need camera access to take your verification selfie.",
+      "grantPermission": "Allow Camera Access",
+      "processing": "Verifying your photo…"
+    },
+    "result": {
+      "successTitle": "You're Verified!",
+      "successBody": "Your verified badge will now appear on your profile.",
+      "successButton": "Done",
+      "failureTitle": "Verification Failed",
+      "attemptCount": "Attempt {{current}} of {{max}}",
+      "limitTitle": "Daily Limit Reached",
+      "limitBody": "You've used all verification attempts for today. Please try again tomorrow.",
+      "tryAgainButton": "Try Again",
+      "reason": {
+        "noFaceDetected": "We couldn't detect a face clearly. Try better lighting and ensure your face fills the oval.",
+        "lowConfidence": "The photo quality was too low. Ensure good lighting and hold your phone steady.",
+        "multipleFaces": "Multiple faces detected. Please take a solo selfie.",
+        "profilePhotoMissing": "Your profile needs at least one photo before verifying.",
+        "profilePhotoFaceMissing": "We couldn't detect a clear face in your profile photo. Please update your profile photo and try again.",
+        "faceMismatch": "Your selfie doesn't appear to match your profile photo. Please use a current photo.",
+        "unsafeContent": "The photo was flagged by our safety system. Please try again.",
+        "dailyLimitReached": "You've reached the daily verification limit. Please try again tomorrow.",
+        "generic": "Something went wrong. Please try again."
+      }
     }
   },
   "notifications": {

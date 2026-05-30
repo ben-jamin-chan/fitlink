@@ -12,6 +12,7 @@ import BiometricPromptScreen from '@/app/auth/BiometricPromptScreen'
 import { AuthNavigator } from '@/app/navigation/AuthNavigator'
 import { MainTabNavigator } from '@/app/navigation/MainTabNavigator'
 import { OnboardingNavigator } from '@/app/onboarding/OnboardingNavigator'
+import PhotoVerificationScreen from '@/app/profile/PhotoVerificationScreen'
 import PremiumScreen from '@/app/settings/PremiumScreen'
 
 import {
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   Onboarding: undefined
   BiometricPrompt: undefined
   Premium: undefined
+  PhotoVerification: undefined
 }
 
 const Stack = createStackNavigator<RootStackParamList>()
@@ -148,6 +150,15 @@ export const RootNavigator = (): React.JSX.Element | null => {
               headerBackTitle: '',
               headerShown: true,
               title: t('subscription.screenTitle'),
+            }}
+          />
+          <Stack.Screen
+            name="PhotoVerification"
+            component={PhotoVerificationScreen}
+            options={{
+              headerBackTitle: '',
+              headerShown: true,
+              title: t('verification.navigationTitle'),
             }}
           />
         </>
