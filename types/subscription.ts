@@ -40,7 +40,7 @@ export interface TodayStats {
   distance: number                     // km
   calories: number
   workouts: WorkoutSession[]
-  updatedAt: Timestamp
+  updatedAt: Timestamp | null
   source?: FitnessTrackingSource
 }
 

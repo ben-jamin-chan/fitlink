@@ -15,3 +15,5 @@ export { createStripeCheckout } from "./createStripeCheckout";
 export { stripeWebhook } from "./stripeWebhook";
 export { recordSwipe } from "./recordSwipe";
 export { verifyProfilePhoto } from "./verifyProfilePhoto";
+export { exchangeStravaToken } from "./exchangeStravaToken";
+export { syncStravaActivity } from "./syncStravaActivity";

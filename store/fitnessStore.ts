@@ -4,6 +4,11 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { db } from '@/services/firebase/config'
+import {
+  connectStrava,
+  disconnectStrava,
+  syncStrava,
+} from '@/services/strava'
 
 import type {
   FitnessConnectionStatus,
@@ -31,6 +36,10 @@ interface FitnessActions {
   connectSource: (uid: string, source: FitnessSource) => Promise<void>
   disconnectSource: (uid: string, source: FitnessSource) => Promise<void>
   syncNow: (uid: string, source: FitnessSource) => Promise<void>
+  setConnectionStatus: (
+    source: FitnessSource,
+    status: FitnessConnectionStatus
+  ) => void
   clearError: () => void
 }
 
@@ -108,33 +117,69 @@ export const useFitnessStore = create<FitnessStore>()(
         uid: string,
         source: FitnessSource
       ): Promise<void> => {
-        void uid
-        console.warn(
-          `[fitnessStore] connectSource('${source}') called before service wiring is available.`
-        )
+        set({ isLoading: true, error: null })
+
+        try {
+          if (source === 'strava') {
+            await connectStrava(uid)
+          } else if (source === 'appleHealth') {
+            console.warn('connectSource(appleHealth) not yet implemented - Task 61')
+          } else if (source === 'googleFit') {
+            console.warn('connectSource(googleFit) not yet implemented - Task 62')
+          }
+        } finally {
+          set({ isLoading: false })
+        }
       },
 
       disconnectSource: async (
         uid: string,
         source: FitnessSource
       ): Promise<void> => {
-        void uid
-        console.warn(
-          `[fitnessStore] disconnectSource('${source}') called before service wiring is available.`
-        )
-        set((state) => ({
-          connections: {
-            ...state.connections,
-            [source]: createDisconnectedStatus(),
-          },
-        }))
+        set({ isLoading: true, error: null })
+
+        try {
+          if (source === 'strava') {
+            await disconnectStrava(uid)
+          } else if (source === 'appleHealth') {
+            console.warn(
+              'disconnectSource(appleHealth) not yet implemented - Task 61'
+            )
+          } else if (source === 'googleFit') {
+            console.warn(
+              'disconnectSource(googleFit) not yet implemented - Task 62'
+            )
+          }
+        } finally {
+          set({ isLoading: false })
+        }
       },
 
       syncNow: async (uid: string, source: FitnessSource): Promise<void> => {
-        console.warn(
-          `[fitnessStore] syncNow('${source}') called before service wiring is available.`
-        )
-        await get().fetchTodayStats(uid)
+        void uid
+        set({ isLoading: true, error: null })
+
+        try {
+          if (source === 'strava') {
+            const stats = await syncStrava()
+            set({ todayStats: stats })
+          } else if (source === 'appleHealth') {
+            console.warn('syncNow(appleHealth) not yet implemented - Task 61')
+          } else if (source === 'googleFit') {
+            console.warn('syncNow(googleFit) not yet implemented - Task 62')
+          }
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+
+      setConnectionStatus: (
+        source: FitnessSource,
+        status: FitnessConnectionStatus
+      ): void => {
+        set((state) => ({
+          connections: { ...state.connections, [source]: status },
+        }))
       },
 
       clearError: (): void => {

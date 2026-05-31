@@ -4,6 +4,57 @@
 
 ---
 
+## [Phase 2D - Task 60] - 2026-06-01
+
+### Completed
+
+- Task 60: Strava OAuth Integration
+- services/strava.ts: created - connectStrava OAuth browser flow, syncStrava callable wrapper, disconnectStrava Firestore status clear
+- functions/src/exchangeStravaToken.ts: created - 2nd gen callable, token exchange, AES-256-CBC refresh token encryption, Firestore write
+- functions/src/syncStravaActivity.ts: created - 2nd gen callable, token refresh, Strava activities fetch, today stats calculation, Firestore persist
+- store/fitnessStore.ts: setConnectionStatus action added; connectSource/disconnectSource/syncNow wired for 'strava'; appleHealth/googleFit stubs preserved
+- functions/src/index.ts: exchangeStravaToken and syncStravaActivity exports added
+- functions/.env.example: Strava client id, client secret, and STRAVA_TOKEN_ENCRYPTION_KEY placeholders added
+- types/subscription.ts: TodayStats.updatedAt now allows null for the local post-sync placeholder before Firestore serverTimestamp is fetched
+- firestore.rules: users/{uid} update rule hardened so clients cannot write Strava accessToken/refreshToken/expiresAt
+
+### Files Created / Modified
+
+- services/strava.ts: created - connectStrava, syncStrava, disconnectStrava named exports
+- functions/src/exchangeStravaToken.ts: created - onCall, auth guard, token exchange, refresh token encryption
+- functions/src/syncStravaActivity.ts: created - onCall, auth guard, token refresh, activities API fetch, stats write
+- store/fitnessStore.ts: setConnectionStatus added; strava dispatch wired in 3 actions
+- functions/src/index.ts: exchangeStravaToken and syncStravaActivity exports added
+- functions/.env.example: Strava env placeholders added
+- types/subscription.ts: TodayStats.updatedAt widened to Timestamp | null
+- firestore.rules: Strava token fields blocked from client writes while disconnect-only connected/lastSync clears remain allowed
+
+### Architecture Decisions
+
+- encryptToken/decryptToken are defined locally in each Cloud Function file - each function is self-contained and deployable independently
+- Strava refresh tokens are encrypted before every Firestore write and decrypted only inside Cloud Functions
+- disconnectStrava only updates connected/lastSync fields on the client path; raw token fields remain server-managed
+- TodayStats.updatedAt is null in the syncStrava() return value - the real timestamp is written server-side and loaded by fetchTodayStats()
+- Strava token exchange and refresh use form-encoded POST bodies with Node 18 native fetch; no node-fetch dependency added
+- Firestore rules allow client Strava writes only for disconnect semantics: connected=false and lastSync=null
+
+### Known Issues / Deferred
+
+- Strava token cleanup on disconnect deferred to Phase 3 Cloud Function trigger or explicit revocation function
+- Strava steps are always 0 because Strava activities do not provide step counts
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/
+- npm run lint passes in functions/
+- firebase emulators:exec --only firestore "node -e \"process.exit(0)\"" passes
+- Targeted checks confirm zero any in touched files, zero inline styles, zero console.log, no new Date() calls, and no Strava secret env references in client source
+
+### Next Up
+
+- Task 61: Apple Health Integration (services/healthKit.ts, hooks/useAppleHealth.ts, iOS only)
+
 ## [Phase 2D - Task 59] - 2026-05-31
 
 ### Completed

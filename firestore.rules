@@ -55,6 +55,67 @@ service cloud.firestore {
       );
     }
 
+    function fitnessTrackingBefore() {
+      return resource.data.get('fitnessTracking', {});
+    }
+
+    function fitnessTrackingAfter() {
+      return request.resource.data.get('fitnessTracking', {});
+    }
+
+    function stravaBefore() {
+      return fitnessTrackingBefore().get('strava', {});
+    }
+
+    function stravaAfter() {
+      return fitnessTrackingAfter().get('strava', {});
+    }
+
+    function hasValidFitnessTrackingMap() {
+      return fitnessTrackingBefore() is map
+             && fitnessTrackingAfter() is map;
+    }
+
+    function hasValidStravaMap() {
+      return stravaBefore() is map
+             && stravaAfter() is map;
+    }
+
+    function fitnessTrackingAffectedKeys() {
+      return fitnessTrackingAfter().diff(fitnessTrackingBefore()).affectedKeys();
+    }
+
+    function stravaAffectedKeys() {
+      return stravaAfter().diff(stravaBefore()).affectedKeys();
+    }
+
+    function isStravaClientDisconnectOnly() {
+      return stravaAffectedKeys().hasOnly(['connected', 'lastSync'])
+             && (
+               !stravaAffectedKeys().hasAny(['connected'])
+               || stravaAfter().connected == false
+             )
+             && (
+               !stravaAffectedKeys().hasAny(['lastSync'])
+               || stravaAfter().lastSync == null
+             );
+    }
+
+    function doesNotModifyServerManagedFitnessFields() {
+      return !request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(['fitnessTracking'])
+             || (
+               hasValidFitnessTrackingMap()
+               && (
+                 !fitnessTrackingAffectedKeys().hasAny(['strava'])
+                 || (
+                   hasValidStravaMap()
+                   && isStravaClientDisconnectOnly()
+                 )
+               )
+             );
+    }
+
     // Returns true if the requester is a participant in the given match
     function isMatchParticipant(matchId) {
       return request.auth.uid in
@@ -70,7 +131,10 @@ service cloud.firestore {
       allow create: if isAuthenticated()
                     && isOwner(userId)
                     && doesNotSetServerOnlyFieldsOnCreate();
-      allow update: if isAuthenticated() && isOwner(userId) && doesNotModifyServerOnlyFields();
+      allow update: if isAuthenticated()
+                    && isOwner(userId)
+                    && doesNotModifyServerOnlyFields()
+                    && doesNotModifyServerManagedFitnessFields();
       allow delete: if false; // account deletion handled by Cloud Function / auth.ts deleteAccount()
 
       // ─── /users/{userId}/dailyLikes ─────────────────────────────────────────
