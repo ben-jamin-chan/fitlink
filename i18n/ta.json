@@ -877,6 +877,41 @@
       "genericError": "Something went wrong."
     }
   },
+  "fitness": {
+    "source": {
+      "appleHealth": "Apple Health",
+      "googleFit": "Google Fit",
+      "strava": "Strava"
+    },
+    "connection": {
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "lastSync": "Last synced {{time}}",
+      "neverSynced": "Never synced"
+    },
+    "stats": {
+      "steps": "Steps",
+      "distance": "Distance",
+      "calories": "Calories",
+      "activeToday": "Active today",
+      "noData": "No activity data today"
+    },
+    "share": {
+      "label": "Show activity on profile",
+      "helper": "Your today's activity stats will be visible to your matches"
+    },
+    "actions": {
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "syncNow": "Sync Now",
+      "syncing": "Syncing..."
+    },
+    "errors": {
+      "fetchFailed": "Could not load activity data",
+      "shareFailed": "Could not update sharing settings",
+      "syncFailed": "Sync failed. Please try again."
+    }
+  },
   "errors": {
     "required": "This field is required",
     "network": "Network error. Please try again.",

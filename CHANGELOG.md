@@ -4,6 +4,44 @@
 
 ---
 
+## [Phase 2D - Task 59] - 2026-05-31
+
+### Completed
+
+- Task 59: Fitness tracking types and store
+- types/fitness.ts: created - re-exports 6 fitness types from subscription.ts; adds FitnessConnectionStatus and StravaActivity
+- store/fitnessStore.ts: created - useFitnessStore with fetchTodayStats, setShareOnProfile, stub connectSource/disconnectSource/syncNow, persist for shareOnProfile and connections
+- i18n: fitness.* namespace added to all 4 language files
+
+### Files Created / Modified
+
+- types/fitness.ts: created - canonical fitness type import point; re-exports from types/subscription.ts plus FitnessSource alias and new Task 59 types
+- store/fitnessStore.ts: created - useFitnessStore named export, Zustand + AsyncStorage persist, all 6 actions
+- i18n/en.json: fitness.* keys added (source, connection, stats, share, actions, errors)
+- i18n/my.json, zh.json, ta.json: fitness.* mirrored with English placeholders
+
+### Architecture Decisions
+
+- types/fitness.ts re-exports from types/subscription.ts rather than redefining - single source of truth, no duplication
+- FitnessSource is a re-exported alias for FitnessTrackingSource - convenience name for Tasks 60-64
+- connectSource/disconnectSource/syncNow are stubs with console.warn - wired to real services in Tasks 60-62
+- todayStats excluded from persist partialize - always fetched fresh to avoid stale-day data
+- Store actions take uid as first argument - decoupled from authStore for testability
+
+### Known Issues / Deferred
+
+- connectSource/disconnectSource/syncNow are stubs - wired in Tasks 60 (Strava), 61 (Apple Health), 62 (Google Fit)
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/ (no changes to functions)
+- Targeted checks confirm zero any, zero inline styles, zero console.log, valid i18n JSON, and expected fitness type exports
+
+### Next Up
+
+- Task 60: Strava OAuth Integration (services/strava.ts, functions/src/exchangeStravaToken.ts, functions/src/syncStravaActivity.ts)
+
 ## [Phase 2C - Task 58] - 2026-05-30
 
 ### Completed
