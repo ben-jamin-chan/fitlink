@@ -4,6 +4,50 @@
 
 ---
 
+## [Phase 2D - Task 61] - 2026-06-01
+
+### Completed
+
+- Task 61: Apple Health Integration (iOS only)
+- services/healthKit.ts: created - isAppleHealthAvailable, requestAppleHealthPermissions, fetchAppleHealthTodayStats, updateAppleHealthFirestore, setAppleHealthConnected; all exported functions guard Platform.OS !== 'ios'
+- hooks/useAppleHealth.ts: created - isConnected, todayStats, sync(), disconnect(); AppState listener for foreground auto-sync; syncInFlightRef prevents concurrent syncs
+- store/fitnessStore.ts: appleHealth branch wired in connectSource, disconnectSource, syncNow; appleHealth console.warn stubs removed
+- i18n: fitness.appleHealth.* namespace added to all 4 language files
+- react-native-health installed and app.json plugin configured with HealthKit usage descriptions
+
+### Files Created / Modified
+
+- services/healthKit.ts: created - 5 named exports, full iOS guard pattern
+- hooks/useAppleHealth.ts: created - useAppleHealth named export, AppState lifecycle, re-entrant sync guard
+- store/fitnessStore.ts: appleHealth case bodies replaced in 3 actions; Platform import added
+- services/firebase/firestore.ts: updateUserProfile input type extended for typed fitnessTracking dot-path writes
+- i18n/en.json: fitness.appleHealth.* keys added
+- i18n/my.json, zh.json, ta.json: fitness.appleHealth.* mirrored with English placeholders
+- package.json, package-lock.json: react-native-health added
+- app.json: react-native-health config plugin added with HealthKit permission strings
+
+### Architecture Decisions
+
+- HealthKit imports are isolated to services/healthKit.ts; hooks and store call only plain service functions
+- updateAppleHealthFirestore owns the Apple Health source marker and Firestore serverTimestamp write
+- HealthKit date windows are only used for read queries; Firestore timestamp writes use serverTimestamp()
+- Google Fit Task 62 console.warn stubs remain untouched by design
+
+### Known Issues / Deferred
+
+- react-native-health requires a development build; cannot be tested in Expo Go
+- npm install reported existing dependency audit findings: 17 moderate and 4 high vulnerabilities
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/
+- Targeted checks confirm Apple Health stubs removed, all HealthKit call sites guarded with Platform.OS === 'ios', TodayStats.updatedAt returns null from fetchAppleHealthTodayStats, and Firestore timestamp writes use serverTimestamp()
+
+### Next Up
+
+- Task 62: Google Fit Integration (services/googleFit.ts, hooks/useGoogleFit.ts, Android only)
+
 ## [Phase 2D - Task 60] - 2026-06-01
 
 ### Completed

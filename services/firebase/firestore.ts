@@ -18,7 +18,11 @@ import type { FieldValue } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 
 import type { Match } from '@/types/match'
-import type { PremiumStatus, PremiumTier } from '@/types/subscription'
+import type {
+  PremiumStatus,
+  PremiumTier,
+  TodayStats,
+} from '@/types/subscription'
 import type { LookingFor, UserProfile, UserStats } from '@/types/user'
 
 const FIRESTORE_WRITE_TIMEOUT_MS = 20000
@@ -82,6 +86,15 @@ interface CreateUserProfileInput {
   language: string
 }
 
+interface FitnessTodayStatsUpdateInput extends Omit<TodayStats, 'updatedAt'> {
+  updatedAt: Timestamp | FieldValue
+}
+
+interface FitnessSourceConnectionUpdateInput {
+  connected: boolean
+  lastSync: Timestamp | FieldValue | null
+}
+
 export type UserProfileUpdateInput = Partial<
   Omit<
     UserProfile,
@@ -98,6 +111,8 @@ export type UserProfileUpdateInput = Partial<
   >
 > & {
   lastActive?: UserProfile['lastActive'] | FieldValue
+  'fitnessTracking.appleHealth'?: FitnessSourceConnectionUpdateInput
+  'fitnessTracking.todayStats'?: FitnessTodayStatsUpdateInput
 }
 
 interface UserProfileDocument extends UserProfile {

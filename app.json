@@ -50,7 +50,14 @@
         "@stripe/stripe-react-native",
         {}
       ],
-      "expo-camera"
+      "expo-camera",
+      [
+        "react-native-health",
+        {
+          "NSHealthShareUsageDescription": "fitlink reads your activity to show your fitness stats to matches.",
+          "NSHealthUpdateUsageDescription": "fitlink does not write to Apple Health."
+        }
+      ]
     ]
   }
 }

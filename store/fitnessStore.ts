@@ -1,9 +1,17 @@
+import { Platform } from 'react-native'
+
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { db } from '@/services/firebase/config'
+import {
+  fetchAppleHealthTodayStats,
+  requestAppleHealthPermissions,
+  setAppleHealthConnected,
+  updateAppleHealthFirestore,
+} from '@/services/healthKit'
 import {
   connectStrava,
   disconnectStrava,
@@ -123,7 +131,22 @@ export const useFitnessStore = create<FitnessStore>()(
           if (source === 'strava') {
             await connectStrava(uid)
           } else if (source === 'appleHealth') {
-            console.warn('connectSource(appleHealth) not yet implemented - Task 61')
+            if (Platform.OS !== 'ios') {
+              return
+            }
+
+            const granted = await requestAppleHealthPermissions()
+            if (!granted) {
+              return
+            }
+
+            await setAppleHealthConnected(uid, true)
+            set((state) => ({
+              connections: {
+                ...state.connections,
+                appleHealth: { connected: true, lastSync: null },
+              },
+            }))
           } else if (source === 'googleFit') {
             console.warn('connectSource(googleFit) not yet implemented - Task 62')
           }
@@ -142,9 +165,15 @@ export const useFitnessStore = create<FitnessStore>()(
           if (source === 'strava') {
             await disconnectStrava(uid)
           } else if (source === 'appleHealth') {
-            console.warn(
-              'disconnectSource(appleHealth) not yet implemented - Task 61'
-            )
+            if (Platform.OS !== 'ios') {
+              return
+            }
+
+            await setAppleHealthConnected(uid, false)
+            get().setConnectionStatus('appleHealth', {
+              connected: false,
+              lastSync: null,
+            })
           } else if (source === 'googleFit') {
             console.warn(
               'disconnectSource(googleFit) not yet implemented - Task 62'
@@ -156,7 +185,6 @@ export const useFitnessStore = create<FitnessStore>()(
       },
 
       syncNow: async (uid: string, source: FitnessSource): Promise<void> => {
-        void uid
         set({ isLoading: true, error: null })
 
         try {
@@ -164,7 +192,18 @@ export const useFitnessStore = create<FitnessStore>()(
             const stats = await syncStrava()
             set({ todayStats: stats })
           } else if (source === 'appleHealth') {
-            console.warn('syncNow(appleHealth) not yet implemented - Task 61')
+            if (Platform.OS !== 'ios') {
+              return
+            }
+
+            const stats = await fetchAppleHealthTodayStats()
+            await updateAppleHealthFirestore(uid, {
+              steps: stats.steps,
+              distance: stats.distance,
+              calories: stats.calories,
+              workouts: stats.workouts,
+            })
+            await get().fetchTodayStats(uid)
           } else if (source === 'googleFit') {
             console.warn('syncNow(googleFit) not yet implemented - Task 62')
           }

@@ -883,6 +883,16 @@
       "googleFit": "Google Fit",
       "strava": "Strava"
     },
+    "appleHealth": {
+      "name": "Apple Health",
+      "connectPrompt": "Connect Apple Health to share your activity with matches.",
+      "permissionDenied": "Permission denied. Enable Apple Health access in your device Settings.",
+      "syncSuccess": "Apple Health synced",
+      "syncError": "Could not sync Apple Health. Please try again.",
+      "disconnectConfirmTitle": "Disconnect Apple Health?",
+      "disconnectConfirmMessage": "Your activity stats will no longer update from Apple Health.",
+      "notAvailable": "Apple Health is only available on iOS."
+    },
     "connection": {
       "connected": "Connected",
       "notConnected": "Not connected",
