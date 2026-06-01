@@ -57,7 +57,8 @@
           "NSHealthShareUsageDescription": "fitlink reads your activity to show your fitness stats to matches.",
           "NSHealthUpdateUsageDescription": "fitlink does not write to Apple Health."
         }
-      ]
+      ],
+      "react-native-google-fit"
     ]
   }
 }

@@ -112,6 +112,8 @@ export type UserProfileUpdateInput = Partial<
 > & {
   lastActive?: UserProfile['lastActive'] | FieldValue
   'fitnessTracking.appleHealth'?: FitnessSourceConnectionUpdateInput
+  'fitnessTracking.googleFit.connected'?: boolean
+  'fitnessTracking.googleFit.lastSync'?: Timestamp | FieldValue | null
   'fitnessTracking.todayStats'?: FitnessTodayStatsUpdateInput
 }
 

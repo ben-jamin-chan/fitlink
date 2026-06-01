@@ -7,6 +7,13 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { db } from '@/services/firebase/config'
 import {
+  fetchGoogleFitTodayStats,
+  isGoogleFitAvailable,
+  requestGoogleFitPermissions,
+  setGoogleFitConnected,
+  updateGoogleFitFirestore,
+} from '@/services/googleFit'
+import {
   fetchAppleHealthTodayStats,
   requestAppleHealthPermissions,
   setAppleHealthConnected,
@@ -148,7 +155,27 @@ export const useFitnessStore = create<FitnessStore>()(
               },
             }))
           } else if (source === 'googleFit') {
-            console.warn('connectSource(googleFit) not yet implemented - Task 62')
+            if (Platform.OS !== 'android' || !isGoogleFitAvailable()) {
+              return
+            }
+
+            const granted = await requestGoogleFitPermissions()
+            if (!granted) {
+              return
+            }
+
+            await setGoogleFitConnected(uid, true)
+            set((state) => ({
+              connections: {
+                ...state.connections,
+                googleFit: { connected: true, lastSync: null },
+              },
+            }))
+
+            const stats = await fetchGoogleFitTodayStats()
+            set({ todayStats: stats })
+            await updateGoogleFitFirestore(uid, stats)
+            await get().fetchTodayStats(uid)
           }
         } finally {
           set({ isLoading: false })
@@ -175,9 +202,15 @@ export const useFitnessStore = create<FitnessStore>()(
               lastSync: null,
             })
           } else if (source === 'googleFit') {
-            console.warn(
-              'disconnectSource(googleFit) not yet implemented - Task 62'
-            )
+            if (Platform.OS !== 'android') {
+              return
+            }
+
+            await setGoogleFitConnected(uid, false)
+            get().setConnectionStatus('googleFit', {
+              connected: false,
+              lastSync: null,
+            })
           }
         } finally {
           set({ isLoading: false })
@@ -205,7 +238,14 @@ export const useFitnessStore = create<FitnessStore>()(
             })
             await get().fetchTodayStats(uid)
           } else if (source === 'googleFit') {
-            console.warn('syncNow(googleFit) not yet implemented - Task 62')
+            if (Platform.OS !== 'android') {
+              return
+            }
+
+            const stats = await fetchGoogleFitTodayStats()
+            set({ todayStats: stats })
+            await updateGoogleFitFirestore(uid, stats)
+            await get().fetchTodayStats(uid)
           }
         } finally {
           set({ isLoading: false })

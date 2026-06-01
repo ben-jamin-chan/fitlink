@@ -4,6 +4,50 @@
 
 ---
 
+## [Phase 2D - Task 62] - 2026-06-01
+
+### Completed
+
+- Task 62: Google Fit Integration (Android only)
+- services/googleFit.ts: created - isGoogleFitAvailable, requestGoogleFitPermissions, fetchGoogleFitTodayStats, updateGoogleFitFirestore, setGoogleFitConnected; all exported functions guard Platform.OS !== 'android'
+- hooks/useGoogleFit.ts: created - isConnected, todayStats, sync(), disconnect(); AppState listener for foreground auto-sync; syncInFlightRef prevents concurrent syncs
+- store/fitnessStore.ts: googleFit branch wired in connectSource, disconnectSource, syncNow; googleFit console.warn stubs removed
+- i18n: fitness.googleFit.* namespace added to all 4 language files
+- react-native-google-fit installed
+
+### Files Created / Modified
+
+- services/googleFit.ts: created - 5 named exports, full Android guard pattern
+- hooks/useGoogleFit.ts: created - useGoogleFit named export, AppState lifecycle, re-entrant sync guard
+- store/fitnessStore.ts: googleFit case bodies replaced in 3 actions; Apple Health and Strava branches left unchanged
+- services/firebase/firestore.ts: updateUserProfile input type extended for typed Google Fit dot-path writes
+- i18n/en.json: fitness.googleFit.* keys added
+- i18n/my.json, zh.json, ta.json: fitness.googleFit.* mirrored with English placeholders
+- package.json, package-lock.json: react-native-google-fit added
+- app.json: react-native-google-fit config plugin added by npx expo install
+
+### Architecture Decisions
+
+- Google Fit imports and API calls are isolated to services/googleFit.ts; all public service functions return before calling the library on non-Android platforms
+- setGoogleFitConnected writes connected=false with lastSync=null to match existing Apple Health and Strava disconnect semantics
+- useGoogleFit accepts an optional uid for Task 64 compatibility, while falling back to authStore.uid to mirror useAppleHealth
+- Expo install added the react-native-google-fit config plugin; local package docs require it for Expo apps to add Android 11+ Google Fit package queries
+
+### Known Issues / Deferred
+
+- react-native-google-fit requires a development build; cannot be tested in Expo Go
+- npm install reported existing dependency audit findings: 17 moderate and 4 high vulnerabilities
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/
+- Targeted checks confirm Android guards, zero any, zero inline styles, zero console.log/console.warn, zero new Date() calls in touched task files, no relative imports, valid i18n JSON, and no functions/ diff
+
+### Next Up
+
+- Task 63: Fitness Activity Display on Profiles (TodayActivityCard, FullProfileModal, ProfileScreen, SwipeCard "Active today" badge)
+
 ## [Phase 2D - Task 61] - 2026-06-01
 
 ### Completed
