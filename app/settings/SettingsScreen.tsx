@@ -474,6 +474,10 @@ export default function SettingsScreen(): React.JSX.Element {
     navigation.navigate('PhotoVerification')
   }
 
+  const handleConnectedApps = (): void => {
+    navigation.navigate('ConnectedApps')
+  }
+
   const handleUpgradePress = (): void => {
     Alert.alert(
       t('settings.subscription.title'),
@@ -686,6 +690,11 @@ export default function SettingsScreen(): React.JSX.Element {
             }
             icon="shield-checkmark-outline"
             onPress={handleVerifyProfile}
+          />
+          <SettingsRow
+            label={t('settings.connectedApps.title')}
+            icon="link-outline"
+            onPress={handleConnectedApps}
           />
           <SettingsRow
             label={t('settings.account.logout')}

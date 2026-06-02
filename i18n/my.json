@@ -685,6 +685,12 @@
       "blockedCount": "{{count}} blocked",
       "noBlocked": "No blocked users"
     },
+    "connectedApps": {
+      "title": "Connected Apps",
+      "shareSection": "Activity Sharing",
+      "shareLabel": "Show activity on profile",
+      "shareHelper": "Your today's activity stats will be visible to your matches"
+    },
     "subscription": {
       "title": "Subscription",
       "upgrade": "Upgrade to Premium",
@@ -901,7 +907,15 @@
       "title": "Connected Apps",
       "shareToggleLabel": "Share activity on profile",
       "syncNow": "Sync Now",
-      "noSources": "No fitness apps connected. Connect one in Settings."
+      "noSources": "No fitness apps connected. Connect one in Settings.",
+      "notConnected": "Not connected",
+      "neverSynced": "Never synced",
+      "justNow": "Last synced just now",
+      "minutesAgo": "Last synced {{count}}m ago",
+      "hoursAgo": "Last synced {{count}}h ago",
+      "daysAgo": "Last synced {{count}}d ago",
+      "syncErrorTitle": "Sync failed",
+      "syncErrorMessage": "Could not sync this app. Please try again."
     },
     "appleHealth": {
       "name": "Apple Health",
@@ -923,6 +937,19 @@
       "permissionDenied": "Google Fit permission denied",
       "notAvailable": "Google Fit is not available on this device",
       "connectError": "Failed to connect Google Fit"
+    },
+    "strava": {
+      "title": "Strava",
+      "connect": "Connect",
+      "connected": "Strava Connected",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect Strava?",
+      "disconnectMessage": "Your activity stats will no longer update from Strava.",
+      "disconnectConfirm": "Disconnect",
+      "connectErrorTitle": "Could not connect Strava",
+      "connectErrorMessage": "Please try connecting Strava again.",
+      "disconnectErrorTitle": "Could not disconnect Strava",
+      "disconnectErrorMessage": "Please try disconnecting Strava again."
     },
     "connection": {
       "connected": "Connected",

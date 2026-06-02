@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 2D - Task 64] - 2026-06-02
+
+### Completed
+
+- Task 64: Connected Apps Settings Screen
+- ConnectedAppsScreen: new settings screen with platform-gated Apple Health and Google Fit sections, cross-platform Strava connect/sync/disconnect controls, per-source sync spinners, last-synced labels, and activity sharing toggle
+- MainTabNavigator: ConnectedApps added to SettingsStackParamList and registered in the Settings stack with navigator-owned title
+- SettingsScreen: Connected Apps row added to Account settings and wired to navigation.navigate('ConnectedApps')
+- i18n: settings.connectedApps.*, fitness.connectedApps sync/status keys, and fitness.strava.* keys added to all 4 language files
+
+### Files Created / Modified
+
+- app/settings/ConnectedAppsScreen.tsx: created - default-export screen, no inline styles, no direct healthKit/googleFit service imports, platform guards for native integrations
+- app/navigation/MainTabNavigator.tsx: ConnectedApps screen import, param list entry, and Settings stack registration added
+- app/settings/SettingsScreen.tsx: Connected Apps navigation row added
+- store/fitnessStore.ts: Strava disconnectSource branch now updates local connection state only, avoiding a duplicate disconnectStrava Firestore call from ConnectedAppsScreen
+- i18n/en.json: settings.connectedApps.*, fitness.connectedApps.*, and fitness.strava.* keys added
+- i18n/my.json, zh.json, ta.json: same keys mirrored with English placeholders
+
+### Architecture Decisions
+
+- Apple Health and Google Fit enable flows use fitnessStore connectSource before hook sync, while manual sync/disconnect uses useAppleHealth/useGoogleFit so hook-owned sync guards remain in control
+- Strava connect/sync/disconnect stays in services/strava.ts, with disconnect confirmation before Firestore cleanup and local store update
+- Strava disconnect order is disconnectStrava(userId) for Firestore cleanup, then disconnectSource(userId, 'strava') for Zustand state, both inside the Alert destructive confirm handler try/catch
+- ConnectedAppsScreen uses local useState only for transient button spinners; source connection and share state remain in fitnessStore
+- Last-synced formatting is display-only and uses Date.now() without creating client-side Firestore timestamps
+
+### Known Issues / Deferred
+
+- Native Apple Health and Google Fit flows require development builds and cannot be verified in Expo Go
+
+### Verification
+
+- npx tsc --noEmit passes
+- i18n JSON parses for en, my, zh, ta
+- Targeted checks confirm zero any, zero inline style={{ }}, zero console.*, and clean scoped git diff --check for Task 64 paths
+
+### Next Up
+
+- Continue Phase 2D follow-up testing in development builds for native fitness integrations
+
 ## [Phase 2D - Task 63] - 2026-06-02
 
 ### Completed

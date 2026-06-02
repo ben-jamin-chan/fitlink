@@ -13,6 +13,7 @@ import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
 import EditProfileScreen from '@/app/profile/EditProfileScreen'
 import ProfileScreen from '@/app/profile/ProfileScreen'
+import ConnectedAppsScreen from '@/app/settings/ConnectedAppsScreen'
 import DeleteAccountScreen from '@/app/settings/DeleteAccountScreen'
 import SettingsScreen from '@/app/settings/SettingsScreen'
 
@@ -32,6 +33,7 @@ export type ProfileStackParamList = {
 export type SettingsStackParamList = {
   Settings: undefined
   DeleteAccount: undefined
+  ConnectedApps: undefined
 }
 
 export type MainTabParamList = {
@@ -104,15 +106,28 @@ const ProfileStackNavigator = (): React.JSX.Element => (
   </ProfileStack.Navigator>
 )
 
-const SettingsStackNavigator = (): React.JSX.Element => (
-  <SettingsStack.Navigator screenOptions={settingsStackScreenOptions}>
-    <SettingsStack.Screen name="Settings" component={SettingsScreen} />
-    <SettingsStack.Screen
-      name="DeleteAccount"
-      component={DeleteAccountScreen}
-    />
-  </SettingsStack.Navigator>
-)
+const SettingsStackNavigator = (): React.JSX.Element => {
+  const { t } = useTranslation()
+
+  return (
+    <SettingsStack.Navigator screenOptions={settingsStackScreenOptions}>
+      <SettingsStack.Screen name="Settings" component={SettingsScreen} />
+      <SettingsStack.Screen
+        name="DeleteAccount"
+        component={DeleteAccountScreen}
+      />
+      <SettingsStack.Screen
+        name="ConnectedApps"
+        component={ConnectedAppsScreen}
+        options={{
+          headerBackTitle: '',
+          headerShown: true,
+          title: t('settings.connectedApps.title'),
+        }}
+      />
+    </SettingsStack.Navigator>
+  )
+}
 
 const SettingsPlaceholder = (): React.JSX.Element => {
   const { t } = useTranslation()

@@ -21,7 +21,6 @@ import {
 } from '@/services/healthKit'
 import {
   connectStrava,
-  disconnectStrava,
   syncStrava,
 } from '@/services/strava'
 
@@ -190,7 +189,10 @@ export const useFitnessStore = create<FitnessStore>()(
 
         try {
           if (source === 'strava') {
-            await disconnectStrava(uid)
+            get().setConnectionStatus('strava', {
+              connected: false,
+              lastSync: null,
+            })
           } else if (source === 'appleHealth') {
             if (Platform.OS !== 'ios') {
               return
