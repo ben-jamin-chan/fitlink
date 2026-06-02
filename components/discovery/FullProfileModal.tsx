@@ -31,8 +31,10 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { ActivityBadge } from '@/components/discovery/ActivityBadge'
 import { PhotoViewer } from '@/components/discovery/PhotoViewer'
 import { ProfileSection } from '@/components/profile/ProfileSection'
+import { TodayActivityCard } from '@/components/profile/TodayActivityCard'
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
+import type { FitnessSource } from '@/types/fitness'
 import type { LookingFor, UserProfile } from '@/types/user'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
@@ -126,6 +128,28 @@ const computeSharedInterests = (
 
 const getLookingForLabel = (value: LookingFor, t: TFunction): string => {
   return t(`profile.lookingFor.${value}`)
+}
+
+const resolveActiveSource = (
+  fitnessTracking: UserProfile['fitnessTracking'],
+): FitnessSource | null => {
+  if (fitnessTracking === undefined) {
+    return null
+  }
+
+  if (fitnessTracking.appleHealth?.connected === true) {
+    return 'appleHealth'
+  }
+
+  if (fitnessTracking.googleFit?.connected === true) {
+    return 'googleFit'
+  }
+
+  if (fitnessTracking.strava?.connected === true) {
+    return 'strava'
+  }
+
+  return null
 }
 
 export const FullProfileModal = ({
@@ -536,6 +560,40 @@ export const FullProfileModal = ({
                   </>
                 )}
               </ProfileSection>
+
+              {(() => {
+                const fitnessTracking = profile.fitnessTracking
+
+                if (fitnessTracking?.shareOnProfile !== true) {
+                  return null
+                }
+
+                const todayStats = fitnessTracking.todayStats ?? null
+
+                if (todayStats === null || todayStats.updatedAt === null) {
+                  return null
+                }
+
+                const ageMs = Date.now() - todayStats.updatedAt.toMillis()
+
+                if (ageMs > ONE_HOUR_IN_MS * HOURS_IN_DAY) {
+                  return null
+                }
+
+                const activeSource = resolveActiveSource(fitnessTracking)
+
+                if (activeSource === null) {
+                  return null
+                }
+
+                return (
+                  <TodayActivityCard
+                    stats={todayStats}
+                    source={activeSource}
+                    isOwn={false}
+                  />
+                )
+              })()}
 
               <View style={styles.actionBarSpacer} />
             </ScrollView>

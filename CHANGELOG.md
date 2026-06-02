@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 2D - Task 63] - 2026-06-02
+
+### Completed
+
+- Task 63: Fitness activity display on profiles
+- TodayActivityCard: new named-export presentational component - steps, calories, distance row, latest workout row, source label, last-updated relative timestamp, own-profile detail stub
+- FullProfileModal: "Today's Activity" section added after "What You Have in Common"; gated on shareOnProfile === true and updatedAt within 24 hours
+- ProfileScreen: "Today's Activity" card visible for own user when stats and a connected source exist; "Connected Apps" section with share toggle and per-source Sync Now links
+- SwipeCard: "Active today" chip badge derived inline from UserProfile.fitnessTracking; shown when shareOnProfile === true and updatedAt is within 24 hours
+- i18n: fitness.activity.* and fitness.connectedApps.* keys added to all 4 language files
+
+### Files Created / Modified
+
+- components/profile/TodayActivityCard.tsx: created - named export, no store imports, no platform-specific imports, typed styles
+- components/discovery/FullProfileModal.tsx: Today's Activity section added with share and freshness guard logic
+- app/profile/ProfileScreen.tsx: TodayActivityCard + Connected Apps section with share toggle, green connected-source dots, and Sync Now handlers
+- components/discovery/SwipeCard.tsx: isActiveTodayVisible flag + Active today badge
+- i18n/en.json: fitness.activity.* and fitness.connectedApps.* added
+- i18n/my.json, zh.json, ta.json: same keys mirrored with English placeholders
+
+### Architecture Decisions
+
+- TodayActivityCard stays presentational and receives stats/source through props; ProfileScreen reads own data from fitnessStore and FullProfileModal/SwipeCard read candidate data from UserProfile.fitnessTracking
+- ProfileScreen triggers fetchTodayStats(userId) when a logged-in uid is available so the own-profile surface can display fresh Firestore-backed stats
+- Active source priority follows the task order: appleHealth, then googleFit, then strava
+- The own-profile tap interaction is an i18n-backed Alert stub until Task 64 builds the full connected-apps settings surface
+
+### Known Issues / Deferred
+
+- Connected Apps management remains a compact profile row in this task; the full connect/disconnect/settings screen is Task 64
+
+### Verification
+
+- npx tsc --noEmit passes
+- npx tsc --noEmit passes in functions/
+- Targeted checks confirm valid i18n JSON, zero any, zero inline style={{ }}, zero console.* in touched UI files, and clean scoped git diff --check for Task 63 paths
+
+### Next Up
+
+- Task 64: Connected Apps Settings Screen (app/settings/ConnectedAppsScreen.tsx - full connect/disconnect/sync UI per platform, share toggle, navigation from SettingsScreen)
+
 ## [Phase 2D - Task 62] - 2026-06-01
 
 ### Completed

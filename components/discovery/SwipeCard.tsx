@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native'
+import type { TextStyle, ViewStyle } from 'react-native'
 
 import * as Haptics from 'expo-haptics'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -211,6 +212,21 @@ export const SwipeCard = ({
 
   const photoUri = user.photos[currentPhotoIndex] ?? user.photos[0]
   const activeLabel = getActiveLabel()
+  const isActiveTodayVisible: boolean = (() => {
+    const fitnessTracking = user.fitnessTracking
+
+    if (fitnessTracking?.shareOnProfile !== true) {
+      return false
+    }
+
+    const updatedAt = fitnessTracking.todayStats?.updatedAt ?? null
+
+    if (updatedAt === null) {
+      return false
+    }
+
+    return Date.now() - updatedAt.toMillis() <= ONE_HOUR_IN_MS * HOURS_IN_DAY
+  })()
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -265,6 +281,13 @@ export const SwipeCard = ({
               {user.firstName}, {user.age}
             </Text>
             <VerifiedBadge visible={user.photoVerified} size="sm" />
+            {isActiveTodayVisible && (
+              <View style={styles.activeTodayBadge}>
+                <Text style={styles.activeTodayText}>
+                  {t('fitness.activity.activeTodayBadge')}
+                </Text>
+              </View>
+            )}
           </View>
           <Text style={styles.distanceText}>{activeLabel}</Text>
           <Text style={styles.cityText}>{user.location.city}</Text>
@@ -285,6 +308,18 @@ export const SwipeCard = ({
 }
 
 const styles = StyleSheet.create({
+  activeTodayBadge: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    marginLeft: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs / 2,
+  } as ViewStyle,
+  activeTodayText: {
+    color: colors.white,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.semibold,
+  } as TextStyle,
   badgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',

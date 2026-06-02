@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   Image,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
-import type { ColorValue } from 'react-native'
+import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
@@ -19,18 +20,21 @@ import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAuthStore } from '@/store/authStore'
+import { useFitnessStore } from '@/store/fitnessStore'
 import { useProfileStore } from '@/store/profileStore'
 
 import { ActivityChip } from '@/components/profile/ActivityChip'
 import { InfoCard, InfoRow } from '@/components/profile/InfoCard'
 import { PhotoGrid } from '@/components/profile/PhotoGrid'
 import { StatsBadge } from '@/components/profile/StatsBadge'
+import { TodayActivityCard } from '@/components/profile/TodayActivityCard'
 import { Button } from '@/components/ui/Button'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { ProfileStackParamList } from '@/app/navigation/MainTabNavigator'
+import type { FitnessSource } from '@/types/fitness'
 import type { DrinkingStatus, FitnessLevel, SmokingStatus } from '@/types/user'
 
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
@@ -48,6 +52,10 @@ const HERO_GRADIENT_COLORS: [ColorValue, ColorValue] = [
   colors.transparent,
   HERO_GRADIENT_END,
 ]
+const SWITCH_TRACK_COLORS: { false: ColorValue; true: ColorValue } = {
+  false: colors.gray[400],
+  true: colors.primary,
+}
 
 const editHitSlop = {
   bottom: spacing.sm,
@@ -89,7 +97,23 @@ export default function ProfileScreen(): React.JSX.Element {
   const isLoading = useProfileStore((state) => state.isLoading)
   const error = useProfileStore((state) => state.error)
   const fetchProfile = useProfileStore((state) => state.fetchProfile)
+  const {
+    connections,
+    fetchTodayStats,
+    setShareOnProfile,
+    shareOnProfile,
+    syncNow,
+    todayStats,
+  } = useFitnessStore()
   const [bioExpanded, setBioExpanded] = useState(false)
+
+  useEffect(() => {
+    if (userId === undefined) {
+      return
+    }
+
+    void fetchTodayStats(userId)
+  }, [fetchTodayStats, userId])
 
   const handleEditProfile = (): void => {
     navigation.navigate('EditProfile')
@@ -115,6 +139,38 @@ export default function ProfileScreen(): React.JSX.Element {
     // TODO Phase 2: navigate to PremiumScreen.
   }
 
+  const handleShareOnProfileChange = (enabled: boolean): void => {
+    if (userId === undefined) {
+      return
+    }
+
+    void setShareOnProfile(userId, enabled)
+  }
+
+  const handleAppleHealthSync = (): void => {
+    if (userId === undefined) {
+      return
+    }
+
+    void syncNow(userId, 'appleHealth')
+  }
+
+  const handleGoogleFitSync = (): void => {
+    if (userId === undefined) {
+      return
+    }
+
+    void syncNow(userId, 'googleFit')
+  }
+
+  const handleStravaSync = (): void => {
+    if (userId === undefined) {
+      return
+    }
+
+    void syncNow(userId, 'strava')
+  }
+
   if (error !== null && profile === null && !isLoading) {
     return (
       <SafeAreaView style={styles.errorContainer}>
@@ -134,6 +190,18 @@ export default function ProfileScreen(): React.JSX.Element {
     return <LoadingOverlay visible={true} />
   }
 
+  const ownActiveSource: FitnessSource | null = connections.appleHealth
+    .connected
+    ? 'appleHealth'
+    : connections.googleFit.connected
+      ? 'googleFit'
+      : connections.strava.connected
+        ? 'strava'
+        : null
+  const hasConnectedSource =
+    connections.appleHealth.connected ||
+    connections.googleFit.connected ||
+    connections.strava.connected
   const primaryPhoto = profile.photos[0]
   const daysActive = getDaysActiveValue(
     profile.createdAt,
@@ -219,6 +287,86 @@ export default function ProfileScreen(): React.JSX.Element {
             />
             <View style={styles.statsDivider} />
             <StatsBadge value={daysActive} label={t('profile.daysActive')} />
+          </View>
+
+          {todayStats !== null && ownActiveSource !== null && (
+            <TodayActivityCard
+              stats={todayStats}
+              source={ownActiveSource}
+              isOwn={true}
+            />
+          )}
+
+          <View style={styles.connectedAppsSection}>
+            <Text style={styles.connectedAppsTitle}>
+              {t('fitness.connectedApps.title')}
+            </Text>
+
+            <View style={styles.shareToggleRow}>
+              <Text style={styles.shareToggleLabel}>
+                {t('fitness.connectedApps.shareToggleLabel')}
+              </Text>
+              <Switch
+                value={shareOnProfile}
+                onValueChange={handleShareOnProfileChange}
+                trackColor={SWITCH_TRACK_COLORS}
+                thumbColor={colors.white}
+              />
+            </View>
+
+            {connections.appleHealth.connected && (
+              <View style={styles.connectedSourceRow}>
+                <View style={styles.connectedSourceLabelRow}>
+                  <View style={styles.connectedSourceDot} />
+                  <Text style={styles.connectedSourceName}>
+                    {t('fitness.source.appleHealth')}
+                  </Text>
+                </View>
+                <Text
+                  style={styles.syncNowButton}
+                  onPress={handleAppleHealthSync}
+                >
+                  {t('fitness.connectedApps.syncNow')}
+                </Text>
+              </View>
+            )}
+
+            {connections.googleFit.connected && (
+              <View style={styles.connectedSourceRow}>
+                <View style={styles.connectedSourceLabelRow}>
+                  <View style={styles.connectedSourceDot} />
+                  <Text style={styles.connectedSourceName}>
+                    {t('fitness.source.googleFit')}
+                  </Text>
+                </View>
+                <Text
+                  style={styles.syncNowButton}
+                  onPress={handleGoogleFitSync}
+                >
+                  {t('fitness.connectedApps.syncNow')}
+                </Text>
+              </View>
+            )}
+
+            {connections.strava.connected && (
+              <View style={styles.connectedSourceRow}>
+                <View style={styles.connectedSourceLabelRow}>
+                  <View style={styles.connectedSourceDot} />
+                  <Text style={styles.connectedSourceName}>
+                    {t('fitness.source.strava')}
+                  </Text>
+                </View>
+                <Text style={styles.syncNowButton} onPress={handleStravaSync}>
+                  {t('fitness.connectedApps.syncNow')}
+                </Text>
+              </View>
+            )}
+
+            {!hasConnectedSource && (
+              <Text style={styles.noSourcesText}>
+                {t('fitness.connectedApps.noSources')}
+              </Text>
+            )}
           </View>
 
           <View style={styles.photoGridContainer}>
@@ -387,6 +535,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
   },
+  connectedAppsSection: {
+    backgroundColor: colors.surface,
+    borderColor: colors.gray[200],
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    marginBottom: spacing.md,
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  } as ViewStyle,
+  connectedAppsTitle: {
+    color: colors.gray[800],
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    marginBottom: spacing.sm,
+  } as TextStyle,
+  connectedSourceDot: {
+    backgroundColor: colors.online,
+    borderRadius: borderRadius.full,
+    height: spacing.sm,
+    width: spacing.sm,
+  } as ViewStyle,
+  connectedSourceLabelRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+  } as ViewStyle,
+  connectedSourceName: {
+    color: colors.gray[800],
+    fontSize: typography.sizes.sm,
+  } as TextStyle,
+  connectedSourceRow: {
+    alignItems: 'center',
+    borderTopColor: colors.gray[200],
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.xs,
+  } as ViewStyle,
   emptyValue: {
     color: colors.gray[500],
     fontSize: typography.sizes.sm,
@@ -482,6 +669,11 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semibold,
   },
+  noSourcesText: {
+    color: colors.gray[600],
+    fontSize: typography.sizes.sm,
+    marginTop: spacing.xs,
+  } as TextStyle,
   retryButton: {
     width: '100%',
   },
@@ -511,6 +703,18 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
   },
+  shareToggleLabel: {
+    color: colors.gray[800],
+    flex: 1,
+    fontSize: typography.sizes.sm,
+  } as TextStyle,
+  shareToggleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+    paddingVertical: spacing.xs,
+  } as ViewStyle,
   statsDivider: {
     alignSelf: 'center',
     backgroundColor: colors.gray[200],
@@ -525,6 +729,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: spacing.md,
   },
+  syncNowButton: {
+    color: colors.primary,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  } as TextStyle,
   verificationCard: {
     backgroundColor: colors.surface,
     borderColor: colors.secondary,

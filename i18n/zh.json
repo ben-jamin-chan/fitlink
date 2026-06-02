@@ -883,6 +883,26 @@
       "googleFit": "Google Fit",
       "strava": "Strava"
     },
+    "activity": {
+      "sectionTitle": "Today's Activity",
+      "steps": "Steps",
+      "calories": "Cal",
+      "distanceKm": "km",
+      "workoutDuration": "{{count}} min",
+      "workoutSummary": "{{type}} - {{duration}}",
+      "justSynced": "Just synced",
+      "updatedMinutesAgo": "Updated {{count}}m ago",
+      "updatedHoursAgo": "Updated {{count}}h ago",
+      "activeTodayBadge": "Active today",
+      "detailTitle": "Activity breakdown",
+      "detailComingSoon": "Detailed activity breakdown is coming soon."
+    },
+    "connectedApps": {
+      "title": "Connected Apps",
+      "shareToggleLabel": "Share activity on profile",
+      "syncNow": "Sync Now",
+      "noSources": "No fitness apps connected. Connect one in Settings."
+    },
     "appleHealth": {
       "name": "Apple Health",
       "connectPrompt": "Connect Apple Health to share your activity with matches.",
