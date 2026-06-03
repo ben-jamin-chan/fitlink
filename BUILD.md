@@ -257,7 +257,7 @@ The following native modules **cannot** be tested in Expo Go. A development buil
 | Module | Feature |
 |---|---|
 | `@invertase/react-native-apple-authentication` | Apple Sign-In (Task 66) |
-| `@react-native-google-signin/google-signin` | Google Sign-In (Task 65) |
+| `expo-auth-session` | Google Sign-In (Task 65) |
 | `@react-native-firebase/crashlytics` | Error reporting (Task 67) |
 
 ### Verifying Crashlytics

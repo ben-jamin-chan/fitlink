@@ -9,15 +9,15 @@
 ### Completed
 
 - Task 67: Firebase Crashlytics integration
-- services/crashlytics.ts: logError, setUser, and log named exports added; all calls are wrapped in try/catch so Crashlytics cannot interrupt app flows
+- services/crashlytics.ts: logError, setUser, and log named exports added; native module loading and calls are wrapped in try/catch so Crashlytics cannot interrupt app flows
 - ErrorBoundary.tsx: console.error calls replaced with logError(error, { componentStack })
 - authStore.ts: setCrashlyticsUser called on setUser (uid) and logout ('')
 - app.json: @react-native-firebase/app and @react-native-firebase/crashlytics plugins appended
-- BUILD.md: native module table and Crashlytics verification steps documented
+- BUILD.md: native module table and Crashlytics verification steps documented; Google Sign-In row names the actual expo-auth-session dependency
 
 ### Files Created / Modified
 
-- services/crashlytics.ts: created - sole client import point for @react-native-firebase/crashlytics
+- services/crashlytics.ts: created - sole client boundary for @react-native-firebase/crashlytics with lazy native module resolution
 - components/ui/ErrorBoundary.tsx: componentDidCatch now records errors through the Crashlytics wrapper
 - store/authStore.ts: setCrashlyticsUser added to setUser and logout actions
 - app.json: two @react-native-firebase plugin entries appended to plugins array
