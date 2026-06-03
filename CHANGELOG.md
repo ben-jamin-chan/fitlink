@@ -4,6 +4,48 @@
 
 ---
 
+## [Phase 2E - Task 67] - 2026-06-03
+
+### Completed
+
+- Task 67: Firebase Crashlytics integration
+- services/crashlytics.ts: logError, setUser, and log named exports added; all calls are wrapped in try/catch so Crashlytics cannot interrupt app flows
+- ErrorBoundary.tsx: console.error calls replaced with logError(error, { componentStack })
+- authStore.ts: setCrashlyticsUser called on setUser (uid) and logout ('')
+- app.json: @react-native-firebase/app and @react-native-firebase/crashlytics plugins appended
+- BUILD.md: native module table and Crashlytics verification steps documented
+
+### Files Created / Modified
+
+- services/crashlytics.ts: created - sole client import point for @react-native-firebase/crashlytics
+- components/ui/ErrorBoundary.tsx: componentDidCatch now records errors through the Crashlytics wrapper
+- store/authStore.ts: setCrashlyticsUser added to setUser and logout actions
+- app.json: two @react-native-firebase plugin entries appended to plugins array
+- package.json, package-lock.json: @react-native-firebase/app and @react-native-firebase/crashlytics installed via npx expo install
+- BUILD.md: "Native Modules - Development Build Required" section appended
+
+### Architecture Decisions
+
+- Crashlytics native imports are isolated to services/crashlytics.ts; app code imports only the local wrapper
+- Every Crashlytics wrapper swallows SDK errors to keep auth and error-boundary flows non-blocking
+- setCrashlyticsUser import alias avoids shadowing the existing authStore setUser action
+
+### Known Issues / Deferred
+
+- Crashlytics requires a development build and cannot be verified in Expo Go
+- Live crash dashboard verification is deferred to development-build testing
+- npx expo install completed but repeated the existing Apple authentication config-plugin warning
+
+### Verification
+
+- npx tsc --noEmit passes
+- Targeted checks confirm no console calls, no any, no inline style={{ }}, and no direct @react-native-firebase/crashlytics imports outside services/crashlytics.ts in touched client paths
+- app.json, package.json, and package-lock.json parse successfully
+
+### Next Up
+
+- Task 68: Update Firestore Security Rules for Phase 2
+
 ## [Phase 2E - Task 66] - 2026-06-03
 
 ### Completed

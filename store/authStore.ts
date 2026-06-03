@@ -8,6 +8,7 @@ import {
   signOut as firebaseSignOut,
   subscribeToAuthState,
 } from '@/services/firebase/auth'
+import { setUser as setCrashlyticsUser } from '@/services/crashlytics'
 import { unregisterPushNotifications } from '@/services/notifications'
 import { useProfileStore } from '@/store/profileStore'
 
@@ -56,6 +57,11 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: user !== null,
           isLoading: false,
         })
+        if (user !== null) {
+          setCrashlyticsUser(user.uid)
+        } else {
+          setCrashlyticsUser('')
+        }
       },
 
       setIsLoading: (loading: boolean): void => {
@@ -96,6 +102,7 @@ export const useAuthStore = create<AuthState>()(
             hasCompletedOnboarding: false,
             error: null,
           })
+          setCrashlyticsUser('')
         } catch (error: unknown) {
           const errorCode = isAppError(error) ? error.code : 'errors.generic'
           set({ error: errorCode })

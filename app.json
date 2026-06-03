@@ -62,7 +62,9 @@
           "NSHealthUpdateUsageDescription": "fitlink does not write to Apple Health."
         }
       ],
-      "react-native-google-fit"
+      "react-native-google-fit",
+      "@react-native-firebase/app",
+      "@react-native-firebase/crashlytics"
     ]
   }
 }

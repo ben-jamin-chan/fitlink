@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 
 import i18n from '@/i18n'
+import { logError } from '@/services/crashlytics'
 
 import { colors, spacing, typography } from '@/constants/theme'
 
@@ -41,9 +42,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    // TODO Phase 2: replace with Firebase Crashlytics.recordError(error).
-    console.error('[ErrorBoundary] Caught error:', error)
-    console.error('[ErrorBoundary] Component stack:', info.componentStack)
+    logError(error, {
+      componentStack: info.componentStack ?? '',
+    })
   }
 
   handleReset = (): void => {

@@ -246,3 +246,31 @@ Emulators used:
 - [ ] Tag the release commit: `git tag v1.1.0 && git push --tags`
 - [ ] Build production: `eas build --profile production --platform all`
 - [ ] Submit: `eas submit --profile production --platform all`
+
+---
+
+## Native Modules — Development Build Required
+
+The following native modules **cannot** be tested in Expo Go. A development build
+(`eas build --profile development`) is required:
+
+| Module | Feature |
+|---|---|
+| `@invertase/react-native-apple-authentication` | Apple Sign-In (Task 66) |
+| `@react-native-google-signin/google-signin` | Google Sign-In (Task 65) |
+| `@react-native-firebase/crashlytics` | Error reporting (Task 67) |
+
+### Verifying Crashlytics
+
+1. Trigger a test crash from the ErrorBoundary in a development build:
+   ```typescript
+   // Temporary - remove after verifying
+   crashlytics().crash()
+   ```
+2. Reopen the app. The crash report is uploaded on next launch.
+3. Check Firebase Console → Crashlytics → Issues within ~5 minutes.
+
+### Crashlytics in Production
+
+Crashlytics is automatically enabled in production EAS builds. No additional configuration
+is required beyond the `app.json` plugin entries added in Task 67.
