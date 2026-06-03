@@ -67,6 +67,11 @@
     },
     "google": {
       "missingToken": "Google sign-in failed. Please try again."
+    },
+    "apple": {
+      "missingToken": "Apple Sign-In failed: missing token. Please try again.",
+      "cancelledByUser": "Apple Sign-In was cancelled.",
+      "failed": "Apple Sign-In failed. Please try again."
     }
   },
   "biometric": {

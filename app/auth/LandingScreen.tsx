@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import type { TextStyle, ViewStyle } from 'react-native'
 
+import appleAuth from '@invertase/react-native-apple-authentication'
 import { useNavigation } from '@react-navigation/native'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import * as Google from 'expo-auth-session/providers/google'
@@ -21,7 +22,7 @@ import { useAuthStore } from '@/store/authStore'
 import { Button } from '@/components/ui/Button'
 
 import {
-  signInWithApple,
+  signInWithAppleCredential,
   signInWithGoogleCredential,
 } from '@/services/firebase/auth'
 
@@ -39,9 +40,36 @@ type LandingNavProp = StackNavigationProp<AuthStackParamList, 'Landing'>
 const TERMS_URL = 'https://example.com/terms'
 const PRIVACY_URL = 'https://example.com/privacy'
 
+const getErrorCode = (error: unknown): string | null => {
+  if (typeof error !== 'object' || error === null || !('code' in error)) {
+    return null
+  }
+
+  return typeof error.code === 'string' ? error.code : null
+}
+
+const isErrorTranslationKey = (code: string): boolean => {
+  return code.startsWith('auth.') || code.startsWith('errors.')
+}
+
+const getAuthErrorKey = (error: unknown): string => {
+  const code = getErrorCode(error)
+
+  if (code !== null && isErrorTranslationKey(code)) {
+    return code
+  }
+
+  return mapFirebaseError(error)
+}
+
+const isAppleCancelError = (error: unknown): boolean => {
+  return getErrorCode(error) === appleAuth.Error.CANCELED
+}
+
 export default function LandingScreen(): React.JSX.Element {
   const { t } = useTranslation()
   const navigation = useNavigation<LandingNavProp>()
+  const isLoading = useAuthStore((state) => state.isLoading)
   const setError = useAuthStore((state) => state.setError)
   const setIsLoading = useAuthStore((state) => state.setIsLoading)
   const setUser = useAuthStore((state) => state.setUser)
@@ -95,14 +123,35 @@ export default function LandingScreen(): React.JSX.Element {
     void promptAsync()
   }
 
-  const handleAppleSignIn = async (): Promise<void> => {
+  const handleApplePress = async (): Promise<void> => {
+    if (!appleAuth.isSupported) {
+      return
+    }
+
     setAppleLoading(true)
+    setIsLoading(true)
 
     try {
-      await signInWithApple()
-    } catch (err: unknown) {
-      setError(mapFirebaseError(err))
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      })
+
+      const { identityToken, nonce } = appleAuthRequestResponse
+
+      if (!identityToken || nonce.length === 0) {
+        setError('auth.apple.missingToken')
+        return
+      }
+
+      const credential = await signInWithAppleCredential(identityToken, nonce)
+      setUser(credential.user)
+    } catch (error: unknown) {
+      if (!isAppleCancelError(error)) {
+        setError(getAuthErrorKey(error))
+      }
     } finally {
+      setIsLoading(false)
       setAppleLoading(false)
     }
   }
@@ -152,9 +201,10 @@ export default function LandingScreen(): React.JSX.Element {
             <View style={styles.gap} />
             <Button
               label={t('auth.landing.continueApple')}
-              onPress={handleAppleSignIn}
+              onPress={handleApplePress}
               variant="outline"
               loading={appleLoading}
+              disabled={!appleAuth.isSupported || isLoading || appleLoading}
             />
           </>
         )}

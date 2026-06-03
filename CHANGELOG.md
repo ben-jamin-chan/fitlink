@@ -4,6 +4,46 @@
 
 ---
 
+## [Phase 2E - Task 66] - 2026-06-03
+
+### Completed
+
+- Task 66: Apple Sign-In production flow - signInWithApple stub replaced with @invertase/react-native-apple-authentication
+- services/firebase/auth.ts: signInWithApple stub deleted; signInWithAppleCredential(identityToken, nonce) added as named export
+- LandingScreen.tsx: appleAuth.performRequest wired in handleApplePress; appleAuth.isSupported guard added; user-cancel suppressed; button wired to handleApplePress
+- i18n: auth.apple.missingToken, cancelledByUser, failed added to all 4 language files
+- app.json: @invertase/react-native-apple-authentication config plugin restored as a single plugins entry
+
+### Files Created / Modified
+
+- services/firebase/auth.ts: signInWithApple removed, signInWithAppleCredential(identityToken, nonce) added
+- app/auth/LandingScreen.tsx: handleApplePress added; Apple button wired; appleAuth default import added
+- i18n/en.json: auth.apple.* keys added
+- i18n/my.json, zh.json, ta.json: auth.apple.* mirrored with English placeholders
+- app.json: Apple authentication config plugin added once
+
+### Architecture Decisions
+
+- LandingScreen owns appleAuth.performRequest; auth.ts receives only resolved identityToken and nonce strings - mirrors Task 65 Google split
+- appleAuth.Error.CANCELED used for user-cancel suppression
+- No manual nonce hashing - @invertase library handles nonce lifecycle internally
+- OAuthProvider from firebase/auth; no new package dependency
+- BUILD.md already documents that Apple Sign-In requires a development build and cannot be tested in Expo Go
+
+### Known Issues / Deferred
+
+- Apple Sign-In requires a development build; cannot be verified in Expo Go
+- Task 67 (Crashlytics) will replace console.error in remaining auth error paths
+
+### Verification
+
+- npx tsc --noEmit passes
+- Targeted checks: signInWithApple absent from client source, zero any, zero inline style={{ }}, zero console.log in touched files, valid i18n JSON
+
+### Next Up
+
+- Task 67: Firebase Crashlytics Integration (services/crashlytics.ts, ErrorBoundary, authStore setUser)
+
 ## [Phase 2E - Task 65] - 2026-06-03
 
 ### Completed

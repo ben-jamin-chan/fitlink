@@ -10,6 +10,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  OAuthProvider,
   onAuthStateChanged,
   signInWithCredential,
   signInWithEmailAndPassword,
@@ -114,13 +115,25 @@ export const signInWithGoogleCredential = async (
   }
 }
 
-export const signInWithApple = async (): Promise<UserCredential> => {
-  // TODO: Task 11 - implement with @invertase/react-native-apple-authentication.
-  // Requires development build, not available in Expo Go.
-  throw {
-    code: 'errors.generic',
-    raw: 'Apple Sign-In not yet implemented',
-  } satisfies AppError
+/**
+ * Exchanges an Apple identity token and raw nonce for a Firebase credential.
+ * LandingScreen owns the native Apple request; this service stays hook-free.
+ */
+export const signInWithAppleCredential = async (
+  identityToken: string,
+  nonce: string
+): Promise<UserCredential> => {
+  try {
+    const provider = new OAuthProvider('apple.com')
+    const credential = provider.credential({
+      idToken: identityToken,
+      rawNonce: nonce,
+    })
+
+    return await signInWithCredential(auth, credential)
+  } catch (error) {
+    throw toAppError(error)
+  }
 }
 
 export const signOut = async (): Promise<void> => {
