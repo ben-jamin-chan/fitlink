@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   Linking,
@@ -8,22 +8,31 @@ import {
   Text,
   View,
 } from 'react-native'
+import type { TextStyle, ViewStyle } from 'react-native'
 
 import { useNavigation } from '@react-navigation/native'
-import { StackNavigationProp } from '@react-navigation/stack'
+import type { StackNavigationProp } from '@react-navigation/stack'
+import * as Google from 'expo-auth-session/providers/google'
+import * as WebBrowser from 'expo-web-browser'
 import { useTranslation } from 'react-i18next'
 
 import { useAuthStore } from '@/store/authStore'
 
 import { Button } from '@/components/ui/Button'
 
-import { signInWithApple, signInWithGoogle } from '@/services/firebase/auth'
+import {
+  signInWithApple,
+  signInWithGoogleCredential,
+} from '@/services/firebase/auth'
 
 import { mapFirebaseError } from '@/utils/errorUtils'
 
 import type { AuthStackParamList } from '@/app/navigation/AuthNavigator'
 
 import { colors, spacing, typography } from '@/constants/theme'
+
+// Required by expo-auth-session. Completes the OAuth session redirect on app return.
+WebBrowser.maybeCompleteAuthSession()
 
 type LandingNavProp = StackNavigationProp<AuthStackParamList, 'Landing'>
 
@@ -34,20 +43,56 @@ export default function LandingScreen(): React.JSX.Element {
   const { t } = useTranslation()
   const navigation = useNavigation<LandingNavProp>()
   const setError = useAuthStore((state) => state.setError)
+  const setIsLoading = useAuthStore((state) => state.setIsLoading)
+  const setUser = useAuthStore((state) => state.setUser)
 
-  const [googleLoading, setGoogleLoading] = useState(false)
-  const [appleLoading, setAppleLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false)
+  const [appleLoading, setAppleLoading] = useState<boolean>(false)
 
-  const handleGoogleSignIn = async (): Promise<void> => {
-    setGoogleLoading(true)
+  // Google OAuth hook must be called unconditionally at component top level.
+  // Google Sign-In via expo-auth-session requires a development build.
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
+  })
 
-    try {
-      await signInWithGoogle()
-    } catch (err: unknown) {
-      setError(mapFirebaseError(err))
-    } finally {
+  useEffect((): void => {
+    if (response?.type === 'success') {
+      const idToken = response.authentication?.idToken ?? response.params.id_token
+
+      if (!idToken) {
+        setError('auth.google.missingToken')
+        setGoogleLoading(false)
+        return
+      }
+
+      void handleGoogleToken(idToken)
+    } else if (
+      response?.type === 'error' ||
+      response?.type === 'dismiss' ||
+      response?.type === 'cancel'
+    ) {
       setGoogleLoading(false)
     }
+  }, [response])
+
+  const handleGoogleToken = async (idToken: string): Promise<void> => {
+    try {
+      setIsLoading(true)
+      const credential = await signInWithGoogleCredential(idToken)
+      setUser(credential.user)
+    } catch (error: unknown) {
+      setError(mapFirebaseError(error))
+    } finally {
+      setIsLoading(false)
+      setGoogleLoading(false)
+    }
+  }
+
+  const handleGooglePress = (): void => {
+    setGoogleLoading(true)
+    void promptAsync()
   }
 
   const handleAppleSignIn = async (): Promise<void> => {
@@ -97,9 +142,10 @@ export default function LandingScreen(): React.JSX.Element {
         <View style={styles.gap} />
         <Button
           label={t('auth.landing.continueGoogle')}
-          onPress={handleGoogleSignIn}
+          onPress={handleGooglePress}
           variant="outline"
           loading={googleLoading}
+          disabled={!request || googleLoading}
         />
         {Platform.OS === 'ios' && (
           <>
@@ -137,48 +183,48 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xxxl,
     paddingBottom: spacing.xl,
     justifyContent: 'space-between',
-  },
+  } as ViewStyle,
   logoContainer: {
     alignItems: 'center',
     marginBottom: spacing.xxl,
-  },
+  } as ViewStyle,
   logoText: {
     fontSize: typography.sizes.xxxl,
     fontWeight: typography.weights.bold,
     color: colors.primary,
     marginBottom: spacing.sm,
-  },
+  } as TextStyle,
   tagline: {
     fontSize: typography.sizes.lg,
     color: colors.gray[600],
     textAlign: 'center',
-  },
+  } as TextStyle,
   buttonContainer: {
     width: '100%',
     marginBottom: spacing.xl,
-  },
+  } as ViewStyle,
   gap: {
     height: spacing.md,
-  },
+  } as ViewStyle,
   termsContainer: {
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-  },
+  } as ViewStyle,
   termsText: {
     fontSize: typography.sizes.xs,
     color: colors.gray[500],
     textAlign: 'center',
     lineHeight: typography.sizes.xs * typography.lineHeights.relaxed,
-  },
+  } as TextStyle,
   termsLinks: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.md,
     marginTop: spacing.xs,
-  },
+  } as ViewStyle,
   termsLink: {
     color: colors.primary,
     fontSize: typography.sizes.xs,
     fontWeight: typography.weights.medium,
-  },
+  } as TextStyle,
 })

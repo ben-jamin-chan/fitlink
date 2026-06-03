@@ -65,6 +65,9 @@
       "enableSubtitle": "Log in faster next time",
       "enableButton": "Enable",
       "skipButton": "Not now"
+    },
+    "google": {
+      "missingToken": "Google sign-in failed. Please try again."
     }
   },
   "biometric": {

@@ -4,6 +4,44 @@
 
 ---
 
+## [Phase 2E - Task 65] - 2026-06-03
+
+### Completed
+
+- Task 65: Google Sign-In production flow - signInWithPopup replaced with expo-auth-session OAuth
+- services/firebase/auth.ts: signInWithGoogle removed; signInWithGoogleCredential(idToken) added as named export
+- LandingScreen.tsx: Google.useAuthRequest hook wired; WebBrowser.maybeCompleteAuthSession() at module level; promptAsync() triggers OAuth browser flow; response handled in useEffect; signInWithGoogleCredential called on success; disabled guard includes !request
+- .env.example: EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO/IOS/ANDROID keys appended
+- i18n: auth.google.missingToken added to all 4 language files
+
+### Files Created / Modified
+
+- services/firebase/auth.ts: signInWithGoogle removed, signInWithGoogleCredential(idToken) added
+- app/auth/LandingScreen.tsx: Google.useAuthRequest hook, WebBrowser.maybeCompleteAuthSession(), handleGooglePress, handleGoogleToken, !request disabled guard on Google button
+- .env.example: three EXPO_PUBLIC_GOOGLE_CLIENT_ID_* placeholder keys appended
+- i18n/en.json: auth.google.missingToken added
+- i18n/my.json, zh.json, ta.json: auth.google.missingToken mirrored with English placeholder
+
+### Architecture Decisions
+
+- LandingScreen owns the Google OAuth hook and browser prompt, while services/firebase/auth.ts stays a plain Firebase credential helper with no hook or WebBrowser imports
+- The Google response handler reads response.authentication?.idToken first and falls back to response.params.id_token, matching expo-auth-session's local Google provider behavior after code exchange
+- authStore's existing setIsLoading action is used for global auth loading because this repo does not expose a setLoading action
+
+### Known Issues / Deferred
+
+- Google Sign-In requires a development build; cannot be verified in Expo Go
+- Apple Sign-In stub unchanged - addressed in Task 66
+
+### Verification
+
+- npx tsc --noEmit passes
+- Targeted checks confirm signInWithPopup is absent from client .ts/.tsx files, no inline style={{ }} in touched files, zero any in touched TypeScript files, zero console.log in touched TypeScript files, valid i18n JSON, and clean scoped git diff --check
+
+### Next Up
+
+- Task 66: Apple Sign-In Production Flow (replace signInWithApple stub with @invertase/react-native-apple-authentication)
+
 ## [Phase 2D - Task 64] - 2026-06-02
 
 ### Completed

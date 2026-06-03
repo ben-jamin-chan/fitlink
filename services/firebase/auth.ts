@@ -11,9 +11,9 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signInWithPhoneNumber,
-  signInWithPopup,
   signOut as firebaseSignOut,
 } from 'firebase/auth'
 import type { ConfirmationResult, User, UserCredential } from 'firebase/auth'
@@ -97,15 +97,18 @@ export const signUpWithEmail = async (
   }
 }
 
-export const signInWithGoogle = async (): Promise<UserCredential> => {
+/**
+ * Completes Google Sign-In using an ID token obtained from the expo-auth-session
+ * OAuth flow in LandingScreen.tsx. Browser popup auth is incompatible with EAS
+ * development builds and is not used anywhere in this project.
+ */
+export const signInWithGoogleCredential = async (
+  idToken: string
+): Promise<UserCredential> => {
   try {
-    // TODO: Replace signInWithPopup with expo-auth-session for production builds.
-    // signInWithPopup works in Expo Go dev only.
-    const provider = new GoogleAuthProvider()
-    provider.addScope('profile')
-    provider.addScope('email')
+    const credential = GoogleAuthProvider.credential(idToken)
 
-    return await signInWithPopup(auth, provider)
+    return await signInWithCredential(auth, credential)
   } catch (error) {
     throw toAppError(error)
   }
