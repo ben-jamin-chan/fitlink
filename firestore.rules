@@ -1,62 +1,123 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ─── Helper functions ─────────────────────────────────────────────────────
+    // ─── Helpers ────────────────────────────────────────────────────────────
 
-    // Returns true if the requester is authenticated
-    function isAuthenticated() {
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    // Returns true if the requester owns this document (uid matches path segment)
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
     }
 
-    // Returns true if the incoming write does NOT touch server-only fields.
-    // These fields are managed exclusively by Cloud Functions and must never
-    // be written from a client — even by the account owner.
+    function existingData() {
+      return resource.data == null ? {} : resource.data;
+    }
+
+    function legacyServerOnlyFields() {
+      return ['stats', 'verified'];
+    }
+
+    // Returns true if a new document omits fields that are exclusively managed
+    // by Cloud Functions or the Admin SDK.
     function doesNotSetServerOnlyFieldsOnCreate() {
-      return !(
-        request.resource.data.keys()
-          .hasAny([
-            'age',
-            'banned',
-            'bannedAt',
-            'banReason',
-            'premium',
-            'photoVerified',
-            'stats',
-            'stripeCustomerId',
-            'subscription',
-            'verified',
-            'verifiedAt',
-          ])
-      );
+      let serverOnlyFields = [
+        // Phase 1 server-only fields
+        'age',
+        'banned',
+        'banReason',
+        'bannedAt',
+        // Phase 2 server-only fields
+        'photoVerified',
+        'verifiedAt',
+        'stripeCustomerId',
+        'premium',
+        // Legacy Phase 1 field — client still sees it in normalised reads
+        // but must not write it
+        'subscription'
+      ];
+      return !request.resource.data.keys().hasAny(serverOnlyFields);
     }
 
+    function doesNotSetLegacyServerOnlyFieldsOnCreate() {
+      return !request.resource.data.keys().hasAny(legacyServerOnlyFields());
+    }
+
+    // Returns true if an update attempts to change any field that is exclusively
+    // managed by Cloud Functions or the Admin SDK.
+    // Phase 2 expands this root-level list beyond Phase 1 to include premium
+    // and verification fields. Nested Strava token fields are checked
+    // separately on the /users update rule.
     function doesNotModifyServerOnlyFields() {
-      return !(
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny([
-            'age',
-            'banned',
-            'bannedAt',
-            'banReason',
-            'premium',
-            'photoVerified',
-            'stats',
-            'stripeCustomerId',
-            'subscription',
-            'verified',
-            'verifiedAt',
-          ])
-      );
+      let serverOnlyFields = [
+        // Phase 1 server-only fields
+        'age',
+        'banned',
+        'banReason',
+        'bannedAt',
+        // Phase 2 server-only fields
+        'photoVerified',
+        'verifiedAt',
+        'stripeCustomerId',
+        'premium',
+        // Legacy Phase 1 field — client still sees it in normalised reads
+        // but must not write it
+        'subscription'
+      ];
+      return !request.resource.data.diff(existingData())
+              .affectedKeys()
+              .hasAny(serverOnlyFields);
+    }
+
+    function doesNotModifyLegacyServerOnlyFields() {
+      return !request.resource.data.diff(existingData())
+              .affectedKeys()
+              .hasAny(legacyServerOnlyFields());
+    }
+
+    function fitnessTrackingOnCreate() {
+      return request.resource.data.get('fitnessTracking', {});
+    }
+
+    function stravaOnCreate() {
+      return fitnessTrackingOnCreate().get('strava', {});
+    }
+
+    function stravaCreateKeys() {
+      return stravaOnCreate().keys();
+    }
+
+    function isStravaCreateDisconnectOnly() {
+      return stravaCreateKeys().hasOnly(['connected', 'lastSync'])
+             && (
+               !stravaCreateKeys().hasAny(['connected'])
+               || stravaOnCreate().get('connected', false) == false
+             )
+             && (
+               !stravaCreateKeys().hasAny(['lastSync'])
+               || stravaOnCreate().get('lastSync', 'missing') == null
+             );
+    }
+
+    function doesNotSetServerManagedFitnessFieldsOnCreate() {
+      return !request.resource.data.keys().hasAny(['fitnessTracking'])
+             || (
+               fitnessTrackingOnCreate() is map
+               && (
+                 !fitnessTrackingOnCreate().keys().hasAny(['strava'])
+                 || (
+                   stravaOnCreate() is map
+                   && isStravaCreateDisconnectOnly()
+                 )
+               )
+             );
     }
 
     function fitnessTrackingBefore() {
-      return resource.data.get('fitnessTracking', {});
+      return existingData().get('fitnessTracking', {});
     }
 
     function fitnessTrackingAfter() {
@@ -93,17 +154,27 @@ service cloud.firestore {
       return stravaAffectedKeys().hasOnly(['connected', 'lastSync'])
              && (
                !stravaAffectedKeys().hasAny(['connected'])
-               || stravaAfter().connected == false
+               || stravaAfter().get('connected', false) == false
              )
              && (
                !stravaAffectedKeys().hasAny(['lastSync'])
-               || stravaAfter().lastSync == null
+               || stravaAfter().get('lastSync', 'missing') == null
              );
     }
 
-    function doesNotModifyServerManagedFitnessFields() {
-      return !request.resource.data.diff(resource.data).affectedKeys()
-                .hasAny(['fitnessTracking'])
+    function doesNotModifyStravaTokenFields() {
+      return !request.resource.data.diff(existingData())
+              .affectedKeys()
+              .hasAny([
+                'fitnessTracking.strava.accessToken',
+                'fitnessTracking.strava.refreshToken',
+                'fitnessTracking.strava.expiresAt'
+              ]);
+    }
+
+    function doesNotModifyStravaMapExceptDisconnect() {
+      return !request.resource.data.diff(existingData()).affectedKeys()
+               .hasAny(['fitnessTracking'])
              || (
                hasValidFitnessTrackingMap()
                && (
@@ -116,112 +187,197 @@ service cloud.firestore {
              );
     }
 
-    // Returns true if the requester is a participant in the given match
+    // Returns true if a user is a participant in the given match document.
+    // Used to gate match reads; not used in discovery hot path.
     function isMatchParticipant(matchId) {
       return request.auth.uid in
         get(/databases/$(database)/documents/matches/$(matchId)).data.users;
     }
 
-    // ─── /users/{userId} ──────────────────────────────────────────────────────
-    // Any authenticated user can read any profile (required for discovery stack).
-    // Users can only update their own document, and cannot touch server-only fields.
-    // Cloud Functions bypass these rules using the Admin SDK.
+
+    // ─── /users/{userId} ────────────────────────────────────────────────────
+
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated()
-                    && isOwner(userId)
-                    && doesNotSetServerOnlyFieldsOnCreate();
-      allow update: if isAuthenticated()
+
+      // Any authenticated user can read any profile.
+      // Required for: discovery stack display, chat header, profile modal,
+      // match card resolution in matchStore.
+      allow read: if isSignedIn();
+
+      // New user document creation:
+      //   - Only the authenticated user can create their own document.
+      //   - Server-only fields must be absent on creation (Cloud Functions
+      //     write them after the document is created).
+      allow create: if isOwner(userId)
+                    && doesNotSetServerOnlyFieldsOnCreate()
+                    && doesNotSetLegacyServerOnlyFieldsOnCreate()
+                    && doesNotSetServerManagedFitnessFieldsOnCreate();
+
+      // Profile update:
+      //   - Only the authenticated user can update their own document.
+      //   - Server-only fields (premium, photoVerified, stripeCustomerId, etc.)
+      //     are blocked — managed exclusively by Cloud Functions.
+      //
+      // Client-writable fitnessTracking sub-fields (NOT blocked):
+      //   - fitnessTracking.shareOnProfile    ← user preference toggle
+      //   - fitnessTracking.appleHealth.*     ← permission grant/revoke on iOS
+      //   - fitnessTracking.googleFit.*       ← permission grant/revoke on Android
+      //
+      // Strava token fields (BLOCKED — managed by exchangeStravaToken /
+      //   syncStravaActivity Cloud Functions):
+      //   - fitnessTracking.strava.accessToken
+      //   - fitnessTracking.strava.refreshToken
+      //   - fitnessTracking.strava.expiresAt
+      //
+      // Verification (BLOCKED — managed by verifyProfilePhoto Cloud Function):
+      //   - photoVerified
+      //   - verifiedAt
+      //
+      // Premium (BLOCKED — managed by Stripe webhook Cloud Function):
+      //   - premium (entire sub-object)
+      //   - stripeCustomerId
+      allow update: if resource.data != null
                     && isOwner(userId)
                     && doesNotModifyServerOnlyFields()
-                    && doesNotModifyServerManagedFitnessFields();
-      allow delete: if false; // account deletion handled by Cloud Function / auth.ts deleteAccount()
+                    && doesNotModifyLegacyServerOnlyFields()
+                    && doesNotModifyStravaTokenFields()
+                    && doesNotModifyStravaMapExceptDisconnect();
 
-      // ─── /users/{userId}/dailyLikes ─────────────────────────────────────────
-      // The dailyLikes document tracks the free-user like count.
-      // Only the owning user can read their own limit document.
-      // All writes are managed by recordSwipe through the Admin SDK.
-      match /dailyLikes/{doc} {
-        allow read: if isAuthenticated() && isOwner(userId);
+      // Deletion is handled by the deleteAccount Cloud Function / Admin SDK.
+      // Direct client delete is denied.
+      allow delete: if false;
+
+
+      // ── /users/{userId}/dailyLikes (single document: .../dailyLikes/doc) ──
+
+      match /dailyLikes/{docId} {
+        // Client reads the dailyLikes count to display remaining likes in the UI.
+        // Writes are owned by the recordSwipe Cloud Function (Task 55).
+        allow read:   if isOwner(userId);
+        allow write:  if false;
+      }
+
+
+      // ── /users/{userId}/verificationAttempts (single document) ────────────
+
+      match /verificationAttempts/{docId} {
+        // Entirely managed by the verifyProfilePhoto Cloud Function (Task 56).
+        // Clients have no read or write access.
+        allow read:  if false;
         allow write: if false;
       }
-    }
 
-    // ─── /swipes/{userId}/likes/{targetId} ───────────────────────────────────
-    // Client writes are blocked; recordSwipe writes through the Admin SDK.
-    // The target user can also read (needed to detect mutual likes client-side,
-    // though the real mutual-like check runs in the onSwipeCreated Cloud Function).
+    } // end /users/{userId}
+
+
+    // ─── /swipes/{userId}/likes/{targetId} ──────────────────────────────────
+
     match /swipes/{userId}/likes/{targetId} {
-      allow read:   if isAuthenticated() && (isOwner(userId) || request.auth.uid == targetId);
-      allow write:  if false;
+      // Reads: the swipe owner (to check their own swipe history) or the target
+      // (to check whether a mutual like exists — used by onSwipeCreated trigger
+      // and client-side checks).
+      allow read: if isSignedIn()
+                  && (isOwner(userId) || isOwner(targetId));
+
+      // Writes: DENIED for all clients.
+      // All like and superlike writes go through the recordSwipe Cloud Function
+      // (Task 55), which enforces the daily limit transactionally.
+      // Firestore security rules deny direct client writes so there is no bypass.
+      allow write: if false;
     }
 
-    // ─── /swipes/{userId}/passes/{targetId} ──────────────────────────────────
-    // Client writes are blocked; recordSwipe writes through the Admin SDK.
-    // Only the owning user can read their own passes.
+
+    // ─── /swipes/{userId}/passes/{targetId} ─────────────────────────────────
+
     match /swipes/{userId}/passes/{targetId} {
-      allow read:   if isAuthenticated() && isOwner(userId);
-      allow write:  if false;
+      // Read: only the swipe owner (to check their own pass history).
+      allow read: if isOwner(userId);
+
+      // Write: DENIED for all clients.
+      // Pass writes also go through recordSwipe Cloud Function (Task 55).
+      allow write: if false;
     }
 
-    // ─── /matches/{matchId} ──────────────────────────────────────────────────
-    // Matches are created and updated exclusively by the onSwipeCreated
-    // Cloud Function using the Admin SDK. Client can read their own matches.
-    // matchId format: [uid1, uid2].sort().join('_')
+
+    // ─── /matches/{matchId} ─────────────────────────────────────────────────
+
     match /matches/{matchId} {
-      allow read:   if isAuthenticated() && isMatchParticipant(matchId);
-      allow create: if false; // Cloud Function only (onSwipeCreated)
-      allow delete: if false; // Cloud Function only (unmatchUser)
+      // Read: only match participants.
+      allow read: if isSignedIn() && isMatchParticipant(matchId);
 
-      // Participants may update only chat metadata fields.
-      // Structural fields (users, createdAt) and the other user's unread count
-      // cannot be modified from the client — only the requester's own unread counter
-      // and the shared lastMessage fields are permitted.
-      allow update: if isAuthenticated()
+      // Create: DENIED — match creation is exclusively the responsibility of
+      // the onSwipeCreated Cloud Function (Task 24).
+      allow create: if false;
+
+      // Update: match participants may update ONLY these chat-metadata fields.
+      // This allows ChatScreen to write lastMessage, lastMessageAt, and their
+      // own unread counter without a Cloud Function round-trip on every send.
+      // The dynamic {userId}_unread field is validated against the authenticated
+      // user's UID to prevent cross-user unread tampering.
+      allow update: if isSignedIn()
                     && isMatchParticipant(matchId)
-                    && request.resource.data.diff(resource.data).affectedKeys()
-                         .hasOnly([
-                           'lastMessage',
-                           'lastMessageAt',
-                           (request.auth.uid + '_unread'),
-                         ]);
+                    && request.resource.data.diff(resource.data)
+                        .affectedKeys()
+                        .hasOnly([
+                          'lastMessage',
+                          'lastMessageAt',
+                          (request.auth.uid + '_unread')
+                        ]);
 
-      // ─── /matches/{matchId}/messages/{messageId} ───────────────────────────
-      // Firestore message subcollection (used for persistent history queries).
-      // Real-time delivery goes through Firebase Realtime Database (RTDB),
-      // but the Firestore copy is written by the client for history.
-      // Both participants can read. Create allowed if sender matches requester.
-      // Updates and deletes permanently blocked — message history is immutable.
+      // Delete: DENIED — unmatch goes through the unmatchUser Cloud Function
+      // (Task 39B).
+      allow delete: if false;
+
+
+      // ── /matches/{matchId}/messages/{messageId} ──────────────────────────
+
       match /messages/{messageId} {
-        allow read:   if isAuthenticated() && isMatchParticipant(matchId);
-        allow create: if isAuthenticated()
+        // Read: only match participants.
+        allow read: if isSignedIn() && isMatchParticipant(matchId);
+
+        // Create: participants may write new messages; sender must be themselves.
+        allow create: if isSignedIn()
                       && isMatchParticipant(matchId)
-                      && request.auth.uid == request.resource.data.senderId;
+                      && isOwner(request.resource.data.senderId);
+
+        // Update/delete: denied.
         allow update: if false;
         allow delete: if false;
       }
-    }
 
-    // ─── /blocked/{userId}/users/{blockedUserId} ─────────────────────────────
-    // Written exclusively by the unmatchUser Cloud Function (Admin SDK bypasses rules).
-    // No client reads or writes permitted.
-    match /blocked/{userId}/users/{blockedUserId} {
-      allow read, write: if false;
-    }
+    } // end /matches/{matchId}
 
-    // ─── /reports/{reportId} ─────────────────────────────────────────────────
-    // Any authenticated user can file a report, but only if they are the reporter.
-    // Reports cannot be read, updated, or deleted by clients — admin only.
+
+    // ─── /reports/{reportId} ────────────────────────────────────────────────
+
     match /reports/{reportId} {
-      allow create: if isAuthenticated()
-                    && request.auth.uid == request.resource.data.reporterId;
+      // Create: any authenticated user may file a report.
+      // The reporterId must match their own UID (no impersonation).
+      allow create: if isSignedIn()
+                    && isOwner(request.resource.data.reporterId);
+
+      // Read/update/delete: denied for clients.
+      // Report review and actioning is admin-only via Firebase Console or
+      // the Admin SDK.
       allow read:   if false;
       allow update: if false;
       allow delete: if false;
     }
 
-    // ─── Default deny ────────────────────────────────────────────────────────
-    // Any collection not explicitly matched above is denied for all operations.
+
+    // ─── /blocked/{userId} ──────────────────────────────────────────────────
+
+    match /blocked/{userId}/{document=**} {
+      // Entirely managed by Cloud Functions (unmatchUser, recordSwipe).
+      // No client reads or writes.
+      allow read:  if false;
+      allow write: if false;
+    }
+
+
+    // ─── Default catch-all ──────────────────────────────────────────────────
+
+    // Any collection not explicitly matched above is denied.
     match /{document=**} {
       allow read, write: if false;
     }

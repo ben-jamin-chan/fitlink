@@ -4,6 +4,49 @@
 
 ---
 
+## [Phase 2F - Task 68] - 2026-06-04
+
+### Completed
+
+- Task 68: Firestore security rules updated for Phase 2
+- firestore.rules: consolidated Phase 1 base rules with Phase 2 patches for premium, photo verification, swipes, daily likes, Strava token ownership, verification attempts, reports, blocked users, matches, and messages
+- doesNotModifyServerOnlyFields(): root-level deny-list now matches the Phase 2 spec exactly: age, banned, banReason, bannedAt, photoVerified, verifiedAt, stripeCustomerId, premium, and legacy subscription
+- Legacy server-managed fields stats and verified remain blocked through separate legacy helper checks so the Phase 2 helper stays clean while existing protection is preserved
+- /users/{userId} update rule now calls a separate Strava token-field check for fitnessTracking.strava.accessToken, refreshToken, and expiresAt, plus a stricter Strava map guard that only allows client disconnect semantics
+- Client-writable fitnessTracking fields remain available for shareOnProfile, appleHealth, and googleFit updates
+- /users/{userId}/dailyLikes: owner reads allowed for UI remaining-like display; all client writes denied
+- /users/{userId}/verificationAttempts: all client access denied
+- /swipes/ likes and passes: all client writes denied; reads remain scoped to owner/target per path
+- /blocked: all client access denied
+
+### Files Created / Modified
+
+- firestore.rules: full Phase 2 rules hardening and follow-up review cleanup
+- CHANGELOG.md: Task 68 implementation summary added
+
+### Architecture Decisions
+
+- Strava token dot-path fields are checked separately from doesNotModifyServerOnlyFields() because they are nested inside fitnessTracking
+- Whole-map Strava updates are still constrained to disconnect-only writes so clients cannot bypass token protection by replacing fitnessTracking.strava
+- doesNotSetServerOnlyFieldsOnCreate() is separate from doesNotModifyServerOnlyFields() to avoid create-time resource.data null evaluation while preserving the same root server-only field intent
+- stats and legacy verified remain server-managed in this codebase, but are documented as legacy helper checks rather than part of the Task 68 Phase 2 helper list
+
+### Known Issues / Deferred
+
+- RTDB security rules for chat remain out of scope for Task 68
+- Admin moderation queues and Phase 3 collections are not yet defined
+
+### Verification
+
+- git diff --check -- firestore.rules passes
+- npx tsc --noEmit passes
+- firebase emulators:exec --only firestore "node -e \"process.exit(0)\"" passes
+- Targeted emulator allow/deny probe passes for user create, dailyLikes owner read, dailyLikes write denial, shareOnProfile update, appleHealth update, googleFit update, Strava token denial, Strava reconnect denial, Strava disconnect allow, premium denial, legacy stats denial, swipe write denial, and server-only field create denial
+
+### Next Up
+
+- Task 69: Phase 2 Firestore Indexes
+
 ## [Phase 2E - Task 67] - 2026-06-03
 
 ### Completed
