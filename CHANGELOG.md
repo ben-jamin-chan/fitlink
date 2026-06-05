@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 2F - Task 69] - 2026-06-05
+
+### Completed
+
+- Task 69: Phase 2 Firestore composite indexes added to firestore.indexes.json
+- Priority profile boosting index added for users: premium.active ASC, location.city ASC, banned ASC, paused ASC, lastActive DESC
+- Active today badge index added for users: fitnessTracking.shareOnProfile ASC, fitnessTracking.todayStats.updatedAt DESC
+- getDiscoveryStack now runs a premium.active == true candidate query before the baseline location query, then de-dupes and scores the combined pool
+- getDiscoveryStack scoring now uses Phase 2 premium.active with a legacy subscription fallback for older user documents
+- Existing Phase 1 index baseline preserved: users discovery, matches listener, reports threshold, and likes createdAt collection-group field override
+
+### Files Created / Modified
+
+- firestore.indexes.json: 2 new users composite indexes appended; existing Task 40 indexes and fieldOverrides preserved
+- functions/src/getDiscoveryStack.ts: discovery query aligned to the new premium-leading composite index
+- CHANGELOG.md: Task 69 implementation summary added
+
+### Architecture Decisions
+
+- Priority profile index leads with premium.active because getDiscoveryStack now fetches the premium-active candidate pool first, then falls back to the Phase 1 location/activity query for the broader candidate pool
+- Active today badge index uses fitnessTracking.shareOnProfile as the leading field so future collection queries can filter shared profiles before ordering by todayStats.updatedAt; current profile surfaces still evaluate known user documents locally
+- Existing likes createdAt field override was preserved because it is committed Task 40 infrastructure and the task prompt explicitly says not to remove pre-existing overrides
+
+### Known Issues / Deferred
+
+- Index propagation to production can take several minutes after deploy; emulator validation reflects index config immediately
+- RTDB security rules remain out of scope
+- No current client collection query uses the active-today composite index directly; the index is deploy-ready for the specified Phase 2 query pattern
+
+### Verification
+
+- firestore.indexes.json parses as valid JSON
+- firestore.indexes.json contains 5 composite indexes and preserves the existing fieldOverrides entry
+- npx tsc --noEmit passes
+- npm --prefix functions run build passes
+- firebase emulators:exec --only firestore "node -e \"process.exit(0)\"" passes
+
+### Next Up
+
+- Phase 2 is now complete. Review the Phase 2 done checklist in docs/TASKS_PHASE2.md before declaring the build ready for App Store / Play Store submission.
+
 ## [Phase 2F - Task 68] - 2026-06-04
 
 ### Completed

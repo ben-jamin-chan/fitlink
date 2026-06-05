@@ -25,9 +25,8 @@ interface UserStats {
   matches: number;
 }
 
-interface UserSubscription {
-  tier: "free" | "premium";
-  expiresAt?: admin.firestore.Timestamp;
+interface UserPremiumStatus {
+  active: boolean;
 }
 
 interface FirestoreUser {
@@ -45,7 +44,7 @@ interface FirestoreUser {
   lookingFor: string[];
   preferences: UserPreferences;
   stats: UserStats;
-  subscription: UserSubscription;
+  premium: UserPremiumStatus;
   paused: boolean;
   banned: boolean;
   lastActive: admin.firestore.Timestamp;
@@ -101,19 +100,40 @@ export const getDiscoveryStack = onCall(
     const excludedIds = await fetchExcludedIds(db, callerId);
     excludedIds.add(callerId);
 
-    const candidatesSnap = await db
-      .collection("users")
-      .where("location.city", "==", caller.location.city)
-      .where("banned", "==", false)
-      .where("paused", "==", false)
-      .orderBy("lastActive", "desc")
-      .limit(QUERY_LIMIT)
-      .get();
+    const [premiumCandidatesSnap, baselineCandidatesSnap] = await Promise.all([
+      db
+        .collection("users")
+        .where("premium.active", "==", true)
+        .where("location.city", "==", caller.location.city)
+        .where("banned", "==", false)
+        .where("paused", "==", false)
+        .orderBy("lastActive", "desc")
+        .limit(QUERY_LIMIT)
+        .get(),
+      db
+        .collection("users")
+        .where("location.city", "==", caller.location.city)
+        .where("banned", "==", false)
+        .where("paused", "==", false)
+        .orderBy("lastActive", "desc")
+        .limit(QUERY_LIMIT)
+        .get(),
+    ]);
 
+    const candidateDocs = [
+      ...premiumCandidatesSnap.docs,
+      ...baselineCandidatesSnap.docs,
+    ];
+    const seenCandidateIds = new Set<string>();
     const scored: DiscoveryCandidate[] = [];
 
-    for (const doc of candidatesSnap.docs) {
+    for (const doc of candidateDocs) {
       const candidateId = doc.id;
+
+      if (seenCandidateIds.has(candidateId)) {
+        continue;
+      }
+      seenCandidateIds.add(candidateId);
 
       if (excludedIds.has(candidateId)) {
         continue;
@@ -176,7 +196,7 @@ function scoreCandidate(caller: FirestoreUser, candidate: FirestoreUser): number
     score += 2;
   }
 
-  if (candidate.subscription.tier === "premium") {
+  if (candidate.premium.active === true) {
     score += 3;
   }
 
@@ -308,13 +328,13 @@ function toFirestoreUser(
   const location = parseLocation(raw.location);
   const preferences = parsePreferences(raw.preferences);
   const stats = parseStats(raw.stats);
-  const subscription = parseSubscription(raw.subscription);
+  const premium = parsePremiumStatus(raw.premium, raw.subscription);
 
   if (
     location === null ||
     preferences === null ||
     stats === null ||
-    subscription === null ||
+    premium === null ||
     !isFitnessLevel(raw.fitnessLevel) ||
     !(raw.lastActive instanceof admin.firestore.Timestamp)
   ) {
@@ -358,7 +378,7 @@ function toFirestoreUser(
     lookingFor: getStringArray(raw.lookingFor),
     preferences,
     stats,
-    subscription,
+    premium,
     photoVerified,
     paused,
     banned,
@@ -425,21 +445,25 @@ function parseStats(value: unknown): UserStats | null {
   return { likes, passes, matches };
 }
 
-function parseSubscription(value: unknown): UserSubscription | null {
-  if (!isRecord(value)) {
-    return null;
+function parsePremiumStatus(
+  premiumValue: unknown,
+  legacySubscriptionValue: unknown
+): UserPremiumStatus | null {
+  if (isRecord(premiumValue)) {
+    const active = getBoolean(premiumValue.active);
+
+    if (active === null) {
+      return null;
+    }
+
+    return { active };
   }
 
-  const tier = value.tier;
-  if (tier !== "free" && tier !== "premium") {
-    return null;
+  if (isRecord(legacySubscriptionValue)) {
+    return { active: legacySubscriptionValue.tier === "premium" };
   }
 
-  if (value.expiresAt instanceof admin.firestore.Timestamp) {
-    return { tier, expiresAt: value.expiresAt };
-  }
-
-  return { tier };
+  return { active: false };
 }
 
 function isFitnessLevel(value: unknown): value is FitnessLevel {

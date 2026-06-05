@@ -25,6 +25,25 @@
         { "fieldPath": "reportedUserId", "order": "ASCENDING" },
         { "fieldPath": "reportedAt",     "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "premium.active", "order": "ASCENDING" },
+        { "fieldPath": "location.city",  "order": "ASCENDING" },
+        { "fieldPath": "banned",         "order": "ASCENDING" },
+        { "fieldPath": "paused",         "order": "ASCENDING" },
+        { "fieldPath": "lastActive",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "fitnessTracking.shareOnProfile",       "order": "ASCENDING" },
+        { "fieldPath": "fitnessTracking.todayStats.updatedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
