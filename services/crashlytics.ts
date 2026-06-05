@@ -1,4 +1,4 @@
-import { Platform } from 'react-native'
+import { NativeModules, Platform } from 'react-native'
 
 declare const require: (moduleName: string) => unknown
 
@@ -28,8 +28,18 @@ const isCrashlyticsClient = (value: unknown): value is CrashlyticsClient => {
 const isCrashlyticsFactory = (value: unknown): value is (() => unknown) =>
   typeof value === 'function'
 
+const hasReactNativeFirebaseAppModule = (): boolean => {
+  const nativeModules: unknown = NativeModules
+
+  return isRecord(nativeModules) && isRecord(nativeModules.RNFBAppModule)
+}
+
 const getCrashlyticsClient = (): CrashlyticsClient | null => {
   try {
+    if (!hasReactNativeFirebaseAppModule()) {
+      return null
+    }
+
     const crashlyticsModule = require('@react-native-firebase/crashlytics')
     const crashlyticsFactory = isRecord(crashlyticsModule)
       ? crashlyticsModule.default

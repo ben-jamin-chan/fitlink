@@ -66,6 +66,7 @@
       "skipButton": "Not now"
     },
     "google": {
+      "missingClientId": "Google sign-in is not configured for this build.",
       "missingToken": "Google sign-in failed. Please try again."
     },
     "apple": {

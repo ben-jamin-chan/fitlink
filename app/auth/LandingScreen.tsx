@@ -40,6 +40,36 @@ type LandingNavProp = StackNavigationProp<AuthStackParamList, 'Landing'>
 const TERMS_URL = 'https://example.com/terms'
 const PRIVACY_URL = 'https://example.com/privacy'
 
+interface GoogleClientIds {
+  clientId?: string
+  iosClientId?: string
+  androidClientId?: string
+}
+
+const getEnvValue = (value: string | undefined): string | undefined => {
+  if (value === undefined || value.trim().length === 0) {
+    return undefined
+  }
+
+  return value
+}
+
+const googleClientIds: GoogleClientIds = {
+  clientId: getEnvValue(process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO),
+  iosClientId: getEnvValue(process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS),
+  androidClientId: getEnvValue(process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID),
+}
+
+const isGoogleAuthConfigured = (clientIds: GoogleClientIds): boolean => {
+  const platformClientId = Platform.select({
+    ios: clientIds.iosClientId,
+    android: clientIds.androidClientId,
+    default: clientIds.clientId,
+  })
+
+  return platformClientId !== undefined
+}
+
 const getErrorCode = (error: unknown): string | null => {
   if (typeof error !== 'object' || error === null || !('code' in error)) {
     return null
@@ -66,23 +96,25 @@ const isAppleCancelError = (error: unknown): boolean => {
   return getErrorCode(error) === appleAuth.Error.CANCELED
 }
 
-export default function LandingScreen(): React.JSX.Element {
-  const { t } = useTranslation()
-  const navigation = useNavigation<LandingNavProp>()
-  const isLoading = useAuthStore((state) => state.isLoading)
+interface GoogleSignInButtonProps {
+  clientIds: GoogleClientIds
+  label: string
+}
+
+const GoogleSignInButton = ({
+  clientIds,
+  label,
+}: GoogleSignInButtonProps): React.JSX.Element => {
   const setError = useAuthStore((state) => state.setError)
   const setIsLoading = useAuthStore((state) => state.setIsLoading)
   const setUser = useAuthStore((state) => state.setUser)
 
   const [googleLoading, setGoogleLoading] = useState<boolean>(false)
-  const [appleLoading, setAppleLoading] = useState<boolean>(false)
 
-  // Google OAuth hook must be called unconditionally at component top level.
-  // Google Sign-In via expo-auth-session requires a development build.
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
+    clientId: clientIds.clientId,
+    iosClientId: clientIds.iosClientId,
+    androidClientId: clientIds.androidClientId,
   })
 
   useEffect((): void => {
@@ -122,6 +154,28 @@ export default function LandingScreen(): React.JSX.Element {
     setGoogleLoading(true)
     void promptAsync()
   }
+
+  return (
+    <Button
+      label={label}
+      onPress={handleGooglePress}
+      variant="outline"
+      loading={googleLoading}
+      disabled={!request || googleLoading}
+    />
+  )
+}
+
+export default function LandingScreen(): React.JSX.Element {
+  const { t } = useTranslation()
+  const navigation = useNavigation<LandingNavProp>()
+  const isLoading = useAuthStore((state) => state.isLoading)
+  const setError = useAuthStore((state) => state.setError)
+  const setIsLoading = useAuthStore((state) => state.setIsLoading)
+  const setUser = useAuthStore((state) => state.setUser)
+
+  const [appleLoading, setAppleLoading] = useState<boolean>(false)
+  const googleConfigured = isGoogleAuthConfigured(googleClientIds)
 
   const handleApplePress = async (): Promise<void> => {
     if (!appleAuth.isSupported) {
@@ -189,13 +243,18 @@ export default function LandingScreen(): React.JSX.Element {
           variant="outline"
         />
         <View style={styles.gap} />
-        <Button
-          label={t('auth.landing.continueGoogle')}
-          onPress={handleGooglePress}
-          variant="outline"
-          loading={googleLoading}
-          disabled={!request || googleLoading}
-        />
+        {googleConfigured ? (
+          <GoogleSignInButton
+            clientIds={googleClientIds}
+            label={t('auth.landing.continueGoogle')}
+          />
+        ) : (
+          <Button
+            label={t('auth.landing.continueGoogle')}
+            onPress={() => setError('auth.google.missingClientId')}
+            variant="outline"
+          />
+        )}
         {Platform.OS === 'ios' && (
           <>
             <View style={styles.gap} />

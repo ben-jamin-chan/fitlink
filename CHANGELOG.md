@@ -4,6 +4,31 @@
 
 ---
 
+## [Expo Go Auth Runtime Fix] - 2026-06-05
+
+### Completed
+
+- Firebase Auth now initializes with React Native AsyncStorage persistence when the app is first initialized
+- Google Sign-In no longer constructs the Expo Google OAuth request unless the current platform has a configured client ID
+- Missing Google OAuth config now sets a translated auth error instead of crashing the landing screen render
+- Crashlytics wrapper now skips RNFirebase loading when RNFBAppModule is unavailable, such as in Expo Go
+
+### Files Created / Modified
+
+- services/firebase/config.ts: Auth initialization updated for AsyncStorage persistence
+- app/auth/LandingScreen.tsx: Google auth hook moved behind a configured-platform guard
+- services/crashlytics.ts: RNFirebase native module availability guard added
+- i18n/en.json, my.json, zh.json, ta.json: missing Google client ID error key added
+- CHANGELOG.md: Expo Go auth runtime fix entry added
+
+### Verification
+
+- npx tsc --noEmit passes
+- git diff --check passes for touched files
+- npx expo export --platform ios --output-dir /private/tmp/fit-link-export-ios-auth-fix passes
+
+---
+
 ## [iOS Bundle Dependency Fix] - 2026-06-05
 
 ### Completed
