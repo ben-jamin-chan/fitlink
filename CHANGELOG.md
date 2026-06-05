@@ -4,6 +4,27 @@
 
 ---
 
+## [iOS Bundle Dependency Fix] - 2026-06-05
+
+### Completed
+
+- Added prop-types as a runtime dependency because @invertase/react-native-apple-authentication imports it from AppleButton.ios.js during iOS bundling
+- Confirmed the iOS Metro export bundles successfully after the dependency update
+
+### Files Created / Modified
+
+- package.json: prop-types dependency added
+- package-lock.json: prop-types dependency locked
+- CHANGELOG.md: dependency fix entry added
+
+### Verification
+
+- npx tsc --noEmit passes
+- npm ls prop-types @invertase/react-native-apple-authentication --depth=1 shows prop-types@15.8.1 installed
+- npx expo export --platform ios --output-dir /private/tmp/fit-link-export-ios passes
+
+---
+
 ## [Phase 2 External Gate Deferrals - Task 74] - 2026-06-05
 
 ### Completed
