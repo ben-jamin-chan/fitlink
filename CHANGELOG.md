@@ -4,6 +4,28 @@
 
 ---
 
+## [Phase 2 EAS Project Link - Task 72] - 2026-06-05
+
+### Completed
+
+- Task 72: EAS project created and linked for dev launch-gate execution
+- EAS project created at @benjaminchan/fit-link with project ID 3af7713a-67de-4659-a324-b742aacdc95f
+- app.json now includes owner and extra.eas.projectId required by EAS env/build commands
+- Expo-resolved Android permissions are now materialized in app.json for biometric and camera/native module requirements
+
+### Files Created / Modified
+
+- app.json: EAS owner/project ID added; Android permissions materialized by EAS init
+- CHANGELOG.md: Task 72 EAS project-link entry added
+
+### Verification
+
+- npx expo config --json passes after EAS project linking
+
+### Next Up
+
+- Configure EAS env values and continue Firebase/Stripe/development-build launch gates.
+
 ## [Phase 2 Launch Gate Prep - Task 71] - 2026-06-05
 
 ### Completed
