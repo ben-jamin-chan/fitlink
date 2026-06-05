@@ -4,6 +4,31 @@
 
 ---
 
+## [Phase 2 Launch Gate Prep - Task 71] - 2026-06-05
+
+### Completed
+
+- Task 71: EAS app-config blocker fixed before external launch-gate execution
+- Removed @invertase/react-native-apple-authentication from app.json plugins because the package does not ship an Expo config plugin and caused Expo/EAS config evaluation to fail
+- Apple Sign-In entitlement remains configured through ios.entitlements.com.apple.developer.applesignin
+
+### Files Created / Modified
+
+- app.json: invalid @invertase/react-native-apple-authentication plugin entry removed; Apple entitlement preserved
+- CHANGELOG.md: Task 71 launch-gate prep entry added
+
+### Architecture Decisions
+
+- Apple Sign-In remains a native development-build feature through @invertase/react-native-apple-authentication at runtime, but Expo config evaluation must not load the package as a config plugin
+
+### Verification
+
+- Pending rerun as part of launch-gate execution: npx expo config --json, npx tsc --noEmit, npm --prefix functions run build, and EAS env/build checks
+
+### Next Up
+
+- Continue Phase 2 external launch-gate execution against gym-dating-dev.
+
 ## [Phase 2 Launch Readiness Remediation - Task 70] - 2026-06-05
 
 ### Completed

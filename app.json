@@ -41,10 +41,6 @@
       "@react-native-community/datetimepicker",
       "expo-font",
       [
-        "@invertase/react-native-apple-authentication",
-        {}
-      ],
-      [
         "expo-local-authentication",
         {
           "faceIDPermission": "Allow fit-link to use Face ID for biometric login."
