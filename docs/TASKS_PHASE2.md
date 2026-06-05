@@ -721,8 +721,8 @@ Before declaring Phase 2 ready for public App Store / Play Store launch:
 - [ ] Webhook updates Firestore `premium.*` within 30 seconds
 - [ ] `isPremium()` gates all premium features correctly
 - [ ] Unlimited likes work for premium users, daily limit still enforced for free users
-- [ ] UpsellModal reasons correctly differentiated (likes / superLike / rewind)
-- [ ] "Upgrade Now" CTA navigates to PremiumScreen (Phase 1 stub resolved)
+- [x] UpsellModal reasons correctly differentiated (likes / superLike / rewind)
+- [x] "Upgrade Now" CTA navigates to PremiumScreen (Phase 1 stub resolved)
 
 **Photo Verification**
 - [ ] Camera permission requested and handled gracefully on both platforms
@@ -755,8 +755,25 @@ Before declaring Phase 2 ready for public App Store / Play Store launch:
 - [x] `npx tsc --noEmit` — zero errors
 - [x] Zero `any` usage
 - [x] Zero `console.log` in client files
-- [ ] All new strings through `t()` with entries in all 4 language files
+- [x] All new strings through `t()` with entries in all 4 language files
 - [ ] All Phase 1 deferred items resolved or explicitly re-deferred with documented reason
+
+---
+
+## External Launch Gates Deferred by Owner
+
+The following account/device-backed gates remain intentionally deferred as of
+2026-06-05 and must stay unchecked above until direct evidence exists:
+
+- Stripe account, Stripe products/prices, webhook secret, and payment/webhook testing
+- Apple Developer, App Store Connect, Google Play Console, and production submit credentials
+- Physical iOS and Android development-build installation and native-device validation
+- Production Firebase project alias/promotion; current `.firebaserc` targets `gym-dating-dev`
+- Strava OAuth dashboard setup and live token exchange testing
+- Cloud Vision, Apple Health, Google Fit, and Crashlytics dashboard verification
+
+Dev-only work can continue against `gym-dating-dev`, but this is not public
+App Store / Play Store launch readiness.
 
 ---
 

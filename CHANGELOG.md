@@ -4,6 +4,32 @@
 
 ---
 
+## [Phase 2 External Gate Deferrals - Task 74] - 2026-06-05
+
+### Completed
+
+- Task 74: Phase 2 checklist updated for owner-approved external gate deferrals
+- Stripe account/payment/webhook gates remain deferred until Stripe setup exists
+- App Store / Play Store account, submit credential, and physical-device validation gates remain deferred
+- Production Firebase promotion remains deferred because `.firebaserc` currently targets only `gym-dating-dev`
+- Locally evidenced checklist items were marked complete for differentiated upsell reasons, Premium navigation CTA, and i18n key coverage
+
+### Files Created / Modified
+
+- docs/TASKS_PHASE2.md: local evidence items checked and external launch gate deferral note added
+- CHANGELOG.md: Task 74 external gate deferral entry added
+
+### Verification
+
+- npx tsc --noEmit passes
+- Scoped git diff --check passes for docs/TASKS_PHASE2.md and CHANGELOG.md
+
+### Next Up
+
+- Continue dev-only Firebase/backend validation against `gym-dating-dev`; do not mark account/device gates complete until direct evidence exists.
+
+---
+
 ## [Phase 2 EAS Project Link - Task 72] - 2026-06-05
 
 ### Completed
