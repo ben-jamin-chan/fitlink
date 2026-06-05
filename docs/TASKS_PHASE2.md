@@ -709,10 +709,10 @@ These steps require your browser and third-party consoles — Codex cannot do th
 Before declaring Phase 2 ready for public App Store / Play Store launch:
 
 **EAS Build**
-- [ ] `eas.json` configured for development, preview, production profiles
+- [x] `eas.json` configured for development, preview, production profiles
 - [ ] Development build runs on physical iOS device
 - [ ] Development build runs on physical Android device
-- [ ] `BUILD.md` documents all build and submit commands
+- [x] `BUILD.md` documents all build and submit commands
 
 **Premium Subscriptions**
 - [ ] Stripe Cloud Functions deploy and pass emulator tests
@@ -749,12 +749,12 @@ Before declaring Phase 2 ready for public App Store / Play Store launch:
 - [ ] `/swipes/` client writes denied by Firestore rules
 - [ ] `premium.*` and `photoVerified` denied from client writes
 - [ ] `recordSwipe` Cloud Function enforces daily limit transactionally
-- [ ] Phase 2 Firestore indexes deployed
+- [x] Phase 2 Firestore indexes deployed
 
 **Code Quality**
-- [ ] `npx tsc --noEmit` — zero errors
-- [ ] Zero `any` usage
-- [ ] Zero `console.log` in client files
+- [x] `npx tsc --noEmit` — zero errors
+- [x] Zero `any` usage
+- [x] Zero `console.log` in client files
 - [ ] All new strings through `t()` with entries in all 4 language files
 - [ ] All Phase 1 deferred items resolved or explicitly re-deferred with documented reason
 
