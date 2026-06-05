@@ -38,6 +38,7 @@ Copy `.env.example` → `.env` and fill in all values before running any build:
 | `EXPO_PUBLIC_FIREBASE_APP_ID` | Firebase JS SDK | |
 | `EXPO_PUBLIC_FIREBASE_DATABASE_URL` | Realtime Database | |
 | `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe SDK | `pk_test_` for dev, `pk_live_` for production |
+| `EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL` | Stripe billing portal | Production customer portal URL from Stripe Dashboard |
 | `EXPO_PUBLIC_STRAVA_CLIENT_ID` | Strava OAuth | From https://www.strava.com/settings/api |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO` | Google Sign-In (Expo Go) | From Google Cloud Console |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS` | Google Sign-In (iOS) | From Google Cloud Console |
@@ -48,6 +49,8 @@ Firebase Functions secrets (set with Firebase CLI, never exposed to the Expo cli
 ```bash
 firebase functions:secrets:set STRIPE_SECRET_KEY
 firebase functions:secrets:set STRIPE_WEBHOOK_SECRET
+firebase functions:secrets:set STRAVA_CLIENT_SECRET
+firebase functions:secrets:set STRAVA_TOKEN_ENCRYPTION_KEY
 ```
 
 Stripe price IDs are non-secret server-side Functions env vars. Keep them in `functions/.env`
@@ -57,14 +60,14 @@ for local emulator work and in the Functions deploy environment for production.
 
 ## Build Commands
 
-### Development Build (Simulator — iOS)
-Use this for day-to-day development when Expo Go is insufficient (Stripe, Apple Sign-In, Crashlytics, HealthKit).
+### Development Build (Physical Device — iOS)
+Use this when Expo Go is insufficient (Stripe, Apple Sign-In, Crashlytics, HealthKit).
 
 ```bash
 eas build --profile development --platform ios
 ```
 
-Output: `.tar.gz` archive — drag into the iOS Simulator.
+Output: installable iOS development build for registered physical devices.
 
 ### Development Build (Physical Device — Android)
 ```bash
@@ -123,21 +126,16 @@ eas submit --profile production --platform android --id <build-id>
    - Bundle ID: `com.fitlink.app`
    - Capabilities: Push Notifications, Sign In with Apple
 2. Create App record in App Store Connect at https://appstoreconnect.apple.com
-   - Note the **App ID (ascAppId)** — update `eas.json` submit → ios → `ascAppId`
-3. Update `eas.json` submit block:
-   ```json
-   "ios": {
-     "appleId": "your@email.com",
-     "ascAppId": "1234567890",
-     "appleTeamId": "XXXXXXXXXX"
-   }
-   ```
+3. Configure iOS submission credentials in EAS / App Store Connect before running
+   `eas submit --profile production --platform ios`. Do not commit Apple IDs,
+   team IDs, API keys, or credential files to the repository.
 
 ### Android — Google Play Console
 1. Create app at https://play.google.com/console
 2. Create a Service Account with `Release Manager` role
-3. Download the service account JSON key → save as `google-play-key.json` in project root
-4. `google-play-key.json` is gitignored — never commit it
+3. Configure Google Play credentials in EAS before running
+   `eas submit --profile production --platform android`
+4. Production submits target the Play Store production track in `eas.json`
 
 ---
 

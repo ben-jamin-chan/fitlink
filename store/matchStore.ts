@@ -3,6 +3,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions'
 import { create } from 'zustand'
 
 import { useAuthStore } from '@/store/authStore'
+import { logError } from '@/services/crashlytics'
 import {
   getUserProfile,
   resetUnreadCount,
@@ -150,7 +151,10 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
     try {
       await resetUnreadCount(matchId, userId)
     } catch (error: unknown) {
-      console.error('[matchStore] markAsRead failed:', error)
+      const loggedError =
+        error instanceof Error ? error : new Error('markAsRead failed')
+
+      logError(loggedError, { action: 'markAsRead' })
     }
   },
 

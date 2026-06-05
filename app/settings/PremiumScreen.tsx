@@ -36,7 +36,8 @@ const DEFAULT_COUNTRY = 'Malaysia'
 const FEATURE_ICON_SIZE = spacing.md
 const HERO_ICON_SIZE = spacing.xxxl + spacing.lg
 const HERO_HEART_SIZE = spacing.xxl + spacing.sm
-const PORTAL_URL = 'https://billing.stripe.com/p/login/test_placeholder'
+const BILLING_PORTAL_URL =
+  process.env.EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL ?? ''
 const SELECTED_CARD_ELEVATION = spacing.xs
 const SELECTED_CARD_SHADOW_OPACITY = 0.25
 const SUCCESS_FEATURE_ICON_SIZE = typography.sizes.lg
@@ -263,7 +264,15 @@ export default function PremiumScreen(): React.JSX.Element {
   }, [])
 
   const handleManageSubscription = useCallback((): void => {
-    void Linking.openURL(PORTAL_URL).catch(() => {
+    if (BILLING_PORTAL_URL.length === 0) {
+      Alert.alert(
+        t('subscription.error.title'),
+        t('subscription.errors.portalNotConfigured')
+      )
+      return
+    }
+
+    void Linking.openURL(BILLING_PORTAL_URL).catch(() => {
       Alert.alert(t('errors.generic'))
     })
   }, [t])

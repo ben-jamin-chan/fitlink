@@ -179,6 +179,7 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
         compressedUri
       )
       const updatedPhotos = [...profile.photos]
+      const shouldPromptReverification = index === 0 && profile.photoVerified
 
       if (index < updatedPhotos.length) {
         updatedPhotos[index] = downloadUrl
@@ -192,7 +193,13 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
       })
 
       set({
-        profile: { ...profile, photos: updatedPhotos },
+        profile: {
+          ...profile,
+          photos: updatedPhotos,
+          photoVerified: shouldPromptReverification
+            ? false
+            : profile.photoVerified,
+        },
         isLoading: false,
         error: null,
       })
@@ -225,9 +232,16 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
     const updatedPhotos = profile.photos.filter(
       (_photo: string, photoIndex: number): boolean => photoIndex !== index
     )
+    const shouldPromptReverification = index === 0 && profile.photoVerified
 
     set({
-      profile: { ...profile, photos: updatedPhotos },
+      profile: {
+        ...profile,
+        photos: updatedPhotos,
+        photoVerified: shouldPromptReverification
+          ? false
+          : profile.photoVerified,
+      },
       isLoading: true,
       error: null,
     })

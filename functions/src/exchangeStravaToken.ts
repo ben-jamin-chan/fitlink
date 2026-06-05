@@ -221,6 +221,10 @@ export const exchangeStravaToken = onCall(
     }
 
     const tokens = await exchangeCodeForTokens(code, environment);
+    const encryptedAccessToken = encryptToken(
+      tokens.accessToken,
+      environment.encryptionKeyHex
+    );
     const encryptedRefreshToken = encryptToken(
       tokens.refreshToken,
       environment.encryptionKeyHex
@@ -228,7 +232,7 @@ export const exchangeStravaToken = onCall(
 
     await userRef.update({
       "fitnessTracking.strava.connected": true,
-      "fitnessTracking.strava.accessToken": tokens.accessToken,
+      "fitnessTracking.strava.accessToken": encryptedAccessToken,
       "fitnessTracking.strava.refreshToken": encryptedRefreshToken,
       "fitnessTracking.strava.expiresAt": tokens.expiresAt,
       "fitnessTracking.strava.lastSync":

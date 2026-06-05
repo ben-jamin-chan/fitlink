@@ -136,7 +136,7 @@ export default function ProfileScreen(): React.JSX.Element {
   }
 
   const handleGetPremium = (): void => {
-    // TODO Phase 2: navigate to PremiumScreen.
+    navigation.navigate('Premium')
   }
 
   const handleShareOnProfileChange = (enabled: boolean): void => {

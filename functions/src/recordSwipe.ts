@@ -143,6 +143,10 @@ export const recordSwipe = onCall(
     }
 
     const isPremium = isPremiumActive(userData);
+    if (direction === "superlike" && !isPremium) {
+      throw new HttpsError("permission-denied", "premium_required");
+    }
+
     const dailyLikesRef = db.doc(`users/${userId}/dailyLikes/doc`);
     const swipeRef = db.doc(`swipes/${userId}/likes/${targetId}`);
     let remainingLikes = getRemainingLikes(isPremium, 0);

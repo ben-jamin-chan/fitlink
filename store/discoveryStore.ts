@@ -4,6 +4,7 @@ import type { Functions, HttpsCallable } from 'firebase/functions'
 import { create } from 'zustand'
 
 import i18n from '@/i18n'
+import { logError } from '@/services/crashlytics'
 import { db } from '@/services/firebase/config'
 import { getDailyLikesDoc } from '@/services/firebase/firestore'
 import { useAuthStore } from '@/store/authStore'
@@ -96,9 +97,14 @@ const getErrorCode = (error: unknown): string | null => {
 const isDailyLimitError = (error: unknown): boolean =>
   getErrorCode(error) === 'functions/resource-exhausted'
 
+const isPremiumRequiredError = (error: unknown): boolean =>
+  getErrorCode(error) === 'functions/permission-denied'
+
 const logUnexpectedSwipeError = (action: string, error: unknown): void => {
-  // TODO Task 67: replace with crashlytics.logError
-  console.error(`[discoveryStore] ${action} error:`, error)
+  const loggedError =
+    error instanceof Error ? error : new Error(`${action} failed`)
+
+  logError(loggedError, { action })
 }
 
 const showSwipeErrorToast = (): void => {
@@ -302,6 +308,11 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
     } catch (error: unknown) {
       if (isDailyLimitError(error)) {
         useSubscriptionStore.getState().showUpsell('likes')
+        return
+      }
+
+      if (isPremiumRequiredError(error)) {
+        useSubscriptionStore.getState().showUpsell('superLike')
         return
       }
 

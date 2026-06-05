@@ -50,7 +50,7 @@ export interface FitnessSourceConnection {
 }
 
 export interface StravaConnection extends FitnessSourceConnection {
-  accessToken: string
+  accessToken: string                  // stored encrypted - never expose client-side
   refreshToken: string                 // stored encrypted - never expose client-side
   expiresAt: number                    // Unix timestamp (seconds)
 }

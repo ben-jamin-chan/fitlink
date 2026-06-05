@@ -91,8 +91,6 @@ export const onUserCreated = onDocumentCreated(
     await db.doc(`users/${uid}`).update({
       ...getServerManagedUserDefaults(age, false),
     });
-
-    console.log(`onUserCreated: uid=${uid} age=${age} written successfully.`);
   }
 );
 

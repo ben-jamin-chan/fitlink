@@ -4,6 +4,53 @@
 
 ---
 
+## [Phase 2 Launch Readiness Remediation - Task 70] - 2026-06-05
+
+### Completed
+
+- Task 70: Phase 2 launch-readiness blockers remediated after checklist review
+- eas.json development iOS builds now target physical devices, production submit no longer contains placeholder iOS credentials, and Android submit targets the production track
+- Profile "Get Premium" CTA now navigates to PremiumScreen
+- PremiumScreen billing portal URL now comes from EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL with translated fallback when missing
+- recordSwipe now rejects non-premium superlike callable attempts server-side
+- onPrimaryPhotoChanged Cloud Function added to clear photoVerified / verifiedAt when a verified user's primary photo changes
+- profileStore now immediately prompts local re-verification after primary photo replacement or deletion while the server trigger enforces the persisted reset
+- Strava OAuth now encrypts access tokens as well as refresh tokens, and syncStravaActivity migrates legacy plaintext tokens during sync
+- Remaining client console error paths in discoveryStore and matchStore now route to Crashlytics
+
+### Files Created / Modified
+
+- functions/src/onPrimaryPhotoChanged.ts: created server-owned primary photo re-verification trigger
+- functions/src/recordSwipe.ts, exchangeStravaToken.ts, syncStravaActivity.ts, onUserCreated.ts, index.ts: callable hardening, token encryption, export, and release logging cleanup
+- app/profile/ProfileScreen.tsx, app/settings/PremiumScreen.tsx, store/profileStore.ts, store/discoveryStore.ts, store/matchStore.ts: premium navigation, billing portal handling, re-verification prompt, and Crashlytics logging
+- eas.json, BUILD.md, .env.example, i18n/en.json, my.json, zh.json, ta.json, types/subscription.ts: release config, env docs, translations, and token typing comments
+
+### Architecture Decisions
+
+- EAS submit credentials remain external to the repository; eas.json no longer stores placeholder Apple IDs or credential paths
+- Primary photo verification reset is server-owned because photoVerified and verifiedAt remain blocked from client writes by Firestore rules
+- Strava token migration treats non-encrypted legacy token strings as plaintext only long enough to sync and rewrite encrypted values
+- Billing portal configuration is public Expo env because it is a customer portal URL, not a secret
+
+### Known Issues / Deferred
+
+- Physical-device verification is still required for iOS and Android development builds, Stripe Payment Sheet, Apple Sign-In, Google Sign-In, Crashlytics dashboard delivery, Apple Health, Google Fit, Strava OAuth, and Cloud Vision photo verification
+- Production deploy verification is still required for Cloud Functions, Firestore rules, Firestore indexes, Stripe webhook endpoint configuration, and webhook premium updates within 30 seconds
+- docs/TASKS_PHASE2.md checklist remains unchecked until direct device/deployment evidence exists
+
+### Verification
+
+- npx tsc --noEmit passes
+- npm --prefix functions run build passes
+- eas.json, app.json, firestore.indexes.json, and all four i18n JSON files parse successfully
+- Firestore emulator rules load via firebase emulators:exec --only firestore "node -e \"process.exit(0)\""
+- Static checks confirm zero inline style={{ }}, zero console.log, zero client console.error, and no real any usage; only the word "Always" in a comment matches the any text scan
+- i18n key parity remains intact for en/my/zh/ta, with only the pre-existing _note extras in non-English files
+
+### Next Up
+
+- Configure external release credentials and run the remaining Phase 2 done checklist on physical devices and deployed Firebase/Stripe infrastructure before App Store / Play Store submission.
+
 ## [Phase 2F - Task 69] - 2026-06-05
 
 ### Completed

@@ -753,6 +753,7 @@
       "noClientSecret": "Failed to initialise payment. Please try again.",
       "paymentFailed": "Payment failed. Please check your details and try again.",
       "priceNotConfigured": "Pricing is not available at the moment. Please try again later.",
+      "portalNotConfigured": "Subscription management is not available right now. Please contact support.",
       "generic": "Something went wrong. Please try again."
     },
     "error": {

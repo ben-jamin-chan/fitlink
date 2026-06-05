@@ -67,6 +67,7 @@ const STRAVA_SECRET_NAMES = [
   "STRAVA_CLIENT_SECRET",
   "STRAVA_TOKEN_ENCRYPTION_KEY",
 ];
+const ENCRYPTED_TOKEN_IV_HEX_LENGTH = 32;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -244,6 +245,27 @@ const encryptToken = (plaintext: string, keyHex: string): string => {
   return `${iv.toString("hex")}:${encrypted.toString("hex")}`;
 };
 
+const isEncryptedToken = (value: string): boolean => {
+  const parts = value.split(":");
+
+  if (parts.length !== 2) {
+    return false;
+  }
+
+  const [ivHex, encryptedHex] = parts;
+
+  if (ivHex === undefined || encryptedHex === undefined) {
+    return false;
+  }
+
+  return (
+    ivHex.length === ENCRYPTED_TOKEN_IV_HEX_LENGTH &&
+    encryptedHex.length > 0 &&
+    isHexString(ivHex) &&
+    isHexString(encryptedHex)
+  );
+};
+
 const decryptToken = (ciphertext: string, keyHex: string): string => {
   const [ivHex, encryptedHex] = ciphertext.split(":");
 
@@ -266,6 +288,14 @@ const decryptToken = (ciphertext: string, keyHex: string): string => {
   ]);
 
   return decrypted.toString("utf8");
+};
+
+const decryptTokenOrLegacy = (token: string, keyHex: string): string => {
+  if (!isEncryptedToken(token)) {
+    return token;
+  }
+
+  return decryptToken(token, keyHex);
 };
 
 const getTodayStartUnix = (nowUnix: number): number => {
@@ -446,13 +476,18 @@ export const syncStravaActivity = onCall(
     }
 
     const nowUnix = Math.floor(Date.now() / 1000);
-    let accessToken = stravaData.accessToken;
+    const accessTokenWasEncrypted = isEncryptedToken(stravaData.accessToken);
+    const refreshTokenWasEncrypted = isEncryptedToken(stravaData.refreshToken);
+    let accessToken = decryptTokenOrLegacy(
+      stravaData.accessToken,
+      environment.encryptionKeyHex
+    );
 
     if (
       nowUnix >=
       stravaData.expiresAt - STRAVA_TOKEN_REFRESH_BUFFER_SECONDS
     ) {
-      const decryptedRefreshToken = decryptToken(
+      const decryptedRefreshToken = decryptTokenOrLegacy(
         stravaData.refreshToken,
         environment.encryptionKeyHex
       );
@@ -464,13 +499,34 @@ export const syncStravaActivity = onCall(
       accessToken = refreshed.accessToken;
 
       await userRef.update({
-        "fitnessTracking.strava.accessToken": accessToken,
+        "fitnessTracking.strava.accessToken": encryptToken(
+          accessToken,
+          environment.encryptionKeyHex
+        ),
         "fitnessTracking.strava.refreshToken": encryptToken(
           refreshed.refreshToken,
           environment.encryptionKeyHex
         ),
         "fitnessTracking.strava.expiresAt": refreshed.expiresAt,
       });
+    } else if (!accessTokenWasEncrypted || !refreshTokenWasEncrypted) {
+      const migrationUpdate: Record<string, string> = {};
+
+      if (!accessTokenWasEncrypted) {
+        migrationUpdate["fitnessTracking.strava.accessToken"] = encryptToken(
+          accessToken,
+          environment.encryptionKeyHex
+        );
+      }
+
+      if (!refreshTokenWasEncrypted) {
+        migrationUpdate["fitnessTracking.strava.refreshToken"] = encryptToken(
+          stravaData.refreshToken,
+          environment.encryptionKeyHex
+        );
+      }
+
+      await userRef.update(migrationUpdate);
     }
 
     const activities = await fetchStravaActivities(
