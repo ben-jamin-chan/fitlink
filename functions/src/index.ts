@@ -12,6 +12,7 @@ export { onSwipeCreated } from "./onSwipeCreated";
 export { onNewMessage } from "./onNewMessage";
 export { unmatchUser } from "./unmatchUser";
 export { createStripeCheckout } from "./createStripeCheckout";
+export { createCustomerPortalSession } from "./createCustomerPortalSession";
 export { stripeWebhook } from "./stripeWebhook";
 export { recordSwipe } from "./recordSwipe";
 export { verifyProfilePhoto } from "./verifyProfilePhoto";

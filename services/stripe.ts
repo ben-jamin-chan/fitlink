@@ -1,4 +1,9 @@
-import { getFunctions, httpsCallable } from 'firebase/functions'
+import {
+  getFunctions,
+  httpsCallable,
+  type HttpsCallableResult,
+} from 'firebase/functions'
+import { Linking } from 'react-native'
 
 import type { PremiumTier, StripePrice } from '@/types/subscription'
 
@@ -17,6 +22,10 @@ interface CreateCheckoutResult {
   clientSecret: string
   subscriptionId: string
   customerId: string
+}
+
+interface CreateCustomerPortalSessionResult {
+  url: string
 }
 
 const COUNTRY_CURRENCY_MAP: Record<string, CurrencyCode> = {
@@ -364,4 +373,27 @@ export const createSubscription = async (
   const result = await createCheckout({ priceId })
 
   return result.data
+}
+
+export const openCustomerPortal = async (): Promise<void> => {
+  const functions = getFunctions(undefined, 'asia-southeast1')
+  const createPortalSession = httpsCallable<
+    Record<string, never>,
+    CreateCustomerPortalSessionResult
+  >(functions, 'createCustomerPortalSession')
+
+  const result: HttpsCallableResult<CreateCustomerPortalSessionResult> =
+    await createPortalSession({})
+  const { url } = result.data
+
+  if (url.length === 0) {
+    throw new Error('portal_url_missing')
+  }
+
+  const canOpen = await Linking.canOpenURL(url)
+  if (!canOpen) {
+    throw new Error('portal_url_not_openable')
+  }
+
+  await Linking.openURL(url)
 }

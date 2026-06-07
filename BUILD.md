@@ -38,7 +38,6 @@ Copy `.env.example` → `.env` and fill in all values before running any build:
 | `EXPO_PUBLIC_FIREBASE_APP_ID` | Firebase JS SDK | |
 | `EXPO_PUBLIC_FIREBASE_DATABASE_URL` | Realtime Database | |
 | `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe SDK | `pk_test_` for dev, `pk_live_` for production |
-| `EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL` | Stripe billing portal | Production customer portal URL from Stripe Dashboard |
 | `EXPO_PUBLIC_STRAVA_CLIENT_ID` | Strava OAuth | From https://www.strava.com/settings/api |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_EXPO` | Google Sign-In (Expo Go) | From Google Cloud Console |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS` | Google Sign-In (iOS) | From Google Cloud Console |

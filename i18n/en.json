@@ -765,6 +765,11 @@
     "sheet": {
       "loading": "Preparing payment..."
     },
+    "portal": {
+      "loading": "Opening subscription management...",
+      "errorTitle": "Could Not Open Portal",
+      "errorMessage": "We were unable to open the subscription management portal. Please try again."
+    },
     "success": {
       "headline": "Welcome to Premium!",
       "subheadline": "Your subscription is now active. Enjoy the full fitlink experience.",
@@ -828,6 +833,13 @@
       "planName": "fitlink {{tier}}",
       "renewsOn": "Renews on {{date}}",
       "manage": "Manage Subscription"
+    }
+  },
+  "premium": {
+    "portal": {
+      "loading": "Opening subscription management...",
+      "errorTitle": "Could Not Open Portal",
+      "errorMessage": "We were unable to open the subscription management portal. Please try again."
     }
   },
   "verification": {

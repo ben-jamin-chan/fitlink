@@ -24,7 +24,11 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { Button } from '@/components/ui/Button'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 
-import { getCurrency, getStripePrices } from '@/services/stripe'
+import {
+  getCurrency,
+  getStripePrices,
+  openCustomerPortal,
+} from '@/services/stripe'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { PremiumTier, StripePrice } from '@/types/subscription'
@@ -36,8 +40,6 @@ const DEFAULT_COUNTRY = 'Malaysia'
 const FEATURE_ICON_SIZE = spacing.md
 const HERO_ICON_SIZE = spacing.xxxl + spacing.lg
 const HERO_HEART_SIZE = spacing.xxl + spacing.sm
-const BILLING_PORTAL_URL =
-  process.env.EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL ?? ''
 const SELECTED_CARD_ELEVATION = spacing.xs
 const SELECTED_CARD_SHADOW_OPACITY = 0.25
 const SUCCESS_FEATURE_ICON_SIZE = typography.sizes.lg
@@ -101,6 +103,7 @@ export default function PremiumScreen(): React.JSX.Element {
   )
   const isPremium = useSubscriptionStore((state) => state.isPremium)
   const profile = useProfileStore((state) => state.profile)
+  const [isPortalLoading, setIsPortalLoading] = useState<boolean>(false)
   const [isSheetLoading, setIsSheetLoading] = useState<boolean>(false)
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false)
 
@@ -263,18 +266,18 @@ export default function PremiumScreen(): React.JSX.Element {
     return () => subscription.remove()
   }, [])
 
-  const handleManageSubscription = useCallback((): void => {
-    if (BILLING_PORTAL_URL.length === 0) {
+  const handleManageSubscription = useCallback(async (): Promise<void> => {
+    setIsPortalLoading(true)
+    try {
+      await openCustomerPortal()
+    } catch {
       Alert.alert(
-        t('subscription.error.title'),
-        t('subscription.errors.portalNotConfigured')
+        t('premium.portal.errorTitle'),
+        t('premium.portal.errorMessage')
       )
-      return
+    } finally {
+      setIsPortalLoading(false)
     }
-
-    void Linking.openURL(BILLING_PORTAL_URL).catch(() => {
-      Alert.alert(t('errors.generic'))
-    })
   }, [t])
 
   const handleOpenTerms = useCallback((): void => {
@@ -356,8 +359,12 @@ export default function PremiumScreen(): React.JSX.Element {
           contentContainerStyle={styles.contentContainer}
         >
           <LoadingOverlay
-            visible={isLoading}
-            message={t('subscription.loading')}
+            visible={isLoading || isPortalLoading}
+            message={
+              isPortalLoading
+                ? t('subscription.portal.loading')
+                : t('subscription.loading')
+            }
           />
 
           <View style={styles.activePlanCard}>
@@ -383,6 +390,8 @@ export default function PremiumScreen(): React.JSX.Element {
             label={t('subscription.activePlan.manage')}
             variant="outline"
             onPress={handleManageSubscription}
+            loading={isPortalLoading}
+            disabled={isPortalLoading}
           />
 
           <Text style={styles.legalText}>

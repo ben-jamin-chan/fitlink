@@ -4,6 +4,53 @@
 
 ---
 
+## [Phase 3A - Task 71] - 2026-06-07
+
+### Completed
+
+- Task 71: Stripe Customer Portal Cloud Function
+- createCustomerPortalSession 2nd-gen callable added in asia-southeast1; reads stripeCustomerId server-side from the authenticated user's Firestore document and returns a one-time Stripe Billing Portal session URL
+- openCustomerPortal() added in services/stripe.ts; calls the callable and opens the returned URL via Linking
+- PremiumScreen "Manage Subscription" now uses the Cloud Function flow with loading state and translated error handling
+- EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL removed from the PremiumScreen portal flow
+- Stale EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL placeholders removed from .env.example and BUILD.md
+- i18n portal loading and error keys added to all 4 language files
+
+### Files Created / Modified
+
+- .env.example, BUILD.md: obsolete static billing portal env var references removed
+- functions/src/createCustomerPortalSession.ts: created callable, Firestore stripeCustomerId lookup, Stripe portal session creation, returns { url }
+- functions/src/index.ts: createCustomerPortalSession export appended
+- services/stripe.ts: openCustomerPortal() named export added
+- app/settings/PremiumScreen.tsx: handleManageSubscription wired to openCustomerPortal(), isPortalLoading state added, static portal URL reference removed
+- i18n/en.json, my.json, zh.json, ta.json: subscription.portal.* and premium.portal.* keys added
+- CHANGELOG.md: Task 71 completion entry added
+
+### Architecture Decisions
+
+- stripeCustomerId is always read from Firestore server-side using request.auth.uid to prevent customer ID impersonation
+- Stripe portal return URL uses the registered fitlink://premium deep-link scheme
+- Stripe SDK failures are converted to HttpsError('internal') so raw Stripe details are not exposed to clients
+- The portal callable uses the existing functions Stripe SDK API version because the task explicitly avoided reinstalling Stripe
+
+### Known Issues / Deferred
+
+- Stripe Billing Portal must be enabled and configured in the Stripe Dashboard before live portal sessions can be created successfully
+
+### Verification
+
+- npx tsc --noEmit passes
+- npm --prefix functions run build passes
+- i18n JSON parse check passes for en/my/zh/ta
+- git diff --check passes
+- Scoped scan confirms PremiumScreen no longer references EXPO_PUBLIC_STRIPE_BILLING_PORTAL_URL or BILLING_PORTAL_URL
+
+### Next Up
+
+- Task 72: Rewind (Undo Last Swipe) for Premium Users
+
+---
+
 ## [Phase 3A Types - Task 70] - 2026-06-07
 
 ### Completed
