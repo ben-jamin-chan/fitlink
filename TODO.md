@@ -26,7 +26,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------brew ----------------------------
 
 # 29 April 2026
 1. Maybe prompt with CODEX_PROMPT_PHASE0.md 
@@ -45,3 +45,9 @@ Task 08 (navigation shell) does not require Firebase to be live yet — you can 
 
 # 19 MAY 2026
 1. One important follow-up: the current client RTDB send helpers also increment unread counts, so once client files are in scope, remove that client-side increment to avoid double unread counts.
+
+# 26 MAY 2026 TODO:
+1. *STRIPE* Before testing in the emulator, the developer needs to copy functions/.env.example → functions/.env and populate at minimum STRIPE_SECRET_KEY and the 6 price IDs. The webhook secret is only needed once the emulator is forwarded via the Stripe CLI (stripe listen --forward-to ...), which is documented in BUILD.md from Task 49.
+
+2. *APPLE & ANDROID ID* After Codex completes, the manual step you'll need before first production submission: fill in ascAppId and appleTeamId in eas.json, and download google-play-key.json from Google Play Console.
+
