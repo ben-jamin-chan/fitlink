@@ -45,6 +45,7 @@ interface FirestoreUser {
   preferences: UserPreferences;
   stats: UserStats;
   premium: UserPremiumStatus;
+  incognito: boolean;
   paused: boolean;
   banned: boolean;
   lastActive: admin.firestore.Timestamp;
@@ -141,6 +142,10 @@ export const getDiscoveryStack = onCall(
 
       const candidate = toFirestoreUser(candidateId, doc.data());
       if (candidate === null) {
+        continue;
+      }
+
+      if (candidate.incognito === true) {
         continue;
       }
 
@@ -349,6 +354,7 @@ function toFirestoreUser(
   const banned = getBoolean(raw.banned);
   const paused = getBoolean(raw.paused);
   const photoVerified = getBoolean(raw.photoVerified);
+  const incognito = getBoolean(raw.incognito) ?? false;
 
   if (
     age === null ||
@@ -380,6 +386,7 @@ function toFirestoreUser(
     stats,
     premium,
     photoVerified,
+    incognito,
     paused,
     banned,
     lastActive: raw.lastActive,

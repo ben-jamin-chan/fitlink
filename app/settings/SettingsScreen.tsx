@@ -29,6 +29,7 @@ import { useProfileStore } from '@/store/profileStore'
 
 import { SettingsRow } from '@/components/settings/SettingsRow'
 import { SettingsSection } from '@/components/settings/SettingsSection'
+import { IncognitoToggleCard } from '@/components/settings/IncognitoToggleCard'
 import { Button } from '@/components/ui/Button'
 import { MultiSelect } from '@/components/ui/MultiSelect'
 import { Slider } from '@/components/ui/Slider'
@@ -158,6 +159,8 @@ const showSettingsToast = (message: string, type: ToastType): void => {
 export default function SettingsScreen(): React.JSX.Element {
   const { t, i18n } = useTranslation()
   const navigation = useNavigation<SettingsNavigationProp>()
+  const rootNavigation =
+    useNavigation<StackNavigationProp<RootStackParamList>>()
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
   const profile = useProfileStore((state) => state.profile)
@@ -796,6 +799,7 @@ export default function SettingsScreen(): React.JSX.Element {
             onToggle={handleShowMeToggle}
             icon="eye-outline"
           />
+          <IncognitoToggleCard navigation={rootNavigation} />
           <SettingsRow
             label={t('settings.privacy.blockedUsers')}
             value={t('settings.privacy.blockedCount', { count: 0 })}

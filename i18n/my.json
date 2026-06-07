@@ -699,6 +699,13 @@
       "blockedCount": "{{count}} blocked",
       "noBlocked": "No blocked users"
     },
+    "incognito": {
+      "title": "Incognito Mode",
+      "description": "Browse profiles without appearing in anyone's discovery stack. Your existing matches can still message you.",
+      "enabledToast": "Incognito Mode enabled",
+      "disabledToast": "Incognito Mode disabled",
+      "errorToast": "Failed to update Incognito Mode. Please try again."
+    },
     "connectedApps": {
       "title": "Connected Apps",
       "shareSection": "Activity Sharing",

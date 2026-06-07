@@ -4,6 +4,48 @@
 
 ---
 
+## [Phase 3A - Task 73] - 2026-06-07
+
+### Completed
+
+- Task 73: Incognito Mode for Pro-tier users
+- IncognitoToggleCard: self-contained settings row with Pro gate, Switch, PremiumBadge, and success/error toast wiring
+- getDiscoveryStack: incognito filtering added after both premium-leading and baseline candidate queries so legacy users without the field remain eligible
+- SettingsScreen: IncognitoToggleCard added to Privacy section below the Show Me toggle
+- settings.incognito.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- components/settings/IncognitoToggleCard.tsx: created Pro-gated incognito toggle card with store integration and typed navigation prop
+- functions/src/getDiscoveryStack.ts: incognito exclusion filter added to both candidate query paths
+- app/settings/SettingsScreen.tsx: IncognitoToggleCard import and render added to Privacy section
+- i18n/en.json, my.json, zh.json, ta.json: settings.incognito.* keys added
+- CHANGELOG.md: Task 73 completion entry added
+
+### Architecture Decisions
+
+- incognito is written directly from profileStore.updateProfile() because it is a user-controlled preference, not a server-enforced security boundary
+- Non-Pro users, including Plus-tier users, are redirected to PremiumScreen on toggle tap; no new UpsellModal reason was introduced
+- incognito is filtered after candidate parsing instead of with a Firestore `in` query because `whereIn` requires the field to exist; missing legacy values default to false
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- npx tsc --noEmit passes
+- npm --prefix functions run build passes
+- i18n JSON parse and settings.incognito key sync check passes for en/my/zh/ta
+- git diff --check passes
+- Scoped scan confirms no any, inline styles, or console.log in touched code files
+
+### Next Up
+
+- Task 74: Profile Boost (Pro tier - 1x per month visibility multiplier)
+
+---
+
 ## [Phase 3A - Task 72] - 2026-06-07
 
 ### Completed
