@@ -33,7 +33,6 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   const swipeRight = useDiscoveryStore((state) => state.swipeRight)
   const swipeLeft = useDiscoveryStore((state) => state.swipeLeft)
   const swipeSuperLike = useDiscoveryStore((state) => state.swipeSuperLike)
-  const rewind = useDiscoveryStore((state) => state.rewind)
   const advanceStack = useDiscoveryStore((state) => state.advanceStack)
   const newMatchIds = useMatchStore((state) => state.newMatchIds)
   const matches = useMatchStore((state) => state.matches)
@@ -113,10 +112,6 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
     void swipeSuperLike(target.uid).catch(() => undefined)
   }
 
-  const handleRewind = (): void => {
-    rewind()
-  }
-
   const handleTapInfo = (user: UserProfile): void => {
     setModalProfile(user)
   }
@@ -144,6 +139,8 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
   }, [clearNewMatch, pendingMatchId])
 
   const isStackEmpty = visibleStack.length === 0
+  const actionButtonsDisabled = isLoading || isStackEmpty
+  const rewindDisabled = isLoading
 
   return (
     <SafeAreaView style={styles.container}>
@@ -182,9 +179,9 @@ const DiscoveryScreen = (): React.JSX.Element | null => {
         onPass={handleSwipeLeft}
         onLike={handleSwipeRight}
         onSuperLike={handleSuperLike}
-        onRewind={handleRewind}
         onInfo={handleTopInfo}
-        disabled={isLoading || isStackEmpty}
+        disabled={actionButtonsDisabled}
+        rewindDisabled={rewindDisabled}
       />
 
       <UpsellModal

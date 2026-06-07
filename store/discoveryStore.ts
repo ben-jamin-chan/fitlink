@@ -32,6 +32,12 @@ interface RecordSwipeResponse {
   remainingLikes: number
 }
 
+interface RewindSwipeResponse {
+  targetProfile: UserProfile
+  targetId: string
+  deletedCollection: 'likes' | 'passes'
+}
+
 interface DiscoveryState {
   stack: UserProfile[]
   currentIndex: number
@@ -41,6 +47,7 @@ interface DiscoveryState {
   isLimitReached: boolean
   dailyLimitReached: boolean
   isRefetching: boolean
+  isRewinding: boolean
 }
 
 interface DiscoveryActions {
@@ -48,7 +55,7 @@ interface DiscoveryActions {
   swipeRight: (targetId: string) => Promise<void>
   swipeLeft: (userId: string, targetId: string) => Promise<void>
   swipeSuperLike: (targetId: string) => Promise<void>
-  rewind: () => void
+  rewind: () => Promise<void>
   checkDailyLimit: (userId: string) => Promise<number>
   advanceStack: () => void
   clearError: () => void
@@ -66,6 +73,7 @@ const initialState: DiscoveryState = {
   isLimitReached: false,
   dailyLimitReached: false,
   isRefetching: false,
+  isRewinding: false,
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -81,6 +89,15 @@ const getRecordSwipeFn = (): HttpsCallable<
   httpsCallable<RecordSwipeRequest, RecordSwipeResponse>(
     getCallableFunctions(),
     'recordSwipe'
+  )
+
+const getRewindSwipeFn = (): HttpsCallable<
+  Record<string, never>,
+  RewindSwipeResponse
+> =>
+  httpsCallable<Record<string, never>, RewindSwipeResponse>(
+    getCallableFunctions(),
+    'rewindSwipe'
   )
 
 const getDailyLikesCountFromRemaining = (remainingLikes: number): number =>
@@ -325,13 +342,42 @@ export const useDiscoveryStore = create<DiscoveryStore>()((set, get) => ({
     }
   },
 
-  rewind: (): void => {
+  rewind: async (): Promise<void> => {
     if (!useSubscriptionStore.getState().isPremium()) {
       useSubscriptionStore.getState().showUpsell('rewind')
       return
     }
 
-    // TODO Phase 3: implement actual rewind logic (restore last swiped card).
+    if (get().isRewinding) {
+      return
+    }
+
+    set({ isRewinding: true })
+
+    try {
+      const rewindSwipe = getRewindSwipeFn()
+      const result = await rewindSwipe({})
+      const { targetId, targetProfile } = result.data
+      const restoredProfile: UserProfile = {
+        ...targetProfile,
+        uid: targetId,
+      }
+
+      set((state) => {
+        const activeStack = state.stack
+          .slice(state.currentIndex)
+          .filter((userProfile) => userProfile.uid !== targetId)
+
+        return {
+          currentIndex: 0,
+          isRewinding: false,
+          stack: [restoredProfile, ...activeStack],
+        }
+      })
+    } catch (error: unknown) {
+      set({ isRewinding: false })
+      throw error
+    }
   },
 
   checkDailyLimit: async (userId: string): Promise<number> => {

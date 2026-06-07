@@ -15,6 +15,7 @@ export { createStripeCheckout } from "./createStripeCheckout";
 export { createCustomerPortalSession } from "./createCustomerPortalSession";
 export { stripeWebhook } from "./stripeWebhook";
 export { recordSwipe } from "./recordSwipe";
+export { rewindSwipe } from "./rewindSwipe";
 export { verifyProfilePhoto } from "./verifyProfilePhoto";
 export { onPrimaryPhotoChanged } from "./onPrimaryPhotoChanged";
 export { exchangeStravaToken } from "./exchangeStravaToken";

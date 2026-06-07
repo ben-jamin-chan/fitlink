@@ -4,6 +4,48 @@
 
 ---
 
+## [Phase 3A - Task 72] - 2026-06-07
+
+### Completed
+
+- Task 72: Rewind / Undo Last Swipe for premium users
+- rewindSwipe 2nd-gen callable added in asia-southeast1; verifies auth and premium status server-side, finds the latest like/pass swipe, deletes exactly one swipe document, and returns the target profile
+- discoveryStore.rewind() now calls the rewindSwipe callable for premium users, preserves the existing non-premium upsell path, tracks isRewinding, and restores the rewound profile to the active discovery stack
+- ActionButtons now owns the client-side premium UX gate, surfaces translated rewind error toasts, and disables rewind while the async operation is running
+- DiscoveryScreen now keeps rewind usable when the visible card stack is empty by passing a rewind-specific disabled state
+- discovery.rewind.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- functions/src/rewindSwipe.ts: created callable with server-owned swipe deletion and premium validation
+- functions/src/index.ts: rewindSwipe export appended
+- store/discoveryStore.ts: isRewinding state and rewind action implemented
+- app/discovery/DiscoveryScreen.tsx: disabled-state wiring added for rewind
+- components/discovery/ActionButtons.tsx: premium/non-premium rewind branch, error toast handling, and per-button disabled handling added
+- i18n/en.json, my.json, zh.json, ta.json: discovery.rewind.* keys added
+- CHANGELOG.md: Task 72 completion entry added
+
+### Architecture Decisions
+
+- Rewind uses the existing regional callable setup in discoveryStore because services/firebase/config.ts does not currently export a Functions instance and was marked read-only for this task
+- The restored card is prepended to the active stack slice and currentIndex is reset to 0 so previously swiped cards do not reappear
+- The discovery screen remains responsible for swipe-stack orchestration, while ActionButtons owns the client-side rewind tap branch required by the task prompt
+- The Cloud Function attaches structured details to the no-swipes not-found error so the client can distinguish it from other not-found failures
+
+### Verification
+
+- npx tsc --noEmit passes
+- npm --prefix functions run build passes
+- i18n JSON parse check passes for en/my/zh/ta
+- git diff --check passes
+- Scoped scans confirm no any, inline styles, or console.log in touched code files
+
+### Next Up
+
+- Continue Phase 3A with the next assigned task.
+
+---
+
 ## [Phase 3A - Task 71] - 2026-06-07
 
 ### Completed

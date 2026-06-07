@@ -4,6 +4,11 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
+import { useTranslation } from 'react-i18next'
+
+import { useDiscoveryStore } from '@/store/discoveryStore'
+import { useSubscriptionStore } from '@/store/subscriptionStore'
+import { showToast } from '@/store/toastStore'
 
 import { colors, spacing } from '@/constants/theme'
 
@@ -16,15 +21,6 @@ const SHADOW_ELEVATION = 4
 type ActionButtonKind = 'rewind' | 'pass' | 'superLike' | 'like' | 'info'
 type IoniconName = React.ComponentProps<typeof Ionicons>['name']
 
-interface ActionButtonsProps {
-  onPass: () => void
-  onLike: () => void
-  onSuperLike: () => void
-  onRewind: () => void
-  onInfo: () => void
-  disabled: boolean
-}
-
 interface ActionButtonConfig {
   kind: ActionButtonKind
   icon: IoniconName
@@ -33,14 +29,58 @@ interface ActionButtonConfig {
   onPress: () => void
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const getErrorCode = (error: unknown): string | null => {
+  if (!isRecord(error) || typeof error.code !== 'string') {
+    return null
+  }
+
+  return error.code
+}
+
+const isRewindNoSwipesError = (error: unknown): boolean =>
+  isRecord(error) &&
+  isRecord(error.details) &&
+  getErrorCode(error) === 'functions/not-found' &&
+  error.details.reason === 'no-swipes'
+
+const getRewindErrorMessageKey = (error: unknown): string => {
+  if (isRewindNoSwipesError(error)) {
+    return 'discovery.rewind.noSwipes'
+  }
+
+  if (getErrorCode(error) === 'functions/permission-denied') {
+    return 'discovery.rewind.notAvailable'
+  }
+
+  return 'discovery.rewind.error'
+}
+
+interface ActionButtonsProps {
+  onPass: () => void
+  onLike: () => void
+  onSuperLike: () => void
+  onInfo: () => void
+  disabled: boolean
+  rewindDisabled: boolean
+}
+
 export const ActionButtons = ({
   onPass,
   onLike,
   onSuperLike,
-  onRewind,
   onInfo,
   disabled,
+  rewindDisabled,
 }: ActionButtonsProps): React.JSX.Element => {
+  const { t } = useTranslation()
+  const rewind = useDiscoveryStore((state) => state.rewind)
+  const isRewinding = useDiscoveryStore((state) => state.isRewinding)
+  const isPremium = useSubscriptionStore((state) => state.isPremium)
+  const showUpsell = useSubscriptionStore((state) => state.showUpsell)
+
   const triggerHaptics = (kind: ActionButtonKind): void => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 
@@ -54,13 +94,24 @@ export const ActionButtons = ({
     config.onPress()
   }
 
+  const handleRewind = (): void => {
+    if (!isPremium()) {
+      showUpsell('rewind')
+      return
+    }
+
+    void rewind().catch((error: unknown): void => {
+      showToast(t(getRewindErrorMessageKey(error)), 'error')
+    })
+  }
+
   const buttons: ActionButtonConfig[] = [
     {
       kind: 'rewind',
       icon: 'reload-outline',
       color: colors.warning,
       size: 'small',
-      onPress: onRewind,
+      onPress: handleRewind,
     },
     {
       kind: 'pass',
@@ -93,9 +144,13 @@ export const ActionButtons = ({
   ]
 
   return (
-    <View style={[styles.container, disabled && styles.disabled]}>
+    <View style={styles.container}>
       {buttons.map((button) => {
         const isLarge = button.size === 'large'
+        const isDisabled =
+          button.kind === 'rewind'
+            ? rewindDisabled || isRewinding
+            : disabled || isRewinding
 
         return (
           <TouchableOpacity
@@ -103,10 +158,11 @@ export const ActionButtons = ({
             style={[
               styles.button,
               isLarge ? styles.buttonLarge : styles.buttonSmall,
+              isDisabled && styles.disabled,
             ]}
             onPress={() => handlePress(button)}
             activeOpacity={0.82}
-            disabled={disabled}
+            disabled={isDisabled}
           >
             <Ionicons
               name={button.icon}

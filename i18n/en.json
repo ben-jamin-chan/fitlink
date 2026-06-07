@@ -275,6 +275,11 @@
     "upgradeNow": "Upgrade Now",
     "maybeLater": "Maybe Later",
     "loading": "Finding your matches...",
+    "rewind": {
+      "noSwipes": "Nothing to undo yet",
+      "error": "Couldn't undo last swipe. Please try again.",
+      "notAvailable": "Rewind is not available"
+    },
     "matchCelebration": {
       "headline": "It's a Match!",
       "subheadline": "You and {{name}} liked each other",
