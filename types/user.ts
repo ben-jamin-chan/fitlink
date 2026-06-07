@@ -58,6 +58,30 @@ export interface UserProfile {
   banned: boolean
   expoPushToken?: string
   language: string
+  timezone?: string
+  // IANA timezone string, e.g. 'Asia/Kuala_Lumpur', 'Asia/Singapore', 'Asia/Bangkok'
+  // Written at onboarding Step 1 (Task 81). Used by recordSwipe and verifyProfilePhoto
+  // Cloud Functions (Task 82) for per-user midnight reset. Optional so existing users
+  // without the field fall back to 'Asia/Kuala_Lumpur' on the server side.
+  incognito?: boolean
+  // Pro tier feature. When true, this user is excluded from all other users'
+  // discovery stacks by getDiscoveryStack (Task 73). The user themselves can still
+  // swipe normally. Client-writable (same as `paused`). Defaults to false if absent.
+  boostExpiresAt?: Timestamp
+  // Pro tier feature. Set server-side by the activateBoost Cloud Function (Task 74).
+  // When present and in the future, getDiscoveryStack adds a scoring bonus.
+  // Blocked from client writes by firestore.rules (Task 87).
+  videoProfileUrl?: string
+  // Cloud Storage download URL for the user's short video loop (max 15s).
+  // Uploaded via storage.uploadVideoProfile (Task 77).
+  // Empty string means no video - treat '' and undefined identically.
+  gymCheckin?: {
+    gymName: string
+    expiresAt: Timestamp
+  }
+  // Denormalised snapshot written by the createCheckin Cloud Function (Task 79)
+  // alongside the /gymCheckins/{id} document. Allows SwipeCard to show the
+  // "At gym" badge without an extra collection query. Cleared on check-out.
   createdAt: Timestamp
   lastActive: Timestamp
 }

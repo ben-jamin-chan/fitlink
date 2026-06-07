@@ -4,6 +4,40 @@
 
 ---
 
+## [Phase 3A Types - Task 70] - 2026-06-07
+
+### Completed
+
+- Task 70: Phase 3 type scaffolding added before feature implementation
+- UserProfile now exposes optional Phase 3 fields for timezone-aware resets, incognito mode, profile boosts, video profiles, and denormalised gym check-ins
+- Event and gym check-in TypeScript interfaces added for future Phase 3 stores, screens, services, and components
+- Git commit numbering uses task-75 because task-70 through task-74 were already consumed by Phase 2 remediation commits
+
+### Files Created / Modified
+
+- types/user.ts: Phase 3 optional UserProfile fields appended after language without changing existing Phase 2 fields
+- types/event.ts: EventLocation, FitlinkEvent, EventRSVPStatus, and EventWithAttendeeProfiles added
+- types/checkin.ts: GymCheckin and GymPlace added
+- CHANGELOG.md: Task 70 completion entry added
+
+### Architecture Decisions
+
+- Phase 3 fields are optional so existing user documents continue to type-check while server code can apply fallback behavior
+- Event and check-in IDs are represented in client-side interfaces as fetched document IDs, not Firestore-stored fields
+- GeoPoint and Timestamp types use the Firebase JS SDK import path for client-side type files
+
+### Verification
+
+- npx tsc --noEmit passes
+- git diff --check HEAD~1..HEAD passes
+- Scoped scan confirms no any, inline styles, or console.log in touched type files
+
+### Next Up
+
+- Continue with Phase 3 Task 71: Stripe Customer Portal Cloud Function.
+
+---
+
 ## [Expo Go Auth Runtime Fix] - 2026-06-05
 
 ### Completed
