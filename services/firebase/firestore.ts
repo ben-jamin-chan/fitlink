@@ -106,6 +106,7 @@ export type UserProfileUpdateInput = Partial<
     | 'photoVerified'
     | 'verifiedAt'
     | 'stripeCustomerId'
+    | 'boost'
     | 'createdAt'
     | 'lastActive'
   >

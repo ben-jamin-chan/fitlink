@@ -29,6 +29,10 @@ interface UserPremiumStatus {
   active: boolean;
 }
 
+interface UserBoostStatus {
+  expiresAt: admin.firestore.Timestamp;
+}
+
 interface FirestoreUser {
   uid: string;
   firstName: string;
@@ -45,6 +49,7 @@ interface FirestoreUser {
   preferences: UserPreferences;
   stats: UserStats;
   premium: UserPremiumStatus;
+  boost?: UserBoostStatus;
   incognito: boolean;
   paused: boolean;
   banned: boolean;
@@ -210,6 +215,13 @@ function scoreCandidate(caller: FirestoreUser, candidate: FirestoreUser): number
   }
 
   if (
+    candidate.boost !== undefined &&
+    candidate.boost.expiresAt.toMillis() > Date.now()
+  ) {
+    score += 20;
+  }
+
+  if (
     caller.dietaryPreference === candidate.dietaryPreference &&
     caller.dietaryPreference !== "No preference" &&
     caller.dietaryPreference !== ""
@@ -334,6 +346,7 @@ function toFirestoreUser(
   const preferences = parsePreferences(raw.preferences);
   const stats = parseStats(raw.stats);
   const premium = parsePremiumStatus(raw.premium, raw.subscription);
+  const boost = parseBoostStatus(raw.boost);
 
   if (
     location === null ||
@@ -385,6 +398,7 @@ function toFirestoreUser(
     preferences,
     stats,
     premium,
+    boost,
     photoVerified,
     incognito,
     paused,
@@ -471,6 +485,18 @@ function parsePremiumStatus(
   }
 
   return { active: false };
+}
+
+function parseBoostStatus(value: unknown): UserBoostStatus | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  if (!(value.expiresAt instanceof admin.firestore.Timestamp)) {
+    return undefined;
+  }
+
+  return { expiresAt: value.expiresAt };
 }
 
 function isFitnessLevel(value: unknown): value is FitnessLevel {

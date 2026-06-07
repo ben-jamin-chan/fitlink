@@ -4,6 +4,58 @@
 
 ---
 
+## [Phase 3A - Task 74] - 2026-06-07
+
+### Completed
+
+- Task 74: Profile Boost for Pro-tier users
+- activateBoost: 2nd-gen callable enforcing active Pro gate, one boost per calendar month, and 30-minute expiry; writes boost.activatedAt and boost.expiresAt server-side
+- getDiscoveryStack: +20 score uplift applied for candidates with an active boost
+- BoostCard: self-contained Pro-gated card with available, active, used-this-month, and non-Pro states
+- SettingsScreen: new Premium section added with BoostCard below Privacy
+- ProfileScreen: BoostCard rendered in the action area for active Pro users
+- firestore.rules: boost added to server-only create and update deny-lists
+- UserProfile boost type aligned to boost.activatedAt / boost.expiresAt and client profile update input types exclude boost
+- profile.boost.* and settings.boost.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- types/user.ts: boost field aligned to server-owned boost object
+- store/profileStore.ts, services/firebase/firestore.ts: profile update input types now omit boost
+- functions/src/activateBoost.ts: created Pro-only callable with calendar-month cap and Admin SDK timestamp writes
+- functions/src/getDiscoveryStack.ts: active boost scoring uplift added to candidate scoring
+- functions/src/index.ts: activateBoost export appended
+- components/profile/BoostCard.tsx: created shared boost card with callable activation and toast feedback
+- app/settings/SettingsScreen.tsx: Premium section and BoostCard added
+- app/profile/ProfileScreen.tsx: BoostCard rendered for Pro users
+- firestore.rules: boost added to server-only field deny-lists
+- i18n/en.json, my.json, zh.json, ta.json: boost and Premium-section keys added
+- CHANGELOG.md: Task 74 completion entry added
+
+### Architecture Decisions
+
+- Boost state is read from the typed Firestore-backed profile boost object; normal client profile update helpers explicitly omit boost
+- BoostCard stores the returned expiresAt milliseconds locally only for immediate UI feedback while the profile listener catches up
+- The monthly cap follows the task prompt's calendar-month check based on boost.activatedAt
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- npx tsc --noEmit passes
+- npm --prefix functions run build passes
+- i18n JSON parse and boost key sync check passes for en/my/zh/ta
+- git diff --check passes
+- Scoped scan confirms no TypeScript any, inline styles, or console.log in touched code files
+
+### Next Up
+
+- Task 75: Matches Advanced Search & Filter
+
+---
+
 ## [Phase 3A - Task 73] - 2026-06-07
 
 ### Completed

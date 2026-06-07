@@ -35,6 +35,7 @@ service cloud.firestore {
         'verifiedAt',
         'stripeCustomerId',
         'premium',
+        'boost',
         // Legacy Phase 1 field — client still sees it in normalised reads
         // but must not write it
         'subscription'
@@ -63,6 +64,7 @@ service cloud.firestore {
         'verifiedAt',
         'stripeCustomerId',
         'premium',
+        'boost',
         // Legacy Phase 1 field — client still sees it in normalised reads
         // but must not write it
         'subscription'

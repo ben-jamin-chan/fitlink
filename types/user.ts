@@ -24,6 +24,11 @@ export interface UserStats {
   matches: number
 }
 
+export interface UserBoost {
+  activatedAt: Timestamp
+  expiresAt: Timestamp
+}
+
 export interface UserProfile {
   uid: string
   firstName: string
@@ -67,10 +72,10 @@ export interface UserProfile {
   // Pro tier feature. When true, this user is excluded from all other users'
   // discovery stacks by getDiscoveryStack (Task 73). The user themselves can still
   // swipe normally. Client-writable (same as `paused`). Defaults to false if absent.
-  boostExpiresAt?: Timestamp
+  boost?: UserBoost
   // Pro tier feature. Set server-side by the activateBoost Cloud Function (Task 74).
-  // When present and in the future, getDiscoveryStack adds a scoring bonus.
-  // Blocked from client writes by firestore.rules (Task 87).
+  // When expiresAt is in the future, getDiscoveryStack adds a scoring bonus.
+  // Blocked from client writes by firestore.rules.
   videoProfileUrl?: string
   // Cloud Storage download URL for the user's short video loop (max 15s).
   // Uploaded via storage.uploadVideoProfile (Task 77).

@@ -27,6 +27,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuthStore } from '@/store/authStore'
 import { useProfileStore } from '@/store/profileStore'
 
+import { BoostCard } from '@/components/profile/BoostCard'
 import { SettingsRow } from '@/components/settings/SettingsRow'
 import { SettingsSection } from '@/components/settings/SettingsSection'
 import { IncognitoToggleCard } from '@/components/settings/IncognitoToggleCard'
@@ -807,6 +808,10 @@ export default function SettingsScreen(): React.JSX.Element {
             onPress={handleBlockedUsers}
             isLast={true}
           />
+        </SettingsSection>
+
+        <SettingsSection title={t('settings.sections.premium')}>
+          <BoostCard navigation={rootNavigation} />
         </SettingsSection>
 
         {isPremium ? (

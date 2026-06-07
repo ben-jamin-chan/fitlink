@@ -585,6 +585,22 @@
       "submit": "Submit Report",
       "submitted": "Report submitted. Thank you for keeping fitlink safe."
     },
+    "boost": {
+      "title": "Profile Boost",
+      "available": "Available this month",
+      "activeTimeRemaining": "Active — {{time}} remaining",
+      "usedThisMonth": "Used this month · Resets next month",
+      "alreadyActive": "Your boost is already active",
+      "alreadyUsedThisMonth": "You've already used your boost this month",
+      "activated": "Boost activated! You're now at the top of the stack.",
+      "activate": "Boost Profile",
+      "active": "Boosted — {{time}} remaining",
+      "proOnly": "Pro only",
+      "success": "Boost activated! You're now at the top of the stack.",
+      "error": "Could not activate boost. Please try again.",
+      "buttonLabel": "Boost",
+      "timeMinutes": "{{minutes}}m"
+    },
     "errors": {
       "fetchFailed": "Could not load profile. Please try again.",
       "updateFailed": "Could not save changes. Please try again.",
@@ -653,6 +669,9 @@
     "listSeparator": ", ",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
+    "sections": {
+      "premium": "Premium"
+    },
     "languages": {
       "en": "English",
       "ms": "Bahasa Melayu",
@@ -704,6 +723,10 @@
       "enabledToast": "Incognito Mode enabled",
       "disabledToast": "Incognito Mode disabled",
       "errorToast": "Failed to update Incognito Mode. Please try again."
+    },
+    "boost": {
+      "title": "Profile Boost",
+      "description": "Move to the top of the discovery stack for 30 minutes. Once per month."
     },
     "connectedApps": {
       "title": "Connected Apps",

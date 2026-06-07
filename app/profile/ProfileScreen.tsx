@@ -24,6 +24,7 @@ import { useFitnessStore } from '@/store/fitnessStore'
 import { useProfileStore } from '@/store/profileStore'
 
 import { ActivityChip } from '@/components/profile/ActivityChip'
+import { BoostCard } from '@/components/profile/BoostCard'
 import { InfoCard, InfoRow } from '@/components/profile/InfoCard'
 import { PhotoGrid } from '@/components/profile/PhotoGrid'
 import { StatsBadge } from '@/components/profile/StatsBadge'
@@ -92,6 +93,8 @@ const getDrinkingKey = (drinking: DrinkingStatus): string => {
 export default function ProfileScreen(): React.JSX.Element {
   const { t } = useTranslation()
   const navigation = useNavigation<ProfileNavigationProp>()
+  const rootNavigation =
+    useNavigation<StackNavigationProp<RootStackParamList>>()
   const userId = useAuthStore((state) => state.user?.uid)
   const profile = useProfileStore((state) => state.profile)
   const isLoading = useProfileStore((state) => state.isLoading)
@@ -491,6 +494,10 @@ export default function ProfileScreen(): React.JSX.Element {
               label={t('profile.editProfile')}
               onPress={handleEditProfile}
             />
+            {profile.premium.active === true &&
+              profile.premium.tier === 'pro' && (
+                <BoostCard navigation={rootNavigation} />
+              )}
             <Button
               label={t('profile.settings')}
               onPress={handleSettings}

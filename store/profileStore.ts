@@ -28,6 +28,7 @@ type EditableProfileUpdate = Partial<
     | 'photoVerified'
     | 'verifiedAt'
     | 'stripeCustomerId'
+    | 'boost'
     | 'createdAt'
     | 'lastActive'
   >
