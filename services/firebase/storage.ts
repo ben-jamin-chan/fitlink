@@ -11,6 +11,17 @@ import { auth, storage } from '@/services/firebase/config'
 import { compressImage } from '@/utils/imageUtils'
 
 const PROFILE_PHOTO_CONTENT_TYPE = 'image/jpeg'
+const VOICE_MESSAGE_CONTENT_TYPES = {
+  m4a: 'audio/mp4',
+  '3gp': 'audio/3gpp',
+} as const
+
+type VoiceMessageExtension = keyof typeof VOICE_MESSAGE_CONTENT_TYPES
+
+const getVoiceMessageExtension = (
+  localUri: string
+): VoiceMessageExtension =>
+  localUri.toLowerCase().includes('.3gp') ? '3gp' : 'm4a'
 
 export const uploadProfilePhoto = async (
   userId: string,
@@ -57,6 +68,27 @@ export const uploadVerificationSelfie = async (
   })
 
   return storagePath
+}
+
+export const uploadVoiceMessage = async (
+  matchId: string,
+  localUri: string
+): Promise<string> => {
+  const extension = getVoiceMessageExtension(localUri)
+  const uploadId = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+  const storagePath = `chats/${matchId}/audio/${uploadId}.${extension}`
+  const audioRef = ref(storage, storagePath)
+  const response = await fetch(localUri)
+  const blob = await response.blob()
+  const uploadTask = uploadBytesResumable(audioRef, blob, {
+    contentType: VOICE_MESSAGE_CONTENT_TYPES[extension],
+  })
+
+  await new Promise<void>((resolve, reject): void => {
+    uploadTask.on('state_changed', undefined, reject, resolve)
+  })
+
+  return getDownloadURL(uploadTask.snapshot.ref)
 }
 
 export const uploadAllProfilePhotos = async (

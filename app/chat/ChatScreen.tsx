@@ -45,6 +45,8 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import { ChatInput } from '@/components/chat/ChatInput'
 import { MessageBubble } from '@/components/chat/MessageBubble'
+import { VoiceMessageBubble } from '@/components/chat/VoiceMessageBubble'
+import { VoiceMessageRecorder } from '@/components/chat/VoiceMessageRecorder'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge'
 
@@ -81,6 +83,11 @@ type ChatListItem = MessageListItem | DateHeaderItem
 interface PresenceStatus {
   text: string
   online: boolean
+}
+
+interface PendingVoiceMessage {
+  localUri: string
+  durationSeconds: number
 }
 
 interface TypingIndicatorProps {
@@ -270,6 +277,7 @@ const ChatScreen = (): React.JSX.Element | null => {
   const closeChat = useChatStore((state) => state.closeChat)
   const sendMessage = useChatStore((state) => state.sendMessage)
   const sendImage = useChatStore((state) => state.sendImage)
+  const sendVoiceMessage = useChatStore((state) => state.sendVoiceMessage)
   const onTypingStart = useChatStore((state) => state.onTypingStart)
   const markChatAsRead = useChatStore((state) => state.markAsRead)
   const flushOfflineQueue = useChatStore((state) => state.flushOfflineQueue)
@@ -283,6 +291,9 @@ const ChatScreen = (): React.JSX.Element | null => {
   const [otherLastSeen, setOtherLastSeen] = useState<number | null>(null)
   const [expandedTimestampIds, setExpandedTimestampIds] = useState<string[]>([])
   const [prefillText, setPrefillText] = useState<string | null>(null)
+  const [isRecording, setIsRecording] = useState<boolean>(false)
+  const [pendingVoiceMessage, setPendingVoiceMessage] =
+    useState<PendingVoiceMessage | null>(null)
 
   const match = useMemo(
     () => matches.find((candidate) => candidate.id === matchId),
@@ -406,6 +417,22 @@ const ChatScreen = (): React.JSX.Element | null => {
     void sendImage(userId, otherUserUid)
   }, [otherUserUid, sendImage, userId])
 
+  const handleMicPress = useCallback((): void => {
+    setIsRecording(true)
+  }, [])
+
+  const handleVoiceSend = useCallback(
+    (localUri: string, durationSeconds: number): void => {
+      setPendingVoiceMessage({ localUri, durationSeconds })
+      setIsRecording(false)
+    },
+    []
+  )
+
+  const handleVoiceCancel = useCallback((): void => {
+    setIsRecording(false)
+  }, [])
+
   const handleTyping = useCallback((): void => {
     if (userId === undefined) {
       return
@@ -492,6 +519,16 @@ const ChatScreen = (): React.JSX.Element | null => {
         item.messageIndex === 0 ||
         (item.messageIndex + 1) % TIMESTAMP_INTERVAL === 0 ||
         expandedTimestampIds.includes(item.message.id)
+
+      if (item.message.type === 'voice' && item.message.audioUrl !== null) {
+        return (
+          <VoiceMessageBubble
+            audioUrl={item.message.audioUrl}
+            duration={item.message.durationSeconds ?? 0}
+            isOwnMessage={item.message.senderId === userId}
+          />
+        )
+      }
 
       return (
         <MessageBubble
@@ -684,6 +721,19 @@ const ChatScreen = (): React.JSX.Element | null => {
   }, [clearError, error, t])
 
   useEffect(() => {
+    if (isRecording || pendingVoiceMessage === null) {
+      return
+    }
+
+    const voiceMessage = pendingVoiceMessage
+    setPendingVoiceMessage(null)
+    void sendVoiceMessage(
+      voiceMessage.localUri,
+      voiceMessage.durationSeconds
+    )
+  }, [isRecording, pendingVoiceMessage, sendVoiceMessage])
+
+  useEffect(() => {
     const subscription = AppState.addEventListener('change', (state): void => {
       if (state === 'active') {
         handleForegroundWork()
@@ -762,10 +812,19 @@ const ChatScreen = (): React.JSX.Element | null => {
           </View>
         )}
 
+        {isRecording && (
+          <VoiceMessageRecorder
+            onSend={handleVoiceSend}
+            onCancel={handleVoiceCancel}
+          />
+        )}
+
         <ChatInput
           onSendText={handleSendText}
           onImagePress={handleImagePress}
+          onMicPress={handleMicPress}
           onTyping={handleTyping}
+          isRecording={isRecording}
           disabled={inputDisabled}
           prefillText={prefillText}
           onPrefillUsed={() => setPrefillText(null)}

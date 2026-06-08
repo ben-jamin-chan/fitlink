@@ -3,11 +3,15 @@ import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage
 import type { DatabaseReference } from 'firebase/database'
 import { create } from 'zustand'
 
+import { useAuthStore } from '@/store/authStore'
+
+import { storage } from '@/services/firebase/config'
 import {
   markMessagesAsRead,
   registerPresence,
   sendImageMessage,
   sendTextMessage,
+  sendVoiceMessage as rtdbSendVoiceMessage,
   setOffline,
   setTypingStatus,
   subscribeToMessages,
@@ -15,7 +19,7 @@ import {
   subscribeToTyping,
   unsubscribeFromMessages,
 } from '@/services/firebase/realtime'
-import { storage } from '@/services/firebase/config'
+import { uploadVoiceMessage } from '@/services/firebase/storage'
 
 import { pickAndCompressImage } from '@/utils/imageUtils'
 
@@ -60,6 +64,10 @@ interface ChatActions {
     recipientId: string
   ) => Promise<void>
   sendImage: (currentUserId: string, recipientId: string) => Promise<void>
+  sendVoiceMessage: (
+    localUri: string,
+    durationSeconds: number
+  ) => Promise<void>
   onTypingStart: (matchId: string, currentUserId: string) => void
   markAsRead: (currentUserId: string) => Promise<void>
   flushOfflineQueue: (
@@ -261,6 +269,37 @@ export const useChatStore = create<ChatStore>()((set, get) => ({
       set({ error: 'chat.error.uploadFailed' })
     } finally {
       set({ isUploadingImage: false, uploadProgress: 0 })
+    }
+  },
+
+  sendVoiceMessage: async (
+    localUri: string,
+    durationSeconds: number
+  ): Promise<void> => {
+    const { activeMatchId } = get()
+    const currentUserId = useAuthStore.getState().user?.uid
+
+    if (
+      activeMatchId === null ||
+      currentUserId === undefined
+    ) {
+      return
+    }
+
+    set({ isSendingMessage: true, error: null })
+
+    try {
+      const audioUrl = await uploadVoiceMessage(activeMatchId, localUri)
+      await rtdbSendVoiceMessage(
+        activeMatchId,
+        currentUserId,
+        audioUrl,
+        durationSeconds
+      )
+    } catch {
+      set({ error: 'chat.error.voiceUploadFailed' })
+    } finally {
+      set({ isSendingMessage: false })
     }
   },
 

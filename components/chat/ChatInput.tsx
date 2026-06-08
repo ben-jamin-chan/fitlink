@@ -18,11 +18,14 @@ const INPUT_MIN_HEIGHT = spacing.xxl
 const ICON_BUTTON_SIZE = spacing.xxl
 const SEND_ICON_SIZE = typography.sizes.xl - spacing.xs / 2
 const IMAGE_ICON_SIZE = typography.sizes.xl
+const MIC_ICON_SIZE = typography.sizes.xl
 
 interface ChatInputProps {
   onSendText: (text: string) => void
   onImagePress: () => void
+  onMicPress: () => void
   onTyping: () => void
+  isRecording: boolean
   disabled?: boolean
   prefillText?: string | null
   onPrefillUsed?: () => void
@@ -31,7 +34,9 @@ interface ChatInputProps {
 export const ChatInput = ({
   onSendText,
   onImagePress,
+  onMicPress,
   onTyping,
+  isRecording,
   disabled = false,
   prefillText = null,
   onPrefillUsed,
@@ -39,7 +44,8 @@ export const ChatInput = ({
   const { t } = useTranslation()
   const [text, setText] = useState('')
   const trimmedText = text.trim()
-  const canSend = trimmedText.length > 0 && !disabled
+  const controlsDisabled = disabled || isRecording
+  const canSend = trimmedText.length > 0 && !controlsDisabled
   const sendIconColor = canSend ? colors.primary : colors.gray[300]
 
   useEffect(() => {
@@ -68,9 +74,9 @@ export const ChatInput = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.iconButton, disabled && styles.disabled]}
+        style={[styles.iconButton, controlsDisabled && styles.disabled]}
         onPress={onImagePress}
-        disabled={disabled}
+        disabled={controlsDisabled}
         activeOpacity={0.75}
         accessibilityLabel={t('chat.attachImage')}
       >
@@ -91,9 +97,23 @@ export const ChatInput = ({
         maxLength={1000}
         scrollEnabled
         returnKeyType="default"
-        editable={!disabled}
+        editable={!controlsDisabled}
         textAlignVertical="center"
       />
+
+      <TouchableOpacity
+        style={[styles.iconButton, controlsDisabled && styles.disabled]}
+        onPress={onMicPress}
+        disabled={controlsDisabled}
+        activeOpacity={0.75}
+        accessibilityLabel={t('chat.voice.hold')}
+      >
+        <Ionicons
+          name="mic-outline"
+          size={MIC_ICON_SIZE}
+          color={colors.gray[600]}
+        />
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.iconButton, !canSend && styles.disabled]}

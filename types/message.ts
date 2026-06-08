@@ -6,6 +6,8 @@ export interface Message {
   id: string
   senderId: string
   text: string
+  audioUrl?: string
+  durationSeconds?: number
   type: MessageType
   readBy: string[]
   createdAt: Timestamp

@@ -150,6 +150,7 @@ The following features **cannot be tested in Expo Go**. Always use a development
 | Firebase Crashlytics | `@react-native-firebase` native module |
 | Apple HealthKit | `react-native-health` native module |
 | Google Fit | `react-native-google-fit` native module |
+| Voice Messages | `expo-av` recording requires native audio permissions/session support |
 | Push Notifications (APNs) | Requires device + APNs certificate |
 
 ---

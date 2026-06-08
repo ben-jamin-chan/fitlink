@@ -4,6 +4,61 @@
 
 ---
 
+## [Phase 3B - Task 76] - 2026-06-08
+
+### Completed
+
+- Task 76: Voice Message Recording & Playback
+- expo-av installed for recording and playback support
+- VoiceMessageRecorder: hold-to-record overlay using Gesture.Simultaneous(LongPress, Pan), slide-left cancellation, 60-second auto-stop, preview send/cancel controls, and audio session teardown
+- VoiceMessageBubble: play/pause playback, static waveform bars, Animated.timing progress width, and heard-state colour update after full playback
+- uploadVoiceMessage: Firebase Storage upload to chats/{matchId}/audio/{uuid}.{ext} with m4a/3gp extension detection
+- sendVoiceMessage: RTDB voice message write with type, audioUrl, durationSeconds, and Firestore lastMessage/lastMessageAt update
+- chatStore.sendVoiceMessage: uploads the local recording then sends the RTDB message, with translated voice upload failure handling
+- ChatInput: mic button added and text/image controls disabled while the recorder overlay is active
+- ChatScreen: recorder overlay rendered above ChatInput and VoiceMessageBubble rendered for voice messages
+- chat.voice.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- package.json, package-lock.json: expo-av added
+- components/chat/VoiceMessageRecorder.tsx: created voice recording overlay with RNGH gestures and expo-av recording lifecycle
+- components/chat/VoiceMessageBubble.tsx: created voice playback bubble with expo-av sound lifecycle and static waveform
+- services/firebase/storage.ts: uploadVoiceMessage() added
+- services/firebase/realtime.ts: RTDBMessage extended for voice; sendVoiceMessage() added; outgoing text/image messages now include type metadata
+- store/chatStore.ts: sendVoiceMessage() action added
+- components/chat/ChatInput.tsx: mic control and recording disabled state added
+- app/chat/ChatScreen.tsx: recorder overlay and voice bubble branch wired
+- types/message.ts: optional audioUrl and durationSeconds fields added
+- i18n/en.json, my.json, zh.json, ta.json: chat.voice.* and voice upload error keys added
+- BUILD.md: voice message development-build requirement documented
+- CHANGELOG.md: Task 76 completion entry added
+
+### Architecture Decisions
+
+- Recipient unread increments remain owned by the existing onNewMessage Cloud Function, so the client updates only lastMessage and lastMessageAt to avoid double-counting unread messages
+- ChatInput did not have the mic stub described by the prompt, so this task added the mic button directly while preserving the existing send and image controls
+- RTDB subscribe normalization infers type for older text/image messages that predate the new type field
+- VoiceMessageBubble uses static waveform heights only; actual audio sample waveform generation remains deferred
+
+### Known Issues / Deferred
+
+- Voice messages require a development build and cannot be fully tested in Expo Go
+- Push notification copy for voice messages still follows the existing onNewMessage fallback because functions/src was intentionally not touched for this task
+
+### Verification
+
+- npx tsc --noEmit passes
+- i18n JSON parse check passes for en/my/zh/ta
+- git diff --check passes
+- Scoped scans confirm no any, inline style={{ }}, or console.* in touched code files
+
+### Next Up
+
+- Task 77: Video Profile Loop
+
+---
+
 ## [Phase 3A - Task 75] - 2026-06-08
 
 ### Completed

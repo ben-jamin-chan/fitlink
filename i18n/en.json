@@ -475,7 +475,18 @@
     },
     "error": {
       "sendFailed": "Message not sent. It will be resent when you're back online.",
-      "uploadFailed": "Photo upload failed. Please try again."
+      "uploadFailed": "Photo upload failed. Please try again.",
+      "voiceUploadFailed": "Voice message failed. Please try again."
+    },
+    "voice": {
+      "hold": "Hold to record",
+      "slideCancel": "Slide left to cancel",
+      "send": "Send",
+      "cancel": "Cancel",
+      "play": "Play voice message",
+      "pause": "Pause voice message",
+      "heard": "Heard",
+      "lastMessage": "🎤 Voice message"
     },
     "empty": {
       "title": "Start the conversation",

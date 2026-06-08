@@ -17,11 +17,16 @@ import {
 
 import { db, rtdb } from '@/services/firebase/config'
 
+import type { MessageType } from '@/types/message'
+
 export interface RTDBMessage {
   id: string
   senderId: string
   text: string | null
   imageUrl: string | null
+  audioUrl: string | null
+  durationSeconds: number | null
+  type: MessageType
   timestamp: number
   read: boolean
 }
@@ -47,10 +52,32 @@ export interface QueuedMessage {
   queuedAt: number
 }
 
-type RTDBMessagePayload = Omit<RTDBMessage, 'id'>
+interface RTDBMessagePayload {
+  senderId: string
+  text: string | null
+  imageUrl: string | null
+  audioUrl?: string | null
+  durationSeconds?: number | null
+  type?: MessageType
+  timestamp: number
+  read: boolean
+}
 
 const PHOTO_MESSAGE_PREVIEW = '📷 Photo'
+const VOICE_MESSAGE_PREVIEW = '🎤'
 const LAST_MESSAGE_PREVIEW_LIMIT = 80
+
+const inferMessageType = (message: RTDBMessagePayload): MessageType => {
+  if (message.type !== undefined) {
+    return message.type
+  }
+
+  if (message.audioUrl !== undefined && message.audioUrl !== null) {
+    return 'voice'
+  }
+
+  return message.imageUrl === null ? 'text' : 'image'
+}
 
 const buildTextPreview = (text: string): string => {
   if (text.length <= LAST_MESSAGE_PREVIEW_LIMIT) {
@@ -77,7 +104,17 @@ export const subscribeToMessages = (
     }
 
     const messages: RTDBMessage[] = Object.entries(raw)
-      .map(([id, data]) => ({ id, ...data }))
+      .map(([id, data]) => ({
+        id,
+        senderId: data.senderId,
+        text: data.text,
+        imageUrl: data.imageUrl,
+        audioUrl: data.audioUrl ?? null,
+        durationSeconds: data.durationSeconds ?? null,
+        type: inferMessageType(data),
+        timestamp: data.timestamp,
+        read: data.read,
+      }))
       .sort(
         (first: RTDBMessage, second: RTDBMessage): number =>
           first.timestamp - second.timestamp
@@ -112,6 +149,9 @@ export const sendTextMessage = async (
     senderId,
     text,
     imageUrl: null,
+    audioUrl: null,
+    durationSeconds: null,
+    type: 'text',
     timestamp: rtdbServerTimestamp(),
     read: false,
   })
@@ -141,12 +181,47 @@ export const sendImageMessage = async (
     senderId,
     text: null,
     imageUrl,
+    audioUrl: null,
+    durationSeconds: null,
+    type: 'image',
     timestamp: rtdbServerTimestamp(),
     read: false,
   })
 
   await updateDoc(doc(db, 'matches', matchId), {
     lastMessage: PHOTO_MESSAGE_PREVIEW,
+    lastMessageAt: firestoreServerTimestamp(),
+  })
+
+  return newRef.key
+}
+
+export const sendVoiceMessage = async (
+  matchId: string,
+  senderId: string,
+  audioUrl: string,
+  durationSeconds: number
+): Promise<string> => {
+  const messagesRef = ref(rtdb, `chats/${matchId}/messages`)
+  const newRef = push(messagesRef)
+
+  if (newRef.key === null) {
+    throw new Error('rtdb-message-key-missing')
+  }
+
+  await set(newRef, {
+    senderId,
+    text: null,
+    imageUrl: null,
+    audioUrl,
+    durationSeconds,
+    type: 'voice',
+    timestamp: rtdbServerTimestamp(),
+    read: false,
+  })
+
+  await updateDoc(doc(db, 'matches', matchId), {
+    lastMessage: VOICE_MESSAGE_PREVIEW,
     lastMessageAt: firestoreServerTimestamp(),
   })
 
