@@ -372,6 +372,24 @@
   "matches": {
     "title": "Matches",
     "searchPlaceholder": "Search matches...",
+    "search": {
+      "placeholder": "Search by name",
+      "premiumOnly": "Search matches — Premium",
+      "noResults": "No matches found",
+      "noResultsHint": "Try clearing your filters or search term"
+    },
+    "filter": {
+      "title": "Filter Matches",
+      "reset": "Reset",
+      "done": "Done",
+      "recentlyActive": {
+        "label": "Recently Active",
+        "subtitle": "Active in the last 24 hours"
+      },
+      "activities": {
+        "label": "Shared Activities"
+      }
+    },
     "tabs": {
       "matches": "Matches",
       "messages": "Messages"

@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 3A - Task 75] - 2026-06-08
+
+### Completed
+
+- Task 75: Matches Advanced Search & Filter
+- useMatchFilter: custom hook encapsulating name search, activity overlap filtering, and recently-active filtering over in-memory matchStore.matches; no Firestore reads
+- MatchFilterSheet: bottom-sheet Modal with 16 canonical activity chips, recently-active Switch, reset, and done controls
+- MatchesScreen: premium-paywall stub replaced with real search and filter UI for premium users; non-premium users see locked row navigating to PremiumScreen; matches and messages tabs render filtered match data; filter-with-no-results empty state added
+- matches.search.* and matches.filter.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- hooks/useMatchFilter.ts: created — MatchFilterState, UseMatchFilterReturn, and useMatchFilter hook
+- components/matches/MatchFilterSheet.tsx: created — bottom-sheet modal for activity and recently-active filter controls
+- app/matches/MatchesScreen.tsx: search bar and filter sheet wired; filteredMatches used as the source for both sorted FlatLists; filter empty-state added
+- i18n/en.json, my.json, zh.json, ta.json: matches.search.* and matches.filter.* keys added
+- CHANGELOG.md: Task 75 completion entry added
+
+### Architecture Decisions
+
+- Filtering remains entirely client-side over the already hydrated matchStore.matches array; matchStore actions and Firestore subscriptions were left unchanged
+- The activity filter stores canonical onboarding activity values for overlap checks while rendering chip labels through existing onboarding activity i18n keys
+- Existing Matches and Messages sort order was preserved by sorting derived slices from filteredMatches
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- npx tsc --noEmit passes
+- i18n JSON parse check passes for en/my/zh/ta
+- Scoped scans confirm no any, inline style={{ }}, or console.* in touched code files
+- git diff --check passes
+
+### Next Up
+
+- Task 76: Voice Message Recording & Playback
+
+---
+
 ## [Phase 3A - Task 74] - 2026-06-07
 
 ### Completed

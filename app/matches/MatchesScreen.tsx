@@ -7,9 +7,11 @@ import {
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
+import type { Insets, TextStyle, ViewStyle } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
@@ -26,8 +28,11 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 
 import { MatchCard } from '@/components/chat/MatchCard'
 import { MessageListItem } from '@/components/chat/MessageListItem'
+import { MatchFilterSheet } from '@/components/matches/MatchFilterSheet'
 import { Button } from '@/components/ui/Button'
 import { PremiumBadge } from '@/components/ui/PremiumBadge'
+
+import { useMatchFilter } from '@/hooks/useMatchFilter'
 
 import type {
   MainTabParamList,
@@ -53,6 +58,14 @@ const GRID_PADDING = spacing.lg * 2
 const GRID_GAP = spacing.sm
 const CARD_WIDTH = (SCREEN_WIDTH - GRID_PADDING - GRID_GAP * 2) / 3
 const AVATAR_SEPARATOR_OFFSET = spacing.xxxl - spacing.xs + spacing.md
+const SEARCH_ICON_SIZE = spacing.lg - spacing.xs
+const SEARCH_CONTROL_SIZE = spacing.xl + spacing.sm
+const FILTER_HIT_SLOP: Insets = {
+  bottom: spacing.sm,
+  left: spacing.sm,
+  right: spacing.sm,
+  top: spacing.sm,
+}
 
 const MatchesScreen = (): React.JSX.Element | null => {
   const { t } = useTranslation()
@@ -69,6 +82,17 @@ const MatchesScreen = (): React.JSX.Element | null => {
   const premiumStatus = useProfileStore((state) => state.profile?.premium)
   const getIsPremium = useSubscriptionStore((state) => state.isPremium)
   const [activeTab, setActiveTab] = useState<ActiveTab>('matches')
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false)
+  const {
+    filter,
+    setQuery,
+    toggleActivity,
+    setRecentlyActiveOnly,
+    resetFilter,
+    isFilterActive,
+    filteredMatches,
+    activeFilterCount,
+  } = useMatchFilter()
   const isPremium = useMemo(
     () => getIsPremium(),
     [getIsPremium, premiumStatus]
@@ -76,15 +100,15 @@ const MatchesScreen = (): React.JSX.Element | null => {
 
   const allMatches = useMemo(
     () =>
-      matches
+      filteredMatches
         .slice()
         .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()),
-    [matches]
+    [filteredMatches]
   )
 
   const conversations = useMemo(
     () =>
-      matches
+      filteredMatches
         .filter((match) => match.lastMessage != null)
         .slice()
         .sort((a, b) => {
@@ -93,7 +117,7 @@ const MatchesScreen = (): React.JSX.Element | null => {
 
           return bTime - aTime
         }),
-    [matches]
+    [filteredMatches]
   )
 
   useEffect(() => {
@@ -145,15 +169,6 @@ const MatchesScreen = (): React.JSX.Element | null => {
     [t, unmatch]
   )
 
-  const handleSearchPress = useCallback((): void => {
-    if (!isPremium) {
-      navigation.navigate('Premium')
-      return
-    }
-
-    // TODO Phase 3: open search/filter modal.
-  }, [isPremium, navigation])
-
   const renderMatch = useCallback(
     ({ item }: { item: MatchWithProfile }): React.JSX.Element => (
       <View style={styles.gridItem}>
@@ -185,12 +200,24 @@ const MatchesScreen = (): React.JSX.Element | null => {
     []
   )
 
+  const renderFilterEmptyState = (): React.JSX.Element => (
+    <View style={styles.emptyState}>
+      <Text style={styles.emptyTitle}>{t('matches.search.noResults')}</Text>
+      <Text style={styles.emptySub}>{t('matches.search.noResultsHint')}</Text>
+      <Button
+        variant="outline"
+        label={t('matches.filter.reset')}
+        onPress={resetFilter}
+      />
+    </View>
+  )
+
   if (userId === undefined) {
     return null
   }
 
   const renderMatchesTab = (): React.JSX.Element => {
-    if (isLoading && allMatches.length === 0) {
+    if (isLoading && matches.length === 0) {
       return (
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -198,7 +225,7 @@ const MatchesScreen = (): React.JSX.Element | null => {
       )
     }
 
-    if (allMatches.length === 0) {
+    if (matches.length === 0) {
       return (
         <View style={styles.emptyState}>
           <Ionicons
@@ -218,6 +245,10 @@ const MatchesScreen = (): React.JSX.Element | null => {
       )
     }
 
+    if (filteredMatches.length === 0 && isFilterActive) {
+      return renderFilterEmptyState()
+    }
+
     return (
       <FlatList
         data={allMatches}
@@ -234,12 +265,16 @@ const MatchesScreen = (): React.JSX.Element | null => {
   }
 
   const renderMessagesTab = (): React.JSX.Element => {
-    if (isLoading && conversations.length === 0) {
+    if (isLoading && matches.length === 0) {
       return (
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )
+    }
+
+    if (filteredMatches.length === 0 && matches.length > 0 && isFilterActive) {
+      return renderFilterEmptyState()
     }
 
     if (conversations.length === 0) {
@@ -282,21 +317,67 @@ const MatchesScreen = (): React.JSX.Element | null => {
         <Text style={styles.title}>{t('matches.title')}</Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.searchRow}
-        onPress={handleSearchPress}
-        activeOpacity={0.8}
-      >
-        <Ionicons
-          name="search-outline"
-          size={typography.sizes.lg}
-          color={colors.gray[600]}
-        />
-        <Text style={styles.searchPlaceholder}>
-          {t('matches.searchPlaceholder')}
-        </Text>
-        {!isPremium && <PremiumBadge tier="plus" size="sm" />}
-      </TouchableOpacity>
+      {isPremium ? (
+        <View style={styles.searchRow}>
+          <View style={styles.searchInputWrap}>
+            <Ionicons
+              name="search-outline"
+              size={SEARCH_ICON_SIZE}
+              color={colors.gray[400]}
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={t('matches.search.placeholder')}
+              placeholderTextColor={colors.gray[400]}
+              value={filter.query}
+              onChangeText={setQuery}
+              returnKeyType="search"
+              clearButtonMode="while-editing"
+              autoCorrect={false}
+              autoCapitalize="none"
+            />
+          </View>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              isFilterActive && styles.filterButtonActive,
+            ]}
+            onPress={() => setFilterSheetVisible(true)}
+            hitSlop={FILTER_HIT_SLOP}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="options-outline"
+              size={spacing.lg}
+              color={isFilterActive ? colors.white : colors.gray[600]}
+            />
+            {activeFilterCount > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeLabel}>
+                  {activeFilterCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.searchRowLocked}
+          onPress={() => navigation.navigate('Premium')}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="search-outline"
+            size={SEARCH_ICON_SIZE}
+            color={colors.gray[400]}
+          />
+          <Text style={styles.searchLockedLabel}>
+            {t('matches.search.premiumOnly')}
+          </Text>
+          <PremiumBadge tier="plus" size="sm" />
+        </TouchableOpacity>
+      )}
 
       <View style={styles.tabBar}>
         <TouchableOpacity
@@ -338,6 +419,14 @@ const MatchesScreen = (): React.JSX.Element | null => {
       <View style={styles.content}>
         {activeTab === 'matches' ? renderMatchesTab() : renderMessagesTab()}
       </View>
+      <MatchFilterSheet
+        visible={filterSheetVisible}
+        filter={filter}
+        onToggleActivity={toggleActivity}
+        onSetRecentlyActiveOnly={setRecentlyActiveOnly}
+        onReset={resetFilter}
+        onClose={() => setFilterSheetVisible(false)}
+      />
     </SafeAreaView>
   )
 }
@@ -385,6 +474,33 @@ const styles = StyleSheet.create({
   gridRow: {
     gap: GRID_GAP,
   },
+  filterBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.danger,
+    borderRadius: borderRadius.full,
+    height: spacing.md,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: spacing.md,
+  } as ViewStyle,
+  filterBadgeLabel: {
+    color: colors.white,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+  } as TextStyle,
+  filterButton: {
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+    borderRadius: borderRadius.md,
+    height: SEARCH_CONTROL_SIZE,
+    justifyContent: 'center',
+    width: SEARCH_CONTROL_SIZE,
+  } as ViewStyle,
+  filterButtonActive: {
+    backgroundColor: colors.primary,
+  } as ViewStyle,
   header: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
@@ -392,30 +508,53 @@ const styles = StyleSheet.create({
   },
   messageSeparator: {
     backgroundColor: colors.gray[200],
-    height: 1,
+    height: StyleSheet.hairlineWidth,
     marginLeft: AVATAR_SEPARATOR_OFFSET,
   },
-  searchPlaceholder: {
-    color: colors.gray[600],
+  searchIcon: {
+    marginRight: spacing.xs,
+  } as TextStyle,
+  searchInput: {
+    color: colors.gray[800],
     flex: 1,
     fontSize: typography.sizes.md,
-  },
+    height: SEARCH_CONTROL_SIZE,
+  } as TextStyle,
+  searchInputWrap: {
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+    borderRadius: borderRadius.md,
+    flex: 1,
+    flexDirection: 'row',
+    height: SEARCH_CONTROL_SIZE,
+    paddingHorizontal: spacing.sm,
+  } as ViewStyle,
+  searchLockedLabel: {
+    color: colors.gray[400],
+    flex: 1,
+    fontSize: typography.sizes.md,
+  } as TextStyle,
   searchRow: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.gray[200],
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
     flexDirection: 'row',
     gap: spacing.sm,
     marginBottom: spacing.md,
     marginHorizontal: spacing.lg,
-    paddingHorizontal: spacing.md,
+  } as ViewStyle,
+  searchRowLocked: {
+    alignItems: 'center',
+    backgroundColor: colors.gray[100],
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+    marginHorizontal: spacing.lg,
+    paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,
-  },
+  } as ViewStyle,
   tabBar: {
     borderBottomColor: colors.gray[200],
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     paddingHorizontal: spacing.lg,
   },
