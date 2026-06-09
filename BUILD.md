@@ -153,6 +153,8 @@ The following features **cannot be tested in Expo Go**. Always use a development
 | Voice Messages | `expo-av` recording requires native audio permissions/session support |
 | Push Notifications (APNs) | Requires device + APNs certificate |
 
+- `expo-video` (video profile playback) requires a development build — not supported in Expo Go.
+
 ---
 
 ## Stripe Setup

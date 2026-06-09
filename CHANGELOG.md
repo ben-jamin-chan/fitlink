@@ -4,6 +4,58 @@
 
 ---
 
+## [Phase 3B - Task 77] - 2026-06-09
+
+### Completed
+
+- Task 77: Video Profile Loop
+- expo-video and expo-file-system installed for development-build video playback and local file size checks
+- uploadVideoProfile: Firebase Storage upload to users/{uid}/video/profile.mp4 with fixed-path overwrite and download URL return
+- updateVideoProfile / removeVideoProfile: profileStore actions added; both delegate profile persistence through updateProfile(); Storage blob deletion remains deferred
+- VideoProfilePicker: pick, size-check, optimistic preview, upload, change, and remove lifecycle with LoadingOverlay and translated error alerts
+- EditProfileScreen: Profile Video section added below the photo grid without changing form submit or dirty-state logic
+- SwipeCard: translated video badge chip appended to existing badge row; expo-video is not imported in the discovery stack
+- FullProfileModal: Photo/Video tab selector added; useVideoPlayer is called unconditionally; VideoView plays only on video-tab activation and pauses on photo-tab switch, close, and unmount
+- profile.video.* i18n keys added to all 4 language files
+- BUILD.md documents the expo-video development-build requirement
+
+### Files Created / Modified
+
+- components/profile/VideoProfilePicker.tsx: created video picker with permission, size validation, upload, and removal lifecycle
+- services/firebase/storage.ts: uploadVideoProfile() added
+- store/profileStore.ts: updateVideoProfile() and removeVideoProfile() actions added
+- app/profile/EditProfileScreen.tsx: VideoProfilePicker section added below photos
+- components/discovery/SwipeCard.tsx: video badge chip added without video playback imports
+- components/discovery/FullProfileModal.tsx: Photo/Video tabs and VideoView playback lifecycle added
+- i18n/en.json, my.json, zh.json, ta.json: profile.video.* keys added
+- BUILD.md: expo-video development-build note added
+- app.json, package.json, package-lock.json: expo-video and expo-file-system install metadata added
+
+### Architecture Decisions
+
+- Storage path users/{uid}/video/profile.mp4 intentionally overwrites prior uploads; removeVideoProfile() clears only the Firestore URL and leaves blob cleanup for Phase 4
+- expo-video is imported only in FullProfileModal, never in SwipeCard, preserving the discovery stack's lightweight render path
+- VideoProfilePicker imports getInfoAsync from expo-file-system/legacy because the SDK 54 root getInfoAsync shim is typed as runtime-throwing
+- Video badge and picker icon are translated through profile.video.badge rather than hardcoded in JSX
+
+### Known Issues / Deferred
+
+- Video profile playback requires a development build and cannot be tested in Expo Go
+- Storage blob cleanup for users/{uid}/video/profile.mp4 on removal remains deferred to Phase 4
+
+### Verification
+
+- npx tsc --noEmit passes
+- i18n JSON parse check passes for en/my/zh/ta
+- git diff --check passes
+- Scoped scans confirm no any, inline style={{ }}, console.*, or expo-video import in SwipeCard
+
+### Next Up
+
+- Task 78: Google Places Gym Search Service
+
+---
+
 ## [Phase 3B - Task 76] - 2026-06-08
 
 ### Completed

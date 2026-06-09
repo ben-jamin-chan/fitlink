@@ -8,7 +8,11 @@ import {
   subscribeToUserProfile,
   updateUserProfile,
 } from '@/services/firebase/firestore'
-import { deleteProfilePhoto, uploadProfilePhoto } from '@/services/firebase/storage'
+import {
+  deleteProfilePhoto,
+  uploadProfilePhoto,
+  uploadVideoProfile,
+} from '@/services/firebase/storage'
 import { useAuthStore } from '@/store/authStore'
 
 import { compressImage } from '@/utils/imageUtils'
@@ -53,6 +57,8 @@ interface ProfileActions {
   updateProfile: (partial: ProfileUpdateInput) => Promise<void>
   uploadPhoto: (uri: string, index: number) => Promise<void>
   deletePhoto: (index: number) => Promise<void>
+  updateVideoProfile: (localUri: string) => Promise<void>
+  removeVideoProfile: () => Promise<void>
   clearError: () => void
   reset: () => void
   clearProfile: () => void
@@ -257,6 +263,37 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
         isLoading: false,
         error: 'profile.errors.deleteFailed',
       })
+    }
+  },
+
+  /**
+   * Uploads a local video, then persists the returned URL through updateProfile.
+   */
+  updateVideoProfile: async (localUri: string): Promise<void> => {
+    const uid = get().profile?.uid
+
+    if (uid === undefined) {
+      throw new Error('profile.errors.notAuthenticated')
+    }
+
+    const videoProfileUrl = await uploadVideoProfile(uid, localUri)
+    await get().updateProfile({ videoProfileUrl })
+
+    const profileError = get().error
+    if (profileError !== null) {
+      throw new Error(profileError)
+    }
+  },
+
+  /**
+   * Clears the video URL only; the fixed Storage blob is cleaned up in Phase 4.
+   */
+  removeVideoProfile: async (): Promise<void> => {
+    await get().updateProfile({ videoProfileUrl: '' })
+
+    const profileError = get().error
+    if (profileError !== null) {
+      throw new Error(profileError)
     }
   },
 

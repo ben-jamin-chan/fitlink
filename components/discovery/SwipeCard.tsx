@@ -296,6 +296,10 @@ export const SwipeCard = ({
               <ActivityBadge key={activity} activity={activity} />
             ))}
             <ActivityBadge activity={user.fitnessLevel} />
+            {user.videoProfileUrl !== undefined &&
+              user.videoProfileUrl.length > 0 && (
+                <ActivityBadge label={t('profile.video.badge')} />
+              )}
           </View>
         </View>
 

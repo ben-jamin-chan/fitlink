@@ -66,7 +66,8 @@
       ],
       "react-native-google-fit",
       "@react-native-firebase/app",
-      "@react-native-firebase/crashlytics"
+      "@react-native-firebase/crashlytics",
+      "expo-video"
     ],
     "extra": {
       "eas": {

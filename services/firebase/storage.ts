@@ -11,6 +11,7 @@ import { auth, storage } from '@/services/firebase/config'
 import { compressImage } from '@/utils/imageUtils'
 
 const PROFILE_PHOTO_CONTENT_TYPE = 'image/jpeg'
+const VIDEO_PROFILE_CONTENT_TYPE = 'video/mp4'
 const VOICE_MESSAGE_CONTENT_TYPES = {
   m4a: 'audio/mp4',
   '3gp': 'audio/3gpp',
@@ -82,6 +83,30 @@ export const uploadVoiceMessage = async (
   const blob = await response.blob()
   const uploadTask = uploadBytesResumable(audioRef, blob, {
     contentType: VOICE_MESSAGE_CONTENT_TYPES[extension],
+  })
+
+  await new Promise<void>((resolve, reject): void => {
+    uploadTask.on('state_changed', undefined, reject, resolve)
+  })
+
+  return getDownloadURL(uploadTask.snapshot.ref)
+}
+
+/**
+ * Uploads a local video URI to the user's fixed video profile slot.
+ * Each upload overwrites users/{userId}/video/profile.mp4; blob cleanup on
+ * remove is deferred to Phase 4.
+ */
+export const uploadVideoProfile = async (
+  userId: string,
+  localUri: string
+): Promise<string> => {
+  const storagePath = `users/${userId}/video/profile.mp4`
+  const videoRef = ref(storage, storagePath)
+  const response = await fetch(localUri)
+  const blob = await response.blob()
+  const uploadTask = uploadBytesResumable(videoRef, blob, {
+    contentType: VIDEO_PROFILE_CONTENT_TYPE,
   })
 
   await new Promise<void>((resolve, reject): void => {

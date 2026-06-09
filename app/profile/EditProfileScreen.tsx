@@ -26,6 +26,7 @@ import { z } from 'zod'
 import { useProfileStore } from '@/store/profileStore'
 
 import { PhotoGrid } from '@/components/profile/PhotoGrid'
+import { VideoProfilePicker } from '@/components/profile/VideoProfilePicker'
 import { Input } from '@/components/ui/Input'
 import { Slider } from '@/components/ui/Slider'
 
@@ -430,6 +431,9 @@ export default function EditProfileScreen(): React.JSX.Element {
         <Text style={styles.photoGuidelines}>
           {t('editProfile.photoGuidelines')}
         </Text>
+
+        <SectionHeader label={t('profile.video.sectionTitle')} />
+        <VideoProfilePicker currentVideoUrl={profile.videoProfileUrl} />
 
         <SectionHeader label={t('editProfile.sections.basicInfo')} />
         <Controller

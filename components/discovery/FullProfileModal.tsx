@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
+import { useVideoPlayer, VideoView } from 'expo-video'
 import type { TFunction } from 'i18next'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
@@ -169,6 +170,11 @@ export const FullProfileModal = ({
   const [photoViewerVisible, setPhotoViewerVisible] = useState(false)
   const [bioExpanded, setBioExpanded] = useState(false)
   const [showReportSheet, setShowReportSheet] = useState(false)
+  const [isVideoTabActive, setIsVideoTabActive] = useState(false)
+  const videoPlayer = useVideoPlayer(profile?.videoProfileUrl ?? '', (player) => {
+    player.loop = true
+    player.muted = false
+  })
 
   const translateY = useSharedValue(0)
 
@@ -177,11 +183,51 @@ export const FullProfileModal = ({
     setPhotoViewerVisible(false)
     setBioExpanded(false)
     setShowReportSheet(false)
+    setIsVideoTabActive(false)
     translateY.value = 0
   }, [profile?.uid, translateY])
 
-  const handleSwipeClose = (): void => {
+  useEffect(() => {
+    if (!visible) {
+      videoPlayer.pause()
+      setIsVideoTabActive(false)
+    }
+  }, [visible, videoPlayer])
+
+  useEffect(() => {
+    return () => {
+      videoPlayer.pause()
+    }
+  }, [videoPlayer])
+
+  const pauseVideo = (): void => {
+    videoPlayer.pause()
+    setIsVideoTabActive(false)
+  }
+
+  const handleCloseModal = (): void => {
+    pauseVideo()
     onClose()
+  }
+
+  const handleSwipeClose = (): void => {
+    handleCloseModal()
+  }
+
+  const handleSwitchToPhotoTab = (): void => {
+    pauseVideo()
+  }
+
+  const handleSwitchToVideoTab = (): void => {
+    if (
+      profile?.videoProfileUrl === undefined ||
+      profile.videoProfileUrl.length === 0
+    ) {
+      return
+    }
+
+    setIsVideoTabActive(true)
+    videoPlayer.play()
   }
 
   const panGesture = Gesture.Pan()
@@ -217,7 +263,7 @@ export const FullProfileModal = ({
           bio: bio.slice(0, BIO_TRUNCATE_LENGTH),
         })
   const closeAfterAction = (): void => {
-    onClose()
+    handleCloseModal()
     onActionComplete()
   }
 
@@ -263,7 +309,7 @@ export const FullProfileModal = ({
     setShowReportSheet(false)
     // TODO Task 38: submit report to Firestore
     Alert.alert(t('profile.report.submitted'))
-    onClose()
+    handleCloseModal()
   }
 
   const handlePhotoTap = (side: 'left' | 'center' | 'right'): void => {
@@ -297,7 +343,7 @@ export const FullProfileModal = ({
         visible={visible}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={onClose}
+        onRequestClose={handleCloseModal}
       >
         <GestureDetector gesture={panGesture}>
           <Animated.View style={[styles.modalContainer, animatedModalStyle]}>
@@ -305,7 +351,7 @@ export const FullProfileModal = ({
 
             <View style={styles.headerIcons}>
               <TouchableOpacity
-                onPress={onClose}
+                onPress={handleCloseModal}
                 style={styles.iconButton}
                 activeOpacity={0.7}
               >
@@ -330,7 +376,96 @@ export const FullProfileModal = ({
               showsVerticalScrollIndicator={false}
               bounces
             >
-              {photos.length > 0 && (
+              {photos.length > 0 &&
+                (profile.videoProfileUrl !== undefined &&
+                profile.videoProfileUrl.length > 0 ? (
+                  <View style={styles.photoContainer}>
+                    {isVideoTabActive ? (
+                      <VideoView
+                        player={videoPlayer}
+                        style={styles.photo}
+                        contentFit="cover"
+                        nativeControls={false}
+                      />
+                    ) : (
+                      <>
+                        <Image
+                          source={{ uri: photos[activePhotoIndex] }}
+                          style={styles.photo}
+                          resizeMode="cover"
+                        />
+                        <TouchableOpacity
+                          style={styles.photoTapLeft}
+                          onPress={() => handlePhotoTap('left')}
+                          activeOpacity={1}
+                        />
+                        <TouchableOpacity
+                          style={styles.photoTapCenter}
+                          onPress={() => handlePhotoTap('center')}
+                          activeOpacity={1}
+                        />
+                        <TouchableOpacity
+                          style={styles.photoTapRight}
+                          onPress={() => handlePhotoTap('right')}
+                          activeOpacity={1}
+                        />
+
+                        {photos.length > 1 && (
+                          <View style={styles.paginationDots}>
+                            {photos.map((photo, index) => (
+                              <View
+                                key={photo}
+                                style={[
+                                  styles.dot,
+                                  index === activePhotoIndex
+                                    ? styles.dotActive
+                                    : styles.dotInactive,
+                                ]}
+                              />
+                            ))}
+                          </View>
+                        )}
+                      </>
+                    )}
+
+                    <View style={styles.mediaTabs}>
+                      <TouchableOpacity
+                        onPress={handleSwitchToPhotoTab}
+                        style={[
+                          styles.mediaTab,
+                          !isVideoTabActive && styles.mediaTabActive,
+                        ]}
+                        activeOpacity={0.8}
+                      >
+                        <Text
+                          style={[
+                            styles.mediaTabText,
+                            !isVideoTabActive && styles.mediaTabTextActive,
+                          ]}
+                        >
+                          {t('profile.video.photoTab')}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={handleSwitchToVideoTab}
+                        style={[
+                          styles.mediaTab,
+                          isVideoTabActive && styles.mediaTabActive,
+                        ]}
+                        activeOpacity={0.8}
+                      >
+                        <Text
+                          style={[
+                            styles.mediaTabText,
+                            isVideoTabActive && styles.mediaTabTextActive,
+                          ]}
+                        >
+                          {t('profile.video.tab')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
                 <View style={styles.photoContainer}>
                   <Image
                     source={{ uri: photos[activePhotoIndex] }}
@@ -369,7 +504,7 @@ export const FullProfileModal = ({
                     </View>
                   )}
                 </View>
-              )}
+                ))}
 
               <View style={styles.basicInfo}>
                 <View style={styles.nameRow}>
@@ -822,6 +957,36 @@ const styles = StyleSheet.create({
   metaText: {
     color: colors.gray[500],
     fontSize: typography.sizes.sm,
+  },
+  mediaTab: {
+    backgroundColor: colors.overlayLight,
+    borderColor: colors.white,
+    borderRadius: borderRadius.full,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  mediaTabActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  mediaTabText: {
+    color: colors.white,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  },
+  mediaTabTextActive: {
+    color: colors.white,
+  },
+  mediaTabs: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: spacing.sm,
+    zIndex: 5,
   },
   modalContainer: {
     backgroundColor: colors.background,

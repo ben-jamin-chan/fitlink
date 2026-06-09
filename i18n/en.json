@@ -630,6 +630,25 @@
       "buttonLabel": "Boost",
       "timeMinutes": "{{minutes}}m"
     },
+    "video": {
+      "sectionTitle": "Profile Video",
+      "add": "Add a Video",
+      "hint": "Up to 15 seconds · Max 50 MB",
+      "added": "Video added",
+      "change": "Change Video",
+      "remove": "Remove Video",
+      "removeTitle": "Remove Video?",
+      "removeMessage": "This will remove your profile video.",
+      "removeError": "Failed to remove video. Please try again.",
+      "uploading": "Uploading video...",
+      "uploadError": "Video upload failed. Please try again.",
+      "tooLarge": "Video must be under 50 MB. Please choose a shorter clip.",
+      "permissionTitle": "Media Access Required",
+      "permissionMessage": "Please allow access to your media library in Settings.",
+      "tab": "🎥 Video",
+      "photoTab": "Photos",
+      "badge": "🎥"
+    },
     "errors": {
       "fetchFailed": "Could not load profile. Please try again.",
       "updateFailed": "Could not save changes. Please try again.",
