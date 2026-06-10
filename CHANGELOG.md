@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 3C - Task 78] - 2026-06-10
+
+### Completed
+
+- Task 78: Google Places Gym Search Service
+- services/places.ts: searchNearbyGyms() calls Places API (New) POST /v1/places:searchNearby with includedTypes gym/fitness_center/sports_complex, maxResultCount 10, and maps validated results to GymPlace[]
+- getPlacePhotoUrl(): pure string builder for Places photo media URLs; no network call
+- types/checkin.ts: GymPlace.coordinates aligned to plain latitude/longitude coordinates for Places results
+- .env.example: EXPO_PUBLIC_GOOGLE_PLACES_API_KEY placeholder added
+
+### Files Created / Modified
+
+- services/places.ts: created - exports searchNearbyGyms() and getPlacePhotoUrl()
+- types/checkin.ts: GymPlace.coordinates now uses GymPlaceCoordinates instead of GeoPoint
+- .env.example: EXPO_PUBLIC_GOOGLE_PLACES_API_KEY placeholder added
+- CHANGELOG.md: Task 78 completion entry added
+
+### Architecture Decisions
+
+- API key is read at call-time inside getApiKey() rather than at module load, so a missing key surfaces with a meaningful error at the call site
+- All Google Places API response interfaces are file-local and not exported, keeping third-party contract shapes out of types/
+- Places response JSON is parsed from unknown through local guards before mapping
+- The service stays Firebase-free and returns a typed plain latitude/longitude object; conversion to GeoPoint remains server-owned by the Task 79 createCheckin Cloud Function
+
+### Known Issues / Deferred
+
+- searchNearbyGyms() is not yet called from a screen or store; Task 79 wires it to GymCheckinScreen and checkinStore
+
+### Verification
+
+- npx tsc --noEmit passes
+- git diff --check passes
+- Scoped scan confirms no any, inline style={{ }}, or console.* in services/places.ts
+- Export scan confirms services/places.ts exports only searchNearbyGyms() and getPlacePhotoUrl()
+
+### Next Up
+
+- Task 79: Gym Check-In Feature
+
+---
+
 ## [Phase 3B - Task 77] - 2026-06-09
 
 ### Completed

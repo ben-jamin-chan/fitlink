@@ -1,5 +1,10 @@
 import { GeoPoint, Timestamp } from 'firebase/firestore'
 
+export interface GymPlaceCoordinates {
+  latitude: number
+  longitude: number
+}
+
 // Mirrors the /gymCheckins/{checkinId} Firestore document schema exactly.
 // id is the document ID, populated client-side after fetch - not stored in the document.
 export interface GymCheckin {
@@ -19,7 +24,7 @@ export interface GymPlace {
   placeId: string
   name: string
   address: string
-  coordinates: GeoPoint
+  coordinates: GymPlaceCoordinates
   rating?: number
   photoUrl?: string
 }
