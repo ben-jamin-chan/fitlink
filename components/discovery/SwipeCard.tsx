@@ -227,6 +227,9 @@ export const SwipeCard = ({
 
     return Date.now() - updatedAt.toMillis() <= ONE_HOUR_IN_MS * HOURS_IN_DAY
   })()
+  const isGymCheckinVisible =
+    user.gymCheckin !== undefined &&
+    user.gymCheckin.expiresAt.toMillis() > Date.now()
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -300,6 +303,9 @@ export const SwipeCard = ({
               user.videoProfileUrl.length > 0 && (
                 <ActivityBadge label={t('profile.video.badge')} />
               )}
+            {isGymCheckinVisible && (
+              <ActivityBadge label={t('checkin.atGymBadge')} />
+            )}
           </View>
         </View>
 

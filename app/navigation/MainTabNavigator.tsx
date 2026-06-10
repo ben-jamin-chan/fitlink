@@ -9,6 +9,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
 
 import ChatScreen from '@/app/chat/ChatScreen'
+import GymCheckinScreen from '@/app/checkin/GymCheckinScreen'
 import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
 import EditProfileScreen from '@/app/profile/EditProfileScreen'
@@ -28,6 +29,7 @@ export type ProfileStackParamList = {
   Profile: undefined
   EditProfile: undefined
   Settings: undefined
+  GymCheckin: undefined
 }
 
 export type SettingsStackParamList = {
@@ -98,13 +100,26 @@ const MatchesNavigator = (): React.JSX.Element => (
   </MatchesStack.Navigator>
 )
 
-const ProfileStackNavigator = (): React.JSX.Element => (
-  <ProfileStack.Navigator screenOptions={profileStackScreenOptions}>
-    <ProfileStack.Screen name="Profile" component={ProfileScreen} />
-    <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
-    <ProfileStack.Screen name="Settings" component={SettingsPlaceholder} />
-  </ProfileStack.Navigator>
-)
+const ProfileStackNavigator = (): React.JSX.Element => {
+  const { t } = useTranslation()
+
+  return (
+    <ProfileStack.Navigator screenOptions={profileStackScreenOptions}>
+      <ProfileStack.Screen name="Profile" component={ProfileScreen} />
+      <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+      <ProfileStack.Screen name="Settings" component={SettingsPlaceholder} />
+      <ProfileStack.Screen
+        name="GymCheckin"
+        component={GymCheckinScreen}
+        options={{
+          headerShown: true,
+          headerBackTitle: '',
+          title: t('checkin.title'),
+        }}
+      />
+    </ProfileStack.Navigator>
+  )
+}
 
 const SettingsStackNavigator = (): React.JSX.Element => {
   const { t } = useTranslation()

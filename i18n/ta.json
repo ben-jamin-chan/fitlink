@@ -1085,6 +1085,30 @@
       "syncFailed": "Sync failed. Please try again."
     }
   },
+  "checkin": {
+    "title": "Check In to a Gym",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "checkInCTA": "📍 Check In to a Gym",
+    "searchPlaceholder": "Search nearby gyms...",
+    "noGymsNearby": "No gyms found nearby. Try expanding your search area.",
+    "confirmTitle": "Check In?",
+    "confirmMessage": "Check in to {{gymName}}?",
+    "confirmCheckOut": "Are you sure you want to check out?",
+    "alreadyCheckedIn": "You're already checked in",
+    "alreadyCheckedInHint": "You can check out first before checking in elsewhere.",
+    "success": "Checked in to {{gymName}}!",
+    "locationError": "Location permission is required to find nearby gyms.",
+    "searchError": "Could not load nearby gyms. Please try again.",
+    "checkingIn": "Checking in...",
+    "checkingOut": "Checking out...",
+    "atGymBadge": "📍 At gym",
+    "banner": {
+      "remaining": "{{remaining}} remaining",
+      "remainingHoursMinutes": "{{hours}}h {{minutes}}m",
+      "remainingMinutes": "{{minutes}}m"
+    }
+  },
   "errors": {
     "required": "This field is required",
     "network": "Network error. Please try again.",

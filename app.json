@@ -17,6 +17,9 @@
       "bundleIdentifier": "com.fitlink.app",
       "buildNumber": "1",
       "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Allow fit-link to use your location to find nearby gyms."
+      },
       "entitlements": {
         "com.apple.developer.applesignin": [
           "Default"
@@ -36,7 +39,8 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -67,7 +71,13 @@
       "react-native-google-fit",
       "@react-native-firebase/app",
       "@react-native-firebase/crashlytics",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow fit-link to use your location to find nearby gyms."
+        }
+      ]
     ],
     "extra": {
       "eas": {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -20,9 +21,11 @@ import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAuthStore } from '@/store/authStore'
+import { useCheckinStore } from '@/store/checkinStore'
 import { useFitnessStore } from '@/store/fitnessStore'
 import { useProfileStore } from '@/store/profileStore'
 
+import { ActiveCheckinBanner } from '@/components/checkin/ActiveCheckinBanner'
 import { ActivityChip } from '@/components/profile/ActivityChip'
 import { BoostCard } from '@/components/profile/BoostCard'
 import { InfoCard, InfoRow } from '@/components/profile/InfoCard'
@@ -100,6 +103,15 @@ export default function ProfileScreen(): React.JSX.Element {
   const isLoading = useProfileStore((state) => state.isLoading)
   const error = useProfileStore((state) => state.error)
   const fetchProfile = useProfileStore((state) => state.fetchProfile)
+  const activeCheckin = useCheckinStore((state) => state.activeCheckin)
+  const isCheckinLoading = useCheckinStore((state) => state.isLoading)
+  const subscribeToActiveCheckin = useCheckinStore(
+    (state) => state.subscribeToActiveCheckin
+  )
+  const unsubscribeFromActiveCheckin = useCheckinStore(
+    (state) => state.unsubscribeFromActiveCheckin
+  )
+  const checkOut = useCheckinStore((state) => state.checkOut)
   const {
     connections,
     fetchTodayStats,
@@ -117,6 +129,23 @@ export default function ProfileScreen(): React.JSX.Element {
 
     void fetchTodayStats(userId)
   }, [fetchTodayStats, userId])
+
+  useEffect(() => {
+    if (userId === undefined) {
+      unsubscribeFromActiveCheckin()
+      return
+    }
+
+    subscribeToActiveCheckin(userId)
+
+    return (): void => {
+      unsubscribeFromActiveCheckin()
+    }
+  }, [
+    subscribeToActiveCheckin,
+    unsubscribeFromActiveCheckin,
+    userId,
+  ])
 
   const handleEditProfile = (): void => {
     navigation.navigate('EditProfile')
@@ -140,6 +169,27 @@ export default function ProfileScreen(): React.JSX.Element {
 
   const handleGetPremium = (): void => {
     navigation.navigate('Premium')
+  }
+
+  const handleGymCheckin = (): void => {
+    navigation.navigate('GymCheckin')
+  }
+
+  const handleCheckOut = (): void => {
+    if (userId === undefined) {
+      return
+    }
+
+    Alert.alert(t('checkin.checkOut'), t('checkin.confirmCheckOut'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('checkin.checkOut'),
+        style: 'destructive',
+        onPress: (): void => {
+          void checkOut(userId)
+        },
+      },
+    ])
   }
 
   const handleShareOnProfileChange = (enabled: boolean): void => {
@@ -232,6 +282,10 @@ export default function ProfileScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LoadingOverlay
+        visible={isCheckinLoading}
+        message={t('checkin.checkingOut')}
+      />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -299,6 +353,29 @@ export default function ProfileScreen(): React.JSX.Element {
               isOwn={true}
             />
           )}
+
+          {activeCheckin !== null && (
+            <ActiveCheckinBanner
+              checkin={activeCheckin}
+              onCheckOut={handleCheckOut}
+            />
+          )}
+
+          <TouchableOpacity
+            style={styles.checkinRow}
+            onPress={handleGymCheckin}
+            activeOpacity={0.8}
+            accessibilityLabel={t('checkin.checkInCTA')}
+          >
+            <Text style={styles.checkinRowText}>
+              {t('checkin.checkInCTA')}
+            </Text>
+            <Ionicons
+              name="chevron-forward-outline"
+              size={spacing.lg}
+              color={colors.gray[400]}
+            />
+          </TouchableOpacity>
 
           <View style={styles.connectedAppsSection}>
             <Text style={styles.connectedAppsTitle}>
@@ -537,6 +614,23 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     lineHeight: typography.sizes.md * typography.lineHeights.normal,
   },
+  checkinRow: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.gray[200],
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  } as ViewStyle,
+  checkinRowText: {
+    color: colors.gray[800],
+    flex: 1,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+  } as TextStyle,
   content: {
     paddingBottom: spacing.xxl,
     paddingHorizontal: spacing.lg,

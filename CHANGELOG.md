@@ -4,6 +4,62 @@
 
 ---
 
+## [Phase 3C - Task 79] - 2026-06-10
+
+### Completed
+
+- Task 79: Gym Check-In Feature
+- createCheckin callable writes /gymCheckins/{id} and users/{uid}.gymCheckin in one batch with GeoPoint conversion and one-active-check-in enforcement
+- checkinStore manages a session-only active check-in listener, checkIn(gym, city), and checkOut(uid)
+- GymCheckinScreen requests foreground location, searches nearby gyms through services/places.ts, filters locally by name, confirms check-ins, and handles checkout state
+- GymSearchList and ActiveCheckinBanner added for reusable check-in UI
+- ProfileScreen subscribes to active check-ins, renders the active banner, and adds a Profile-stack check-in CTA row
+- SwipeCard shows the translated "At gym" badge when user.gymCheckin has not expired
+- GymCheckin added to ProfileStackParamList and registered inside the Profile stack only
+- firestore.rules adds owner read/delete rules for /gymCheckins with client create/update denied
+- checkin.* i18n keys added to all 4 language files
+- expo-location installed and location permission strings added to app.json
+
+### Files Created / Modified
+
+- functions/src/createCheckin.ts: created
+- functions/src/index.ts: createCheckin export added
+- store/checkinStore.ts: created
+- components/checkin/GymSearchList.tsx: created
+- components/checkin/ActiveCheckinBanner.tsx: created
+- app/checkin/GymCheckinScreen.tsx: created
+- app/profile/ProfileScreen.tsx: active check-in subscription, banner, loading overlay, and CTA row added
+- components/discovery/SwipeCard.tsx: active gym badge added without changing the video badge
+- app/navigation/MainTabNavigator.tsx: GymCheckin screen registered in the Profile stack
+- firestore.rules: /gymCheckins/{id} block appended before the default deny rule
+- i18n/en.json, my.json, zh.json, ta.json: checkin.* keys added
+- app.json, package.json, package-lock.json: expo-location install and permission configuration
+
+### Architecture Decisions
+
+- city is sourced from profile.location.city in GymCheckinScreen, not from Places API, because Places does not return a structured city field
+- GymPlace.coordinates remains a plain latitude/longitude object client-side; createCheckin is the only place that converts it to an Admin SDK GeoPoint
+- checkinStore is not persisted; the Firestore listener rehydrates state when ProfileScreen mounts
+
+### Known Issues / Deferred
+
+- /gymCheckins compound indexes are deferred to the Phase 3 index consolidation task
+- Expired check-in documents are logically expired by expiresAt but are not physically cleaned up yet
+
+### Verification
+
+- npm --prefix functions run build passes
+- npx tsc --noEmit passes
+- i18n JSON parse check passes for en/my/zh/ta
+- git diff --check passes
+- Scoped scans confirm no any, inline style={{ }}, console.*, or relative imports in touched code files
+
+### Next Up
+
+- Task 80: Workout Events
+
+---
+
 ## [Phase 3C - Task 78] - 2026-06-10
 
 ### Completed

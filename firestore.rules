@@ -377,6 +377,23 @@ service cloud.firestore {
     }
 
 
+    // ─── /gymCheckins/{checkinId} ───────────────────────────────────────────
+
+    match /gymCheckins/{checkinId} {
+      // Check-in creation is owned by the createCheckin Cloud Function.
+      allow create: if false;
+
+      // Users may read and delete only their own active check-in document.
+      allow read: if isSignedIn()
+                  && request.auth.uid == resource.data.userId;
+      allow delete: if isSignedIn()
+                    && request.auth.uid == resource.data.userId;
+
+      // Check-in fields are server-managed after creation.
+      allow update: if false;
+    }
+
+
     // ─── Default catch-all ──────────────────────────────────────────────────
 
     // Any collection not explicitly matched above is denied.
