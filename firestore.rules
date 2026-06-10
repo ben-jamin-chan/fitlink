@@ -36,6 +36,7 @@ service cloud.firestore {
         'stripeCustomerId',
         'premium',
         'boost',
+        'gymCheckin',
         // Legacy Phase 1 field — client still sees it in normalised reads
         // but must not write it
         'subscription'
@@ -78,6 +79,13 @@ service cloud.firestore {
       return !request.resource.data.diff(existingData())
               .affectedKeys()
               .hasAny(legacyServerOnlyFields());
+    }
+
+    function doesNotModifyGymCheckinExceptDelete() {
+      return !request.resource.data.diff(existingData())
+              .affectedKeys()
+              .hasAny(['gymCheckin'])
+             || !request.resource.data.keys().hasAny(['gymCheckin']);
     }
 
     function fitnessTrackingOnCreate() {
@@ -238,10 +246,15 @@ service cloud.firestore {
       // Premium (BLOCKED — managed by Stripe webhook Cloud Function):
       //   - premium (entire sub-object)
       //   - stripeCustomerId
+      //
+      // Gym check-in (BLOCKED except delete on checkout):
+      //   - gymCheckin is written by createCheckin Cloud Function
+      //   - client may only delete gymCheckin when checking out
       allow update: if resource.data != null
                     && isOwner(userId)
                     && doesNotModifyServerOnlyFields()
                     && doesNotModifyLegacyServerOnlyFields()
+                    && doesNotModifyGymCheckinExceptDelete()
                     && doesNotModifyStravaTokenFields()
                     && doesNotModifyStravaMapExceptDisconnect();
 

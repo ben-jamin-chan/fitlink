@@ -33,6 +33,7 @@ type EditableProfileUpdate = Partial<
     | 'verifiedAt'
     | 'stripeCustomerId'
     | 'boost'
+    | 'gymCheckin'
     | 'createdAt'
     | 'lastActive'
   >

@@ -107,6 +107,7 @@ export type UserProfileUpdateInput = Partial<
     | 'verifiedAt'
     | 'stripeCustomerId'
     | 'boost'
+    | 'gymCheckin'
     | 'createdAt'
     | 'lastActive'
   >

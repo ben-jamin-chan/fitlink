@@ -40,10 +40,11 @@
 - city is sourced from profile.location.city in GymCheckinScreen, not from Places API, because Places does not return a structured city field
 - GymPlace.coordinates remains a plain latitude/longitude object client-side; createCheckin is the only place that converts it to an Admin SDK GeoPoint
 - checkinStore is not persisted; the Firestore listener rehydrates state when ProfileScreen mounts
+- users/{uid}.gymCheckin is server-owned for create/update and client-deletable only during check-out cleanup
 
 ### Known Issues / Deferred
 
-- /gymCheckins compound indexes are deferred to the Phase 3 index consolidation task
+- /gymCheckins compound indexes (userId + expiresAt, city + expiresAt) are deferred to Task 88, the Phase 3 index consolidation task
 - Expired check-in documents are logically expired by expiresAt but are not physically cleaned up yet
 
 ### Verification
@@ -52,6 +53,7 @@
 - npx tsc --noEmit passes
 - i18n JSON parse check passes for en/my/zh/ta
 - git diff --check passes
+- Firebase emulator rules parse check passes for firestore/storage
 - Scoped scans confirm no any, inline style={{ }}, console.*, or relative imports in touched code files
 
 ### Next Up
