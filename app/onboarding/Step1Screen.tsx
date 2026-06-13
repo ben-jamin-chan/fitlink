@@ -20,6 +20,7 @@ import { useOnboardingStore } from '@/store/onboardingStore'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { SingleSelect } from '@/components/ui/SingleSelect'
 
 import {
   OnboardingHeader,
@@ -27,12 +28,19 @@ import {
 } from '@/app/onboarding/OnboardingNavigator'
 import type { Gender } from '@/types/user'
 
+import {
+  COUNTRY_TIMEZONES,
+  SEA_CITIES,
+  SUPPORTED_COUNTRIES,
+} from '@/constants/regions'
+import type { SupportedCountry } from '@/constants/regions'
 import { borderRadius, colors, spacing, typography } from '@/constants/theme'
 
 type Step1NavigationProp = StackNavigationProp<OnboardingStackParamList, 'Step1'>
 
 const STEP = 1
 const MIN_AGE_YEARS = 18
+const DEFAULT_COUNTRY: SupportedCountry = 'Malaysia'
 
 const genderValues: [Gender, Gender, Gender] = ['male', 'female', 'non-binary']
 
@@ -62,6 +70,58 @@ const genders: { value: Gender; labelKey: string }[] = [
   { value: 'non-binary', labelKey: 'onboarding.step1.nonBinary' },
 ]
 
+interface CountryOption {
+  label: string
+  value: SupportedCountry
+}
+
+interface CityOption {
+  label: string
+  value: string
+}
+
+const getSupportedCountry = (
+  country: string | undefined
+): SupportedCountry | null =>
+  SUPPORTED_COUNTRIES.find(
+    (supportedCountry: SupportedCountry): boolean =>
+      supportedCountry === country
+  ) ?? null
+
+const detectCountryFromTimezone = (): SupportedCountry | null => {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    return (
+      SUPPORTED_COUNTRIES.find(
+        (country: SupportedCountry): boolean =>
+          COUNTRY_TIMEZONES[country] === timezone
+      ) ?? null
+    )
+  } catch {
+    return null
+  }
+}
+
+const getCityTranslationKey = (
+  country: SupportedCountry,
+  city: string
+): string => `regions.city.${country}.${city.replace(/\s+/g, '_')}`
+
+const isCityInCountry = (
+  country: SupportedCountry,
+  city: string
+): boolean => SEA_CITIES[country].includes(city)
+
+const isUntouchedDefaultRegion = (
+  country: SupportedCountry | null,
+  timezone: string | undefined,
+  city: string
+): boolean =>
+  country === DEFAULT_COUNTRY &&
+  (timezone === undefined || timezone === COUNTRY_TIMEZONES[DEFAULT_COUNTRY]) &&
+  city === ''
+
 export default function Step1Screen(): React.JSX.Element {
   const { t } = useTranslation()
   const navigation = useNavigation<Step1NavigationProp>()
@@ -77,10 +137,79 @@ export default function Step1Screen(): React.JSX.Element {
   const [showPicker, setShowPicker] = useState(false)
   const [gender, setGender] = useState<Gender | undefined>(draft.gender)
   const [city, setCity] = useState(draft.city ?? '')
+  const [selectedCountry, setSelectedCountry] = useState<SupportedCountry>(
+    getSupportedCountry(draft.country) ?? DEFAULT_COUNTRY
+  )
 
   useEffect((): void => {
     setCurrentStep(STEP)
   }, [setCurrentStep])
+
+  useEffect((): void => {
+    const storedCountry = getSupportedCountry(draft.country)
+    const detectedCountry = detectCountryFromTimezone()
+    const storedCity = draft.city ?? ''
+    const shouldUseDetectedCountry =
+      storedCountry === null ||
+      isUntouchedDefaultRegion(storedCountry, draft.timezone, storedCity)
+    const nextCountry =
+      shouldUseDetectedCountry
+        ? detectedCountry ?? storedCountry ?? DEFAULT_COUNTRY
+        : storedCountry ?? DEFAULT_COUNTRY
+    const shouldClearCity =
+      storedCity !== '' && !isCityInCountry(nextCountry, storedCity)
+
+    setSelectedCountry(nextCountry)
+
+    if (shouldClearCity) {
+      setCity('')
+    }
+
+    if (
+      draft.country !== nextCountry ||
+      draft.timezone !== COUNTRY_TIMEZONES[nextCountry] ||
+      shouldClearCity
+    ) {
+      updateDraft({
+        country: nextCountry,
+        timezone: COUNTRY_TIMEZONES[nextCountry],
+        ...(shouldClearCity ? { city: '' } : {}),
+      })
+    }
+    // Timezone auto-detection is intentionally a one-time mount step.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const countryOptions = useMemo(
+    (): CountryOption[] =>
+      SUPPORTED_COUNTRIES.map(
+        (country: SupportedCountry): CountryOption => ({
+          label: t(`regions.country.${country}`),
+          value: country,
+        })
+      ),
+    [t]
+  )
+
+  const cityOptions = useMemo(
+    (): CityOption[] =>
+      SEA_CITIES[selectedCountry].map(
+        (cityOption: string): CityOption => ({
+          label: t(getCityTranslationKey(selectedCountry, cityOption)),
+          value: cityOption,
+        })
+      ),
+    [selectedCountry, t]
+  )
+
+  const selectedCountryLabel =
+    countryOptions.find(
+      (option: CountryOption): boolean => option.value === selectedCountry
+    )?.label ?? null
+
+  const selectedCityLabel =
+    cityOptions.find((option: CityOption): boolean => option.value === city)
+      ?.label ?? null
 
   const firstNameError =
     firstName.length > 0 && !step1Schema.shape.firstName.safeParse(firstName).success
@@ -94,8 +223,10 @@ export default function Step1Screen(): React.JSX.Element {
         dateOfBirth: dobSelected ? dateOfBirth : undefined,
         gender,
         city,
-      }).success && dateOfBirth <= getMaxDate(),
-    [city, dateOfBirth, dobSelected, firstName, gender]
+      }).success &&
+      dateOfBirth <= getMaxDate() &&
+      isCityInCountry(selectedCountry, city),
+    [city, dateOfBirth, dobSelected, firstName, gender, selectedCountry]
   )
 
   const handleDateChange = (
@@ -116,13 +247,45 @@ export default function Step1Screen(): React.JSX.Element {
     }
   }
 
+  const handleCountrySelect = (country: SupportedCountry): void => {
+    setSelectedCountry(country)
+    setCity('')
+    updateDraft({
+      country,
+      timezone: COUNTRY_TIMEZONES[country],
+      city: '',
+    })
+  }
+
+  const handleCountryLabelSelect = (label: string): void => {
+    const country = countryOptions.find(
+      (option: CountryOption): boolean => option.label === label
+    )?.value
+
+    if (country !== undefined) {
+      handleCountrySelect(country)
+    }
+  }
+
+  const handleCityLabelSelect = (label: string): void => {
+    const nextCity = cityOptions.find(
+      (option: CityOption): boolean => option.label === label
+    )?.value
+
+    if (nextCity !== undefined) {
+      setCity(nextCity)
+      updateDraft({ city: nextCity })
+    }
+  }
+
   const handleNext = (): void => {
     updateDraft({
       firstName: firstName.trim(),
       dateOfBirth: dateOfBirth.toISOString(),
       gender,
       city: city.trim(),
-      country: 'Malaysia',
+      country: selectedCountry,
+      timezone: COUNTRY_TIMEZONES[selectedCountry],
     })
     setCurrentStep(2)
     navigation.navigate('Step2')
@@ -229,14 +392,26 @@ export default function Step1Screen(): React.JSX.Element {
         </View>
 
         <View style={styles.field}>
-          <Input
-            label={t('onboarding.step1.location')}
-            placeholder={t('onboarding.step1.location')}
-            value={city}
-            onChangeText={setCity}
-            autoCapitalize="words"
-            textContentType="addressCity"
-            maxLength={100}
+          <Text style={styles.label}>
+            {t('onboarding.step1.country.label')}
+          </Text>
+          <SingleSelect
+            options={countryOptions.map(
+              (option: CountryOption): string => option.label
+            )}
+            selected={selectedCountryLabel}
+            onChange={handleCountryLabelSelect}
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>{t('onboarding.step1.location')}</Text>
+          <SingleSelect
+            options={cityOptions.map(
+              (option: CityOption): string => option.label
+            )}
+            selected={selectedCityLabel}
+            onChange={handleCityLabelSelect}
           />
         </View>
 

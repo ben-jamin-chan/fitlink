@@ -4,6 +4,53 @@
 
 ---
 
+## [Phase 3D - Task 81] - 2026-06-14
+
+### Completed
+
+- Task 81: SEA Expansion - Singapore & Thailand Regions
+- constants/regions.ts added SUPPORTED_COUNTRIES, COUNTRY_TIMEZONES, and SEA_CITIES for Malaysia, Singapore, and Thailand
+- onboardingStore now persists country and timezone in the onboarding draft with Malaysia / Asia/Kuala_Lumpur defaults
+- Step1Screen now renders a translated country selector and a translated city selector populated from SEA_CITIES
+- Step1Screen silently detects supported device timezones on mount, honours explicit stored countries on remount, and clears stale city values that do not belong to the selected country
+- Step6Screen passes draft timezone through final onboarding submission
+- createUserProfile writes timezone as a top-level user field while preserving country inside location.country
+- services/stripe.ts SGD and THB pricing entries were verified against PRD Section 5.12; requested SGD/THB env placeholders were added to .env.example
+- regions.* and onboarding.step1.country.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- constants/regions.ts: created
+- store/onboardingStore.ts: OnboardingDraft extended with country and timezone defaults
+- app/onboarding/Step1Screen.tsx: country/city SingleSelect flow added with timezone auto-detection
+- app/onboarding/Step6Screen.tsx: timezone passed to createUserProfile
+- services/firebase/firestore.ts: createUserProfile input and payload extended with timezone
+- .env.example: SGD/THB Stripe price placeholders added
+- i18n/en.json, my.json, zh.json, ta.json: country and region city keys added
+
+### Architecture Decisions
+
+- draft.country maps only to location.country in Firestore; no top-level country field was added
+- timezone is a top-level user field written at profile creation and available for Task 82 daily reset logic
+- City and country chip labels are translated through regions.* keys while canonical values stay stable in the draft
+- Existing Plus/Pro SGD and THB pricing amounts were left unchanged because they already match PRD Section 5.12
+
+### Known Issues / Deferred
+
+- Real region translations for MY/ZH/TA remain deferred; English placeholders were added for now
+- Per-user timezone daily resets in recordSwipe and verifyProfilePhoto remain Task 82
+- Existing users created before Task 81 may not have timezone until future migration or fallback logic
+
+### Verification
+
+- npx tsc --noEmit passes
+
+### Next Up
+
+- Task 82: Per-User Timezone Daily Resets
+
+---
+
 ## [Phase 3C - Task 80] - 2026-06-13
 
 ### Completed

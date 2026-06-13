@@ -30,6 +30,8 @@ import { uploadAllProfilePhotos } from '@/services/firebase/storage'
 import { mapFirebaseError } from '@/utils/errorUtils'
 import type { LookingFor, UserProfile } from '@/types/user'
 
+import { COUNTRY_TIMEZONES } from '@/constants/regions'
+import type { SupportedCountry } from '@/constants/regions'
 import {
   MIN_PHOTOS,
   colors,
@@ -44,7 +46,8 @@ const DEFAULT_AGE_MAX = 35
 const MIN_DISTANCE_KM = 5
 const MAX_DISTANCE_KM = 100
 const DEFAULT_DISTANCE_KM = 25
-const FALLBACK_COUNTRY = 'Malaysia'
+const FALLBACK_COUNTRY: SupportedCountry = 'Malaysia'
+const FALLBACK_TIMEZONE = COUNTRY_TIMEZONES[FALLBACK_COUNTRY]
 const FALLBACK_LANGUAGE = 'en'
 
 type Step6NavigationProp = StackNavigationProp<OnboardingStackParamList, 'Step6'>
@@ -65,6 +68,7 @@ interface RequiredDraft {
   gender: NonNullable<OnboardingDraft['gender']>
   city: string
   country: string
+  timezone: string
   photoUris: string[]
   bio: string
   height: number
@@ -289,6 +293,7 @@ export default function Step6Screen(): React.JSX.Element {
       gender: draft.gender,
       city: draft.city,
       country: draft.country ?? FALLBACK_COUNTRY,
+      timezone: draft.timezone ?? FALLBACK_TIMEZONE,
       photoUris: draft.photoUris,
       bio: draft.bio,
       height: draft.height,
@@ -360,6 +365,7 @@ export default function Step6Screen(): React.JSX.Element {
         dateOfBirth: new Date(requiredDraft.dateOfBirth),
         gender: requiredDraft.gender,
         location: buildLocation(requiredDraft.city, requiredDraft.country),
+        timezone: requiredDraft.timezone,
         photos: downloadUrls,
         bio: requiredDraft.bio,
         height: requiredDraft.height,

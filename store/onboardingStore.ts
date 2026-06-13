@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+import { COUNTRY_TIMEZONES } from '@/constants/regions'
+import type { SupportedCountry } from '@/constants/regions'
 import type {
   DrinkingStatus,
   FitnessLevel,
@@ -15,7 +17,8 @@ export interface OnboardingDraft {
   dateOfBirth?: string
   gender?: Gender
   city?: string
-  country?: string
+  country: string
+  timezone: string
   photoUris?: string[]
   activities?: string[]
   fitnessLevel?: FitnessLevel
@@ -42,10 +45,16 @@ interface OnboardingState {
   clearDraft: () => void
 }
 
+const DEFAULT_COUNTRY: SupportedCountry = 'Malaysia'
+const DEFAULT_ONBOARDING_DRAFT: OnboardingDraft = {
+  country: DEFAULT_COUNTRY,
+  timezone: COUNTRY_TIMEZONES[DEFAULT_COUNTRY],
+}
+
 export const useOnboardingStore = create<OnboardingState>()(
   persist(
     (set) => ({
-      draft: {},
+      draft: { ...DEFAULT_ONBOARDING_DRAFT },
       currentStep: 1,
 
       updateDraft: (partial: Partial<OnboardingDraft>): void => {
@@ -59,7 +68,7 @@ export const useOnboardingStore = create<OnboardingState>()(
       },
 
       clearDraft: (): void => {
-        set({ draft: {}, currentStep: 1 })
+        set({ draft: { ...DEFAULT_ONBOARDING_DRAFT }, currentStep: 1 })
       },
     }),
     {

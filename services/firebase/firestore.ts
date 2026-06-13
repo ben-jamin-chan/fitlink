@@ -70,6 +70,7 @@ interface CreateUserProfileInput {
   dateOfBirth: Date
   gender: UserProfile['gender']
   location: UserProfile['location']
+  timezone: string
   photos: string[]
   bio: string
   height: number
@@ -235,6 +236,7 @@ export const createUserProfile = async (
     // CRITICAL: age is intentionally omitted. Task 22 calculates it server-side.
     gender: input.gender,
     location: input.location,
+    timezone: input.timezone,
     photos: input.photos,
     bio: input.bio,
     height: input.height,

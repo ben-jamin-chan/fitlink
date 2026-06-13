@@ -101,7 +101,11 @@
       "male": "Male",
       "female": "Female",
       "nonBinary": "Non-binary",
-      "location": "Your city"
+      "location": "Your city",
+      "country": {
+        "label": "Country",
+        "placeholder": "Select your country"
+      }
     },
     "step2": {
       "title": "Your Photos",
@@ -262,6 +266,41 @@
         "fitnessGoals": "fitness goals",
         "smoking": "smoking",
         "drinking": "drinking"
+      }
+    }
+  },
+  "regions": {
+    "country": {
+      "Malaysia": "Malaysia",
+      "Singapore": "Singapore",
+      "Thailand": "Thailand"
+    },
+    "city": {
+      "Malaysia": {
+        "Kuala_Lumpur": "Kuala Lumpur",
+        "Selangor": "Selangor",
+        "Penang": "Penang",
+        "Johor_Bahru": "Johor Bahru",
+        "Ipoh": "Ipoh",
+        "Melaka": "Melaka",
+        "Kota_Kinabalu": "Kota Kinabalu",
+        "Kuching": "Kuching",
+        "Kuantan": "Kuantan",
+        "Alor_Setar": "Alor Setar"
+      },
+      "Singapore": {
+        "Central": "Central",
+        "East": "East",
+        "North": "North",
+        "South": "South",
+        "West": "West"
+      },
+      "Thailand": {
+        "Bangkok": "Bangkok",
+        "Chiang_Mai": "Chiang Mai",
+        "Phuket": "Phuket",
+        "Pattaya": "Pattaya",
+        "Hat_Yai": "Hat Yai"
       }
     }
   },
