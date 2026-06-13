@@ -4,6 +4,67 @@
 
 ---
 
+## [Phase 3C - Task 80] - 2026-06-13
+
+### Completed
+
+- Task 80: Workout Events — Create & Discover
+- createEvent callable validates event input, writes /events/{id} with server-owned creatorId, attendees, cancelled, and createdAt fields, and returns eventId
+- rsvpEvent callable mutates attendees via Admin SDK arrayUnion / arrayRemove inside a transaction with capacity enforcement
+- eventsStore added as a non-persisted Zustand store for upcoming events, my events, single-event fallback loading, createEvent, and RSVP callable actions
+- EventCard added with activity icon mapping, translated controlled activity labels, attendee count, and RSVP status pill
+- EventsScreen added with Discover / My Events tabs, pull-to-refresh, empty states, and Create Event FAB
+- CreateEventScreen added with React Hook Form + Zod validation, 16 translated activity chips, start/end DateTimePicker controls, optional maxAttendees, and Cloud Function submission
+- EventDetailScreen added with first-five attendee profile avatars, RSVP, creator-only cancellation, cancelled state, and native Share
+- MainTabNavigator exports EventsStackParamList, registers EventsStackNavigator, and inserts Events between Matches and Profile
+- firestore.rules adds /events/{id} rules: authenticated reads, denied creates/deletes, creator-only limited updates
+- firestore.indexes.json adds /events indexes for city/cancelled/startAt and attendees/startAt queries
+- events.* and navigation.tabs.* i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- functions/src/createEvent.ts: created
+- functions/src/rsvpEvent.ts: created
+- functions/src/index.ts: createEvent and rsvpEvent exports appended
+- store/eventsStore.ts: created
+- components/events/EventCard.tsx: created
+- app/events/EventsScreen.tsx: created
+- app/events/CreateEventScreen.tsx: created
+- app/events/EventDetailScreen.tsx: created
+- app/navigation/MainTabNavigator.tsx: Events stack and tab added
+- firestore.rules: /events/{id} block inserted before default deny
+- firestore.indexes.json: two /events composite indexes appended
+- i18n/en.json, my.json, zh.json, ta.json: events and navigation tab keys added
+
+### Architecture Decisions
+
+- DateTimePicker was already installed in package.json, so no dependency install was needed
+- RSVP capacity enforcement is transactional; the function still writes attendees using arrayUnion / arrayRemove
+- CreateEventScreen keeps Google Places autocomplete deferred and uses profile city/country plus profile coordinates for the free-text event location payload
+- The existing app has a Settings bottom tab, so Events is inserted as Discover, Matches, Events, Profile, Settings
+- The Firestore update rule uses changed-field diff validation so creator cancellation can pass without exposing attendees writes
+
+### Known Issues / Deferred
+
+- /gymCheckins compound indexes remain deferred to Task 88
+- Google Places autocomplete UI for event locations remains deferred to Phase 4
+- Expired /events documents are not physically cleaned up; scheduled cleanup remains deferred
+
+### Verification
+
+- npm --prefix functions run build passes
+- npx tsc --noEmit passes
+- firestore.indexes.json and i18n JSON parse validation passes
+- git diff --check passes
+- Scoped scans confirm no any, inline style={{ }}, console.*, or relative imports in new and touched task files
+- Scoped scan confirms no client addDoc to /events and no client arrayUnion / arrayRemove for event attendees
+
+### Next Up
+
+- Task 81: SEA Expansion — Singapore & Thailand Regions
+
+---
+
 ## [Phase 3C - Task 79] - 2026-06-10
 
 ### Completed

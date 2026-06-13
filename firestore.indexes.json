@@ -44,6 +44,23 @@
         { "fieldPath": "fitnessTracking.shareOnProfile",       "order": "ASCENDING" },
         { "fieldPath": "fitnessTracking.todayStats.updatedAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "city",      "order": "ASCENDING" },
+        { "fieldPath": "cancelled", "order": "ASCENDING" },
+        { "fieldPath": "startAt",   "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "attendees", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "startAt",   "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [

@@ -1108,6 +1108,102 @@
       "remainingMinutes": "{{minutes}}m"
     }
   },
+  "events": {
+    "title": "Events",
+    "tabs": {
+      "discover": "Discover",
+      "myEvents": "My Events"
+    },
+    "activities": {
+      "gym": "Gym",
+      "running": "Running",
+      "cycling": "Cycling",
+      "swimming": "Swimming",
+      "yoga": "Yoga",
+      "hiking": "Hiking",
+      "basketball": "Basketball",
+      "football": "Football",
+      "tennis": "Tennis",
+      "badminton": "Badminton",
+      "climbing": "Climbing",
+      "crossFit": "CrossFit",
+      "muayThai": "Muay Thai",
+      "boxing": "Boxing",
+      "pilates": "Pilates",
+      "dancing": "Dancing"
+    },
+    "card": {
+      "attending": "Attending",
+      "join": "Join",
+      "full": "Full",
+      "attendeesOf": "{{count}}/{{max}} attending",
+      "attendeesUnlimited": "{{count}} attending"
+    },
+    "discover": {
+      "empty": "No upcoming events in your city",
+      "createCta": "Create an Event"
+    },
+    "myEvents": {
+      "empty": "You haven't joined any events yet"
+    },
+    "create": {
+      "title": "Create Event",
+      "titleLabel": "Event title",
+      "titlePlaceholder": "e.g. Saturday morning run",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Tell people what to expect...",
+      "activityLabel": "Activity type",
+      "locationLabel": "Location",
+      "locationPlaceholder": "e.g. KLCC Park, Kuala Lumpur",
+      "startLabel": "Start date & time",
+      "endLabel": "End date & time",
+      "maxAttendeesLabel": "Max attendees (optional)",
+      "maxAttendeesPlaceholder": "Leave blank for unlimited",
+      "submit": "Create Event",
+      "submitting": "Creating event...",
+      "errorTitle": "Couldn't create event",
+      "errorMessage": "Please try again",
+      "errors": {
+        "titleMin": "Title must be at least 5 characters",
+        "descriptionRequired": "Description is required",
+        "activityRequired": "Please select an activity",
+        "locationRequired": "Location is required",
+        "cityRequired": "Your profile city is required",
+        "startFuture": "Start time must be in the future",
+        "endAfterStart": "End time must be after start time",
+        "maxAttendeesInvalid": "Enter a positive number or leave it blank"
+      }
+    },
+    "detail": {
+      "about": "About this event",
+      "endsAt": "Ends {{time}}",
+      "attendeesOf": "{{count}} / {{max}} attending",
+      "attendeesUnlimited": "{{count}} attending",
+      "join": "Join Event",
+      "leave": "Leave Event",
+      "full": "Event Full",
+      "cancel": "Cancel Event",
+      "cancelled": "This event has been cancelled",
+      "notFound": "Event not found",
+      "rsvpErrorTitle": "Couldn't update RSVP",
+      "rsvpErrorMessage": "Please try again",
+      "cancelConfirmTitle": "Cancel event?",
+      "cancelConfirmMessage": "This cannot be undone. All attendees will be affected.",
+      "cancelConfirm": "Yes, Cancel",
+      "cancelErrorTitle": "Couldn't cancel event",
+      "cancelErrorMessage": "Please try again"
+    },
+    "shareMessage": "Join me at \"{{title}}\" on Fitlink! {{link}}"
+  },
+  "navigation": {
+    "tabs": {
+      "discover": "Discover",
+      "matches": "Matches",
+      "events": "Events",
+      "profile": "Profile",
+      "settings": "Settings"
+    }
+  },
   "errors": {
     "required": "This field is required",
     "network": "Network error. Please try again.",

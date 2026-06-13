@@ -407,6 +407,34 @@ service cloud.firestore {
     }
 
 
+    // ─── /events/{eventId} ─────────────────────────────────────────────────
+
+    match /events/{eventId} {
+      // Event creation is owned by the createEvent Cloud Function.
+      allow create: if false;
+
+      // Any authenticated user can discover and open workout events.
+      allow read: if isSignedIn();
+
+      // Creator may update only creator-editable fields. Attendees are mutated
+      // exclusively by the rsvpEvent Cloud Function.
+      allow update: if resource.data != null
+                    && isSignedIn()
+                    && request.auth.uid == resource.data.creatorId
+                    && request.resource.data.diff(resource.data)
+                        .affectedKeys()
+                        .hasOnly([
+                          'title',
+                          'description',
+                          'maxAttendees',
+                          'cancelled'
+                        ]);
+
+      // Hard deletes are denied; cancellation is a soft delete.
+      allow delete: if false;
+    }
+
+
     // ─── Default catch-all ──────────────────────────────────────────────────
 
     // Any collection not explicitly matched above is denied.

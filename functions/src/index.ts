@@ -22,3 +22,5 @@ export { onPrimaryPhotoChanged } from "./onPrimaryPhotoChanged";
 export { exchangeStravaToken } from "./exchangeStravaToken";
 export { syncStravaActivity } from "./syncStravaActivity";
 export { createCheckin } from "./createCheckin";
+export { createEvent } from "./createEvent";
+export { rsvpEvent } from "./rsvpEvent";

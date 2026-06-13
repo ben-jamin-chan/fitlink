@@ -11,6 +11,9 @@ import { useTranslation } from 'react-i18next'
 import ChatScreen from '@/app/chat/ChatScreen'
 import GymCheckinScreen from '@/app/checkin/GymCheckinScreen'
 import DiscoveryScreen from '@/app/discovery/DiscoveryScreen'
+import CreateEventScreen from '@/app/events/CreateEventScreen'
+import EventDetailScreen from '@/app/events/EventDetailScreen'
+import EventsScreen from '@/app/events/EventsScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
 import EditProfileScreen from '@/app/profile/EditProfileScreen'
 import ProfileScreen from '@/app/profile/ProfileScreen'
@@ -32,6 +35,12 @@ export type ProfileStackParamList = {
   GymCheckin: undefined
 }
 
+export type EventsStackParamList = {
+  Events: undefined
+  CreateEvent: undefined
+  EventDetail: { eventId: string }
+}
+
 export type SettingsStackParamList = {
   Settings: undefined
   DeleteAccount: undefined
@@ -41,6 +50,7 @@ export type SettingsStackParamList = {
 export type MainTabParamList = {
   Discover: undefined
   Matches: NavigatorScreenParams<MatchesStackParamList> | undefined
+  Events: NavigatorScreenParams<EventsStackParamList> | undefined
   Profile: NavigatorScreenParams<ProfileStackParamList> | undefined
   Settings: NavigatorScreenParams<SettingsStackParamList> | undefined
 }
@@ -51,6 +61,7 @@ interface PlaceholderScreenProps {
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 const MatchesStack = createStackNavigator<MatchesStackParamList>()
+const EventsStack = createStackNavigator<EventsStackParamList>()
 const ProfileStack = createStackNavigator<ProfileStackParamList>()
 const SettingsStack = createStackNavigator<SettingsStackParamList>()
 
@@ -62,32 +73,47 @@ const TAB_ICONS: Record<
 > = {
   Discover: { active: 'flame', inactive: 'flame-outline' },
   Matches: { active: 'heart', inactive: 'heart-outline' },
+  Events: { active: 'calendar', inactive: 'calendar-outline' },
   Profile: { active: 'person', inactive: 'person-outline' },
   Settings: { active: 'settings', inactive: 'settings-outline' },
 }
 
-export const MainTabNavigator = (): React.JSX.Element => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarActiveTintColor: colors.primary,
-      tabBarInactiveTintColor: colors.gray[400],
-      tabBarStyle: styles.tabBar,
-      tabBarLabelStyle: styles.tabLabel,
-      tabBarIcon: ({ focused, color, size }) => {
-        const icons = TAB_ICONS[route.name]
-        const iconName = focused ? icons.active : icons.inactive
+const TAB_LABEL_KEYS: Record<keyof MainTabParamList, string> = {
+  Discover: 'navigation.tabs.discover',
+  Matches: 'navigation.tabs.matches',
+  Events: 'navigation.tabs.events',
+  Profile: 'navigation.tabs.profile',
+  Settings: 'navigation.tabs.settings',
+}
 
-        return <Ionicons name={iconName} size={size} color={color} />
-      },
-    })}
-  >
-    <Tab.Screen name="Discover" component={DiscoveryScreen} />
-    <Tab.Screen name="Matches" component={MatchesNavigator} />
-    <Tab.Screen name="Profile" component={ProfileStackNavigator} />
-    <Tab.Screen name="Settings" component={SettingsStackNavigator} />
-  </Tab.Navigator>
-)
+export const MainTabNavigator = (): React.JSX.Element => {
+  const { t } = useTranslation()
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.gray[400],
+        tabBarStyle: styles.tabBar,
+        tabBarLabel: t(TAB_LABEL_KEYS[route.name]),
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons = TAB_ICONS[route.name]
+          const iconName = focused ? icons.active : icons.inactive
+
+          return <Ionicons name={iconName} size={size} color={color} />
+        },
+      })}
+    >
+      <Tab.Screen name="Discover" component={DiscoveryScreen} />
+      <Tab.Screen name="Matches" component={MatchesNavigator} />
+      <Tab.Screen name="Events" component={EventsStackNavigator} />
+      <Tab.Screen name="Profile" component={ProfileStackNavigator} />
+      <Tab.Screen name="Settings" component={SettingsStackNavigator} />
+    </Tab.Navigator>
+  )
+}
 
 const MatchesNavigator = (): React.JSX.Element => (
   <MatchesStack.Navigator screenOptions={matchesStackScreenOptions}>
@@ -98,6 +124,14 @@ const MatchesNavigator = (): React.JSX.Element => (
       options={{ headerShown: true }}
     />
   </MatchesStack.Navigator>
+)
+
+const EventsStackNavigator = (): React.JSX.Element => (
+  <EventsStack.Navigator screenOptions={eventsStackScreenOptions}>
+    <EventsStack.Screen name="Events" component={EventsScreen} />
+    <EventsStack.Screen name="CreateEvent" component={CreateEventScreen} />
+    <EventsStack.Screen name="EventDetail" component={EventDetailScreen} />
+  </EventsStack.Navigator>
 )
 
 const ProfileStackNavigator = (): React.JSX.Element => {
@@ -159,6 +193,10 @@ const PlaceholderScreen = ({
 )
 
 const matchesStackScreenOptions = {
+  headerShown: false,
+}
+
+const eventsStackScreenOptions = {
   headerShown: false,
 }
 
