@@ -18,7 +18,11 @@
       "buildNumber": "1",
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Allow fit-link to use your location to find nearby gyms."
+        "NSLocationWhenInUseUsageDescription": "Allow fit-link to use your location to find nearby gyms.",
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification"
+        ]
       },
       "entitlements": {
         "com.apple.developer.applesignin": [

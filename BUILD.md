@@ -152,8 +152,23 @@ The following features **cannot be tested in Expo Go**. Always use a development
 | Google Fit | `react-native-google-fit` native module |
 | Voice Messages | `expo-av` recording requires native audio permissions/session support |
 | Push Notifications (APNs) | Requires device + APNs certificate |
+| Background Fetch | `expo-background-fetch` and `expo-task-manager` require a development build |
 
 - `expo-video` (video profile playback) requires a development build — not supported in Expo Go.
+
+## Background Fetch (`expo-background-fetch`, `expo-task-manager`)
+
+- Background `lastActive` updates require a **development build** — Expo Go silently
+  rejects `BackgroundFetch.registerTaskAsync` and the task will never fire in the
+  managed runtime.
+- `TaskManager.defineTask` must be called at module scope before any component mounts.
+  If the background task is not being triggered in a dev build, confirm the task name
+  string in `defineTask` and `registerTaskAsync` match exactly: `'fitlink-lastactive-fetch'`.
+- `UIBackgroundModes: ['fetch', 'remote-notification']` is set in `app.json`
+  `ios.infoPlist` and is included in all EAS builds automatically.
+- The `minimumInterval` of 300 seconds is a hint only — iOS may batch background
+  fetches and call the task less frequently (typically every 15–60 minutes in practice).
+  This is expected and acceptable for `lastActive` granularity.
 
 ---
 

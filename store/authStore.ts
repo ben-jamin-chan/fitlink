@@ -95,6 +95,9 @@ export const useAuthStore = create<AuthState>()(
           }
 
           await firebaseSignOut()
+          await AsyncStorage.removeItem('fitlink-uid').catch(() => {
+            return undefined
+          })
           useProfileStore.getState().reset()
           set({
             user: null,
@@ -135,6 +138,10 @@ export const useAuthStore = create<AuthState>()(
             hideSplash()
             return
           }
+
+          void AsyncStorage.setItem('fitlink-uid', user.uid).catch(() => {
+            return undefined
+          })
 
           set({
             user,

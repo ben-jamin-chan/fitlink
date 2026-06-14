@@ -413,3 +413,7 @@ export const getDailyLikesDoc = async (
   const remaining = Math.max(0, DAILY_LIKE_CAP - count)
   return { count, remaining }
 }
+
+export const updateLastActive = async (uid: string): Promise<void> => {
+  await updateDoc(doc(db, 'users', uid), { lastActive: serverTimestamp() })
+}

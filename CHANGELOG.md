@@ -4,6 +4,53 @@
 
 ---
 
+## [Phase 3D - Task 83] - 2026-06-14
+
+### Completed
+
+- Task 83: Background lastActive Updates (iOS)
+- expo-background-fetch and expo-task-manager installed
+- updateLastActive(uid): extracted as named export from services/firebase/firestore.ts; used by both foreground heartbeat and background task
+- useLastActive.ts: TaskManager.defineTask registered at module scope with 'fitlink-lastactive-fetch' task name; BackgroundFetch.registerTaskAsync called in a useEffect(() => {}, []) with silent catch; foreground heartbeat refactored to call updateLastActive() from the service layer
+- authStore: AsyncStorage.setItem('fitlink-uid', uid) on login; AsyncStorage.removeItem('fitlink-uid') in logout() provides uid to isolated background task JS context without Zustand
+- app.json: UIBackgroundModes ['fetch', 'remote-notification'] added to ios.infoPlist
+- BUILD.md: background fetch development-build requirement documented with task name string and minimumInterval behaviour note
+
+### Files Created / Modified
+
+- package.json, package-lock.json: expo-background-fetch and expo-task-manager dependencies added
+- services/firebase/firestore.ts: updateLastActive(uid) named export added
+- store/authStore.ts: AsyncStorage uid persistence on login/logout added
+- hooks/useLastActive.ts: rewritten with module-scope task definition, background fetch registration useEffect, and foreground heartbeat using service layer
+- app.json: UIBackgroundModes added to ios.infoPlist
+- BUILD.md: background fetch section added
+
+### Architecture Decisions
+
+- TaskManager.defineTask placed at module scope to satisfy Expo's requirement that tasks are registered before any component mounts
+- Background task body uses only AsyncStorage and updateLastActive, with no Zustand or store access, because it runs in an isolated JS context
+- AsyncStorage.setItem('fitlink-uid') duplicates Zustand persist intentionally; Zustand rehydration is not available in the isolated background task context
+- catch handlers on registerTaskAsync and unregisterTaskAsync are intentionally silent; Expo Go and simulators legitimately reject background fetch
+- This repo's auth store exposes user?.uid rather than a top-level uid, so useLastActive selects the foreground uid from state.user?.uid
+
+### Known Issues / Deferred
+
+- Background fetch requires a development build; cannot be verified in Expo Go
+- iOS calls the handler as infrequently as every 15-60 minutes regardless of minimumInterval: 300; this is expected OS behaviour
+- Android background fetch support is not expanded in this task; implementation remains iOS-primary per the task spec
+
+### Verification
+
+- npx tsc --noEmit passes
+- git diff --check passes
+- Scoped scans confirm no any, no console.*, no inline style={{ }}, no direct updateDoc calls remaining in useLastActive.ts, and no Zustand imports inside the TaskManager.defineTask callback
+
+### Next Up
+
+- Task 84: Notification Badge Count & Granular Preferences
+
+---
+
 ## [Phase 3D - Task 82] - 2026-06-14
 
 ### Completed

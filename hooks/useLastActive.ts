@@ -3,88 +3,99 @@ import { useEffect, useRef } from 'react'
 import { AppState } from 'react-native'
 import type { AppStateStatus } from 'react-native'
 
-import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as BackgroundFetch from 'expo-background-fetch'
+import * as TaskManager from 'expo-task-manager'
 
 import { useAuthStore } from '@/store/authStore'
 
-import { db } from '@/services/firebase/config'
+import { updateLastActive } from '@/services/firebase/firestore'
 
-const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000
+const BACKGROUND_FETCH_TASK = 'fitlink-lastactive-fetch'
+
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  try {
+    const uid = await AsyncStorage.getItem('fitlink-uid')
+    if (!uid) {
+      return BackgroundFetch.BackgroundFetchResult.NoData
+    }
+
+    await updateLastActive(uid)
+    return BackgroundFetch.BackgroundFetchResult.NewData
+  } catch {
+    return BackgroundFetch.BackgroundFetchResult.Failed
+  }
+})
 
 export const useLastActive = (): void => {
-  const { isAuthenticated, user } = useAuthStore()
-
+  const uid = useAuthStore((state) => state.user?.uid ?? null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const appStateSubscriptionRef = useRef<
-    ReturnType<typeof AppState.addEventListener> | null
-  >(null)
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState)
 
   useEffect(() => {
-    if (!isAuthenticated || user?.uid === undefined) {
+    if (uid === null) {
       return
     }
 
-    const uid = user.uid
-
-    const writeLastActive = async (): Promise<void> => {
-      try {
-        await updateDoc(doc(db, 'users', uid), {
-          lastActive: serverTimestamp(),
-        })
-      } catch {
+    const writeLastActive = (): void => {
+      updateLastActive(uid).catch(() => {
         return undefined
-      }
+      })
     }
 
-    const startHeartbeat = (): void => {
-      void writeLastActive()
-
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current)
-      }
-
-      intervalRef.current = setInterval(() => {
-        void writeLastActive()
-      }, HEARTBEAT_INTERVAL_MS)
+    const startInterval = (): void => {
+      writeLastActive()
+      intervalRef.current = setInterval(writeLastActive, 5 * 60 * 1000)
     }
 
-    const stopHeartbeat = (): void => {
+    const stopInterval = (): void => {
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-
-      void writeLastActive()
     }
 
-    const handleAppStateChange = (nextState: AppStateStatus): void => {
-      if (nextState === 'active') {
-        startHeartbeat()
-        return
-      }
-
-      if (nextState === 'background' || nextState === 'inactive') {
-        stopHeartbeat()
-      }
-    }
-
-    startHeartbeat()
-
-    appStateSubscriptionRef.current = AppState.addEventListener(
+    const subscription = AppState.addEventListener(
       'change',
-      handleAppStateChange
+      (nextState: AppStateStatus): void => {
+        if (
+          appStateRef.current.match(/inactive|background/) &&
+          nextState === 'active'
+        ) {
+          startInterval()
+        } else if (
+          appStateRef.current === 'active' &&
+          nextState.match(/inactive|background/)
+        ) {
+          writeLastActive()
+          stopInterval()
+        }
+
+        appStateRef.current = nextState
+      }
     )
 
-    return (): void => {
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
+    startInterval()
 
-      if (appStateSubscriptionRef.current !== null) {
-        appStateSubscriptionRef.current.remove()
-        appStateSubscriptionRef.current = null
-      }
+    return (): void => {
+      subscription.remove()
+      stopInterval()
     }
-  }, [isAuthenticated, user?.uid])
+  }, [uid])
+
+  useEffect(() => {
+    BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+      minimumInterval: 300,
+      stopOnTerminate: false,
+      startOnBoot: false,
+    }).catch(() => {
+      return undefined
+    })
+
+    return (): void => {
+      BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK).catch(() => {
+        return undefined
+      })
+    }
+  }, [])
 }
