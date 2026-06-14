@@ -4,6 +4,42 @@
 
 ---
 
+## [Phase 3D - Task 82] - 2026-06-14
+
+### Completed
+
+- Task 82: Per-User Timezone Daily Resets
+- recordSwipe: hardcoded UTC+8 getNextMidnightMs() replaced with async per-user version that reads users/{uid}.timezone from Firestore and computes next local midnight via Intl.DateTimeFormat formatToParts; falls back to Asia/Kuala_Lumpur for pre-Task-81 users
+- verifyProfilePhoto: identical replacement applied; verification attempt resetAt now respects Singapore (Asia/Singapore) and Thailand (Asia/Bangkok) timezones
+
+### Files Created / Modified
+
+- functions/src/recordSwipe.ts: getNextMidnightMs replaced with async uid-param version; dailyLikes resetAt call site now awaits the helper
+- functions/src/verifyProfilePhoto.ts: same helper replacement applied; verificationAttempts resetAt call site now awaits the helper
+
+### Architecture Decisions
+
+- getNextMidnightMs is duplicated in both files rather than extracted to a shared utility; shared extraction remains deferred to a later cleanup task
+- Timezone offset is computed from Intl.DateTimeFormat formatToParts, including local date fields, so calculations remain correct across UTC date boundaries and non-integer UTC offsets
+- Safety guard retained: if computed next-midnight is already in the past, an additional 86400s is added to guarantee resetAt is always future
+
+### Known Issues / Deferred
+
+- Pre-Task-81 users without a timezone field continue to receive Asia/Kuala_Lumpur resets via the fallback; a data migration to back-fill timezone is deferred to Phase 4
+
+### Verification
+
+- npm --prefix functions run build passes
+- npx tsc --noEmit passes
+- git diff --check passes
+- Scoped scans confirm no any, inline style={{ }}, console.*, or client-side imports in touched function files
+
+### Next Up
+
+- Task 83: Background lastActive Updates (iOS)
+
+---
+
 ## [Phase 3D - Task 81] - 2026-06-14
 
 ### Completed

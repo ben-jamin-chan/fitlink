@@ -159,7 +159,7 @@ export const recordSwipe = onCall(
       const nowMs = now.toMillis();
 
       let count = 0;
-      let resetAt = Timestamp.fromMillis(getNextMidnightMs());
+      let resetAt = Timestamp.fromMillis(await getNextMidnightMs(userId));
 
       if (dailyLikesData !== null && dailyLikesData.resetAt.toMillis() > nowMs) {
         count = dailyLikesData.count;
@@ -192,17 +192,67 @@ export const recordSwipe = onCall(
   }
 );
 
-/**
- * Returns the Unix timestamp (ms) of the next midnight in UTC+8
- * (Malaysia/SEA time).
- */
-function getNextMidnightMs(): number {
-  const mytOffsetMs = 8 * 60 * 60 * 1000;
-  const nowUtc = Date.now();
-  const nowMyt = nowUtc + mytOffsetMs;
+async function getNextMidnightMs(uid: string): Promise<number> {
+  const userDoc = await admin.firestore().doc(`users/${uid}`).get();
+  const userData: unknown = userDoc.data();
+  const timezone =
+    isRecord(userData) &&
+    typeof userData.timezone === "string" &&
+    userData.timezone.length > 0 ?
+      userData.timezone :
+      "Asia/Kuala_Lumpur";
 
-  const startOfTodayMyt = Math.floor(nowMyt / 86400000) * 86400000;
-  const nextMidnightMyt = startOfTodayMyt + 86400000;
+  const now = new Date();
+  const partsFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+  const getPart = (
+    parts: Intl.DateTimeFormatPart[],
+    type: string
+  ): number => {
+    return Number(parts.find((part) => part.type === type)?.value ?? 0);
+  };
+  const getOffsetMs = (date: Date): number => {
+    const parts = partsFormatter.formatToParts(date);
+    const localYear = getPart(parts, "year");
+    const localMonth = getPart(parts, "month");
+    const localDay = getPart(parts, "day");
+    const localHour = getPart(parts, "hour");
+    const localMinute = getPart(parts, "minute");
+    const localSecond = getPart(parts, "second");
+    const localAsUtcMs = Date.UTC(
+      localYear,
+      localMonth - 1,
+      localDay,
+      localHour,
+      localMinute,
+      localSecond
+    );
+    const dateMsWithoutMilliseconds = date.getTime() - date.getMilliseconds();
 
-  return nextMidnightMyt - mytOffsetMs;
+    return localAsUtcMs - dateMsWithoutMilliseconds;
+  };
+
+  const nowParts = partsFormatter.formatToParts(now);
+  const year = getPart(nowParts, "year");
+  const month = getPart(nowParts, "month");
+  const day = getPart(nowParts, "day");
+  const nextLocalMidnightAsUtcMs = Date.UTC(year, month - 1, day + 1);
+  let nextMidnightUtcMs = nextLocalMidnightAsUtcMs - getOffsetMs(now);
+
+  nextMidnightUtcMs =
+    nextLocalMidnightAsUtcMs - getOffsetMs(new Date(nextMidnightUtcMs));
+  nextMidnightUtcMs =
+    nextLocalMidnightAsUtcMs - getOffsetMs(new Date(nextMidnightUtcMs));
+
+  return nextMidnightUtcMs > now.getTime() ?
+    nextMidnightUtcMs :
+    nextMidnightUtcMs + 86400 * 1000;
 }
