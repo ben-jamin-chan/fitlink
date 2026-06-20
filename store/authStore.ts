@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as Notifications from 'expo-notifications'
 import * as SplashScreen from 'expo-splash-screen'
 import type { User } from 'firebase/auth'
 import { create } from 'zustand'
@@ -96,6 +97,9 @@ export const useAuthStore = create<AuthState>()(
 
           await firebaseSignOut()
           await AsyncStorage.removeItem('fitlink-uid').catch(() => {
+            return undefined
+          })
+          await Notifications.setBadgeCountAsync(0).catch(() => {
             return undefined
           })
           useProfileStore.getState().reset()

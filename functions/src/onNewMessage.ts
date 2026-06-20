@@ -3,6 +3,12 @@ import { FieldValue } from "firebase-admin/firestore";
 import { logger } from "firebase-functions/v2";
 import { onValueCreated } from "firebase-functions/v2/database";
 
+import {
+  isExpoPushToken,
+  sendExpoPushNotification,
+} from "./utils/expoPush";
+import {isNotificationPreferenceEnabled} from "./utils/notificationPreferences";
+
 interface RtdbMessage {
   senderId: string;
   text: string | null;
@@ -11,96 +17,8 @@ interface RtdbMessage {
   read: boolean;
 }
 
-interface ExpoPushPayload {
-  to: string;
-  title: string;
-  body: string;
-  data: Record<string, string>;
-  sound: "default";
-  badge?: number;
-}
-
-interface ExpoPushTicketDetails {
-  error?: string;
-}
-
-interface ExpoPushTicket {
-  status: "ok" | "error";
-  id?: string;
-  message?: string;
-  details?: ExpoPushTicketDetails;
-}
-
-interface ExpoPushResponse {
-  data: ExpoPushTicket[];
-}
-
-const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 const MAX_BODY_LENGTH = 100;
 const RTDB_INSTANCE = process.env.RTDB_INSTANCE ?? "";
-
-const sendExpoPushNotification = async (
-  payload: ExpoPushPayload
-): Promise<void> => {
-  let response: Response;
-
-  try {
-    response = await fetch(EXPO_PUSH_URL, {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip, deflate",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch (error: unknown) {
-    logger.error("onNewMessage: Expo push request failed", {
-      error: getErrorMessage(error),
-    });
-    return;
-  }
-
-  if (!response.ok) {
-    logger.error("onNewMessage: Expo push HTTP error", {
-      status: response.status,
-      statusText: response.statusText,
-    });
-    return;
-  }
-
-  let responseValue: unknown;
-
-  try {
-    responseValue = await response.json();
-  } catch (error: unknown) {
-    logger.error("onNewMessage: Expo push response JSON parse failed", {
-      error: getErrorMessage(error),
-    });
-    return;
-  }
-
-  const result = toExpoPushResponse(responseValue);
-  if (result === null) {
-    logger.error("onNewMessage: Expo push response shape is invalid");
-    return;
-  }
-
-  for (const ticket of result.data) {
-    if (ticket.status === "error") {
-      logger.error("onNewMessage: Expo push ticket error", {
-        message: ticket.message,
-        details: ticket.details,
-      });
-
-      if (ticket.details?.error === "DeviceNotRegistered") {
-        logger.warn(
-          "onNewMessage: DeviceNotRegistered, token cleanup deferred"
-        );
-      }
-    }
-  }
-};
 
 const buildNotificationBody = (message: RtdbMessage): string => {
   if (message.imageUrl !== null && message.imageUrl.trim().length > 0) {
@@ -179,6 +97,19 @@ export const onNewMessage = onValueCreated(
       [unreadKey]: FieldValue.increment(1),
     });
 
+    const prefsSnap = await db
+      .doc(`users/${recipientId}/notificationPreferences/prefs`)
+      .get();
+    const prefsData: unknown = prefsSnap.data();
+
+    if (!isNotificationPreferenceEnabled(prefsData, "newMessages")) {
+      logger.info("onNewMessage: new-message push disabled by preference", {
+        recipientId,
+        matchId,
+      });
+      return;
+    }
+
     const [recipientSnap, senderSnap] = await Promise.all([
       db.doc(`users/${recipientId}`).get(),
       db.doc(`users/${senderId}`).get(),
@@ -224,7 +155,7 @@ export const onNewMessage = onValueCreated(
         matchId,
         senderId,
       },
-    });
+    }, "onNewMessage");
 
     logger.info("onNewMessage: push processing completed", {
       recipientId,
@@ -264,67 +195,6 @@ function toRtdbMessage(value: unknown): RtdbMessage | null {
   };
 }
 
-function toExpoPushResponse(value: unknown): ExpoPushResponse | null {
-  if (!isRecord(value) || !Array.isArray(value.data)) {
-    return null;
-  }
-
-  const tickets: ExpoPushTicket[] = [];
-
-  for (const item of value.data) {
-    const ticket = toExpoPushTicket(item);
-    if (ticket === null) {
-      return null;
-    }
-
-    tickets.push(ticket);
-  }
-
-  return {data: tickets};
-}
-
-function toExpoPushTicket(value: unknown): ExpoPushTicket | null {
-  if (!isRecord(value)) {
-    return null;
-  }
-
-  if (value.status !== "ok" && value.status !== "error") {
-    return null;
-  }
-
-  const ticket: ExpoPushTicket = {
-    status: value.status,
-  };
-
-  const id = getOptionalString(value.id);
-  if (id !== undefined) {
-    ticket.id = id;
-  }
-
-  const message = getOptionalString(value.message);
-  if (message !== undefined) {
-    ticket.message = message;
-  }
-
-  const details = toExpoPushTicketDetails(value.details);
-  if (details !== undefined) {
-    ticket.details = details;
-  }
-
-  return ticket;
-}
-
-function toExpoPushTicketDetails(
-  value: unknown
-): ExpoPushTicketDetails | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-
-  const error = getOptionalString(value.error);
-  return error === undefined ? {} : {error};
-}
-
 function toUserTuple(value: unknown): [string, string] | null {
   if (!Array.isArray(value) || value.length !== 2) {
     return null;
@@ -338,10 +208,6 @@ function toUserTuple(value: unknown): [string, string] | null {
   }
 
   return [firstUserId, secondUserId];
-}
-
-function isExpoPushToken(value: string): boolean {
-  return value.startsWith("ExponentPushToken[") && value.endsWith("]");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -366,8 +232,4 @@ function getNumber(value: unknown): number | null {
 
 function getBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
-}
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error";
 }

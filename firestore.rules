@@ -273,6 +273,15 @@ service cloud.firestore {
       }
 
 
+      // ── /users/{userId}/notificationPreferences/prefs ────────────────────
+
+      match /notificationPreferences/{docId} {
+        // Owner-managed granular push preferences.
+        // Absent prefs doc means all notification types are enabled.
+        allow read, write: if isOwner(userId);
+      }
+
+
       // ── /users/{userId}/verificationAttempts (single document) ────────────
 
       match /verificationAttempts/{docId} {

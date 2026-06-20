@@ -6,6 +6,12 @@ import {
   type CallableRequest,
 } from "firebase-functions/v2/https";
 
+import {
+  isExpoPushToken,
+  sendExpoPushNotification,
+} from "./utils/expoPush";
+import {isNotificationPreferenceEnabled} from "./utils/notificationPreferences";
+
 if (admin.apps.length === 0) {
   admin.initializeApp();
 }
@@ -28,6 +34,8 @@ interface DailyLikesData {
 }
 
 const FREE_DAILY_LIMIT = 50;
+const LIKED_ME_PUSH_TITLE = "Someone liked you";
+const LIKED_ME_PUSH_BODY = "Open the app to see who it is.";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -188,9 +196,63 @@ export const recordSwipe = onCall(
       remainingLikes = getRemainingLikes(isPremium, nextCount);
     });
 
+    await sendLikedMePushNotification(db, targetId, direction);
+
     return {success: true, remainingLikes};
   }
 );
+
+async function sendLikedMePushNotification(
+  db: admin.firestore.Firestore,
+  targetId: string,
+  direction: SwipeDirection
+): Promise<void> {
+  const shouldSendLikedMePush =
+    direction === "like" || direction === "superlike";
+
+  if (!shouldSendLikedMePush) {
+    return;
+  }
+
+  const targetSnap = await db.doc(`users/${targetId}`).get();
+  const targetData: unknown = targetSnap.data();
+
+  if (!isPremiumActive(targetData) || !isRecord(targetData)) {
+    return;
+  }
+
+  const expoPushToken =
+    typeof targetData.expoPushToken === "string" ?
+      targetData.expoPushToken.trim() :
+      undefined;
+
+  if (
+    expoPushToken === undefined ||
+    expoPushToken.length === 0 ||
+    !isExpoPushToken(expoPushToken)
+  ) {
+    return;
+  }
+
+  const prefsSnap = await db
+    .doc(`users/${targetId}/notificationPreferences/prefs`)
+    .get();
+  const prefsData: unknown = prefsSnap.data();
+
+  if (!isNotificationPreferenceEnabled(prefsData, "likedMe")) {
+    return;
+  }
+
+  await sendExpoPushNotification({
+    to: expoPushToken,
+    title: LIKED_ME_PUSH_TITLE,
+    body: LIKED_ME_PUSH_BODY,
+    sound: "default",
+    data: {
+      type: "likedMe",
+    },
+  }, "recordSwipe");
+}
 
 async function getNextMidnightMs(uid: string): Promise<number> {
   const userDoc = await admin.firestore().doc(`users/${uid}`).get();

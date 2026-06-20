@@ -795,6 +795,15 @@
       "push": "Push Notifications",
       "matches": "New Matches",
       "messages": "New Messages",
+      "newMatches": {
+        "title": "New Matches"
+      },
+      "newMessages": {
+        "title": "New Messages"
+      },
+      "likedMe": {
+        "title": "Likes Me"
+      },
       "permissionDenied": "Enable notifications in your device Settings to receive alerts.",
       "openSettings": "Open Settings"
     },
@@ -1009,6 +1018,10 @@
   "notifications": {
     "newMessage": "You have a new message",
     "newMatch": "You have a new match!",
+    "likedMe": {
+      "title": "Someone liked you",
+      "body": "Open the app to see who it is."
+    },
     "permissionDenied": "Enable notifications in Settings to get match and message alerts",
     "permissionDeniedTitle": "Notifications Disabled"
   },

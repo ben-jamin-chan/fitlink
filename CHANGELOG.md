@@ -4,6 +4,61 @@
 
 ---
 
+## [Phase 3D - Task 84] - 2026-06-20
+
+### Completed
+
+- Task 84: Notification Badge Count & Granular Preferences
+- useNotifications now syncs the app icon badge from matchStore unread counters on active AppState transitions and after the initial matches load completes
+- authStore logout now clears the OS badge count while preserving the Task 83 AsyncStorage uid cleanup
+- Settings notification rows now read and write `/users/{uid}/notificationPreferences/prefs`, with absent docs and fields defaulting to enabled
+- onNewMessage now skips message pushes only when `newMessages === false`, while still incrementing unread counts
+- recordSwipe now sends a generic "liked me" Expo push after successful like/superlike transactions only for premium recipients with push tokens and `likedMe !== false`
+- Expo push sending and notification preference defaulting were extracted into shared Cloud Function utilities
+- firestore.rules now allows owner-only read/write for `/users/{uid}/notificationPreferences/{docId}`
+- settings notification and liked-me push i18n keys added to all 4 language files
+
+### Files Created / Modified
+
+- functions/src/utils/expoPush.ts: created shared Expo Push API sender and token validator
+- functions/src/utils/notificationPreferences.ts: created absent-doc-default preference helper
+- hooks/useNotifications.ts: badge sync added; liked-me foreground toast fallback added; console warnings replaced with Crashlytics logging
+- store/authStore.ts: logout badge reset added
+- app/settings/SettingsScreen.tsx: Firestore-backed notification preferences added; AsyncStorage retained only for local push permission UI state
+- functions/src/onNewMessage.ts: shared Expo push utility adopted; newMessages preference guard added
+- functions/src/recordSwipe.ts: post-transaction liked-me push added for like/superlike
+- firestore.rules: notificationPreferences owner-only subcollection rule added
+- i18n/en.json, my.json, zh.json, ta.json: settings.notifications.* and notifications.likedMe.* keys added
+- CHANGELOG.md: Task 84 completion entry added
+
+### Architecture Decisions
+
+- Notification preference reads use `!== false`, so absent preference docs remain opt-in by default
+- Settings writes only the toggled Firestore preference key with `{ merge: true }`; the legacy AsyncStorage value is now used only for device-local push permission UI state
+- The existing root `useNotifications(navigationRef)` mount in App.tsx was reused; no second lifecycle hook mount was added
+- TASKS_PHASE3.md's original Task 84 spec assumed recordSwipe.ts had a 'rewind' direction (from Task 72). Task 72 was actually implemented as a separate rewindSwipe.ts callable that never calls recordSwipe.ts. The "liked me" push guard was written as the positive condition (direction === 'like' || direction === 'superlike') instead of the originally specified negative guard (direction !== 'rewind'), since the negative guard would have been dead code. ARCHITECT.md's Cloud Functions table still describes recordSwipe as supporting a 'rewind' direction and does not list rewindSwipe — this is a pre-existing documentation drift, not something this task introduced, and should be corrected in a future ARCHITECT.md revision pass.
+
+### Conflict Risks Introduced
+
+- Modified recordSwipe.ts — Task 87 (Firestore security rules) and Task 88 (indexes) do not depend on this change, but any future task touching recordSwipe.ts should be aware the "liked me" push logic now runs after every successful like/superlike transaction.
+- Added firestore.rules block for notificationPreferences — Task 87 consolidates all Phase 3 rules; confirm this block is preserved (not duplicated or overwritten) when generating that task's prompt.
+
+### Verification
+
+- npx tsc --noEmit passes
+- npm --prefix functions run build passes
+- i18n JSON parse check passes for en/my/zh/ta
+- git diff --check passes
+- Firebase emulator rules parse check passes for firestore
+- Scoped scans confirm no any, inline style={{ }}, console.*, TaskManager, expo-video, FieldValue.delete(), or relative `../../` imports in touched task files
+- Diff scan confirms recordSwipe.ts has no rewind guard and introduces no new Date() timestamp writes
+
+### Next Up
+
+- Task 85: Strava Disconnect Cleanup Cloud Function
+
+---
+
 ## [Phase 3D - Task 83] - 2026-06-14
 
 ### Completed

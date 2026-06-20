@@ -21,6 +21,7 @@ import type { CompositeNavigationProp } from '@react-navigation/native'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import Constants from 'expo-constants'
 import { LinearGradient } from 'expo-linear-gradient'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { useTranslation } from 'react-i18next'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -37,6 +38,7 @@ import { Slider } from '@/components/ui/Slider'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { SettingsStackParamList } from '@/app/navigation/MainTabNavigator'
+import { db } from '@/services/firebase/config'
 import { registerForPushNotifications } from '@/services/notifications'
 import { mapFirebaseError } from '@/utils/errorUtils'
 import type { LookingFor } from '@/types/user'
@@ -50,12 +52,24 @@ type SettingsNavigationProp = CompositeNavigationProp<
 
 type DiscoveryModal = 'ageRange' | 'distance' | 'genderPref' | 'lookingFor'
 type LanguageCode = 'en' | 'ms' | 'zh' | 'ta'
+type NotificationPreferenceKey = 'newMatches' | 'newMessages' | 'likedMe'
 type ToastType = 'success' | 'error' | 'info'
 
 interface NotificationPrefs {
   pushEnabled: boolean
   newMatches: boolean
   newMessages: boolean
+  likedMe: boolean
+}
+
+interface StoredNotificationPrefs {
+  pushEnabled: boolean
+}
+
+interface NotificationPreferencePatch {
+  newMatches?: boolean
+  newMessages?: boolean
+  likedMe?: boolean
 }
 
 interface SelectOption<TValue extends string> {
@@ -86,6 +100,7 @@ const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   pushEnabled: false,
   newMatches: true,
   newMessages: true,
+  likedMe: true,
 }
 const LANGUAGE_OPTIONS: LanguageOption[] = [
   { code: 'en', labelKey: 'settings.languages.en', flag: '🇬🇧' },
@@ -98,13 +113,39 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null
 }
 
-const isNotificationPrefs = (value: unknown): value is NotificationPrefs => {
+const isStoredNotificationPrefs = (
+  value: unknown
+): value is StoredNotificationPrefs => {
   return (
     isRecord(value) &&
-    typeof value.pushEnabled === 'boolean' &&
-    typeof value.newMatches === 'boolean' &&
-    typeof value.newMessages === 'boolean'
+    typeof value.pushEnabled === 'boolean'
   )
+}
+
+const isRemotePreferenceEnabled = (
+  data: unknown,
+  key: NotificationPreferenceKey
+): boolean => {
+  if (!isRecord(data)) {
+    return true
+  }
+
+  return data[key] !== false
+}
+
+const getNotificationPreferencePatch = (
+  key: NotificationPreferenceKey,
+  value: boolean
+): NotificationPreferencePatch => {
+  if (key === 'newMatches') {
+    return { newMatches: value }
+  }
+
+  if (key === 'newMessages') {
+    return { newMessages: value }
+  }
+
+  return { likedMe: value }
 }
 
 const normalizeLanguageCode = (
@@ -166,6 +207,7 @@ export default function SettingsScreen(): React.JSX.Element {
   const logout = useAuthStore((state) => state.logout)
   const profile = useProfileStore((state) => state.profile)
   const updateProfile = useProfileStore((state) => state.updateProfile)
+  const uid = user?.uid
   const [activeModal, setActiveModal] = useState<DiscoveryModal | null>(null)
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false)
   const [notificationPrefs, setNotificationPrefs] =
@@ -208,7 +250,7 @@ export default function SettingsScreen(): React.JSX.Element {
   useEffect((): (() => void) => {
     let isMounted = true
 
-    const loadNotificationPrefs = async (): Promise<void> => {
+    const loadLocalNotificationPrefs = async (): Promise<void> => {
       try {
         const storedPrefs = await AsyncStorage.getItem(NOTIFICATION_PREFS_KEY)
 
@@ -218,8 +260,11 @@ export default function SettingsScreen(): React.JSX.Element {
 
         const parsedPrefs: unknown = JSON.parse(storedPrefs)
 
-        if (isMounted && isNotificationPrefs(parsedPrefs)) {
-          setNotificationPrefs(parsedPrefs)
+        if (isMounted && isStoredNotificationPrefs(parsedPrefs)) {
+          setNotificationPrefs((current: NotificationPrefs) => ({
+            ...current,
+            pushEnabled: parsedPrefs.pushEnabled,
+          }))
         }
       } catch {
         if (isMounted) {
@@ -228,12 +273,44 @@ export default function SettingsScreen(): React.JSX.Element {
       }
     }
 
-    void loadNotificationPrefs()
+    const loadRemoteNotificationPrefs = async (): Promise<void> => {
+      if (uid === undefined) {
+        return
+      }
+
+      try {
+        const prefRef = doc(
+          db,
+          'users',
+          uid,
+          'notificationPreferences',
+          'prefs'
+        )
+        const prefSnap = await getDoc(prefRef)
+        const prefData: unknown = prefSnap.data()
+
+        if (isMounted) {
+          setNotificationPrefs((current: NotificationPrefs) => ({
+            ...current,
+            newMatches: isRemotePreferenceEnabled(prefData, 'newMatches'),
+            newMessages: isRemotePreferenceEnabled(prefData, 'newMessages'),
+            likedMe: isRemotePreferenceEnabled(prefData, 'likedMe'),
+          }))
+        }
+      } catch {
+        if (isMounted) {
+          showSettingsToast(t('errors.generic'), 'error')
+        }
+      }
+    }
+
+    void loadLocalNotificationPrefs()
+    void loadRemoteNotificationPrefs()
 
     return (): void => {
       isMounted = false
     }
-  }, [t])
+  }, [t, uid])
 
   const persistProfileUpdate = (
     partial: Parameters<typeof updateProfile>[0],
@@ -257,15 +334,41 @@ export default function SettingsScreen(): React.JSX.Element {
       })
   }
 
-  const persistNotificationPrefs = (nextPrefs: NotificationPrefs): void => {
-    setNotificationPrefs(nextPrefs)
+  const persistPushPreference = (isEnabled: boolean): void => {
+    setNotificationPrefs((current: NotificationPrefs) => ({
+      ...current,
+      pushEnabled: isEnabled,
+    }))
 
     void AsyncStorage.setItem(
       NOTIFICATION_PREFS_KEY,
-      JSON.stringify(nextPrefs)
+      JSON.stringify({ pushEnabled: isEnabled })
     ).catch((): void => {
       showSettingsToast(t('errors.generic'), 'error')
     })
+  }
+
+  const persistNotificationPreference = async (
+    key: NotificationPreferenceKey,
+    isEnabled: boolean
+  ): Promise<void> => {
+    if (uid === undefined) {
+      return
+    }
+
+    const prefRef = doc(
+      db,
+      'users',
+      uid,
+      'notificationPreferences',
+      'prefs'
+    )
+
+    await setDoc(
+      prefRef,
+      getNotificationPreferencePatch(key, isEnabled),
+      { merge: true }
+    )
   }
 
   const openExternalUrl = (url: string): void => {
@@ -348,10 +451,7 @@ export default function SettingsScreen(): React.JSX.Element {
 
   const handlePushToggle = (isEnabled: boolean): void => {
     if (!isEnabled) {
-      persistNotificationPrefs({
-        ...notificationPrefs,
-        pushEnabled: false,
-      })
+      persistPushPreference(false)
       return
     }
 
@@ -363,10 +463,7 @@ export default function SettingsScreen(): React.JSX.Element {
       const granted = await registerForPushNotifications()
 
       if (!granted) {
-        persistNotificationPrefs({
-          ...notificationPrefs,
-          pushEnabled: false,
-        })
+        persistPushPreference(false)
         Alert.alert(
           t('settings.notifications.title'),
           t('settings.notifications.permissionDenied'),
@@ -384,22 +481,29 @@ export default function SettingsScreen(): React.JSX.Element {
         return
       }
 
-      persistNotificationPrefs({
-        ...notificationPrefs,
-        pushEnabled: true,
-      })
+      persistPushPreference(true)
     } catch {
       showSettingsToast(t('errors.generic'), 'error')
     }
   }
 
   const handleNotificationChildToggle = (
-    key: 'newMatches' | 'newMessages',
+    key: NotificationPreferenceKey,
     isEnabled: boolean
   ): void => {
-    persistNotificationPrefs({
-      ...notificationPrefs,
+    const previousValue = notificationPrefs[key]
+
+    setNotificationPrefs((current: NotificationPrefs) => ({
+      ...current,
       [key]: isEnabled,
+    }))
+
+    void persistNotificationPreference(key, isEnabled).catch((): void => {
+      setNotificationPrefs((current: NotificationPrefs) => ({
+        ...current,
+        [key]: previousValue,
+      }))
+      showSettingsToast(t('errors.generic'), 'error')
     })
   }
 
@@ -765,31 +869,35 @@ export default function SettingsScreen(): React.JSX.Element {
             isEnabled={notificationPrefs.pushEnabled}
             onToggle={handlePushToggle}
             icon="notifications-outline"
-            isLast={!notificationPrefs.pushEnabled}
           />
-          {notificationPrefs.pushEnabled && (
-            <>
-              <SettingsRow
-                label={t('settings.notifications.matches')}
-                variant="toggle"
-                isEnabled={notificationPrefs.newMatches}
-                onToggle={(isEnabled: boolean): void => {
-                  handleNotificationChildToggle('newMatches', isEnabled)
-                }}
-                icon="heart-circle-outline"
-              />
-              <SettingsRow
-                label={t('settings.notifications.messages')}
-                variant="toggle"
-                isEnabled={notificationPrefs.newMessages}
-                onToggle={(isEnabled: boolean): void => {
-                  handleNotificationChildToggle('newMessages', isEnabled)
-                }}
-                icon="chatbubble-outline"
-                isLast={true}
-              />
-            </>
-          )}
+          <SettingsRow
+            label={t('settings.notifications.newMatches.title')}
+            variant="toggle"
+            isEnabled={notificationPrefs.newMatches}
+            onToggle={(isEnabled: boolean): void => {
+              handleNotificationChildToggle('newMatches', isEnabled)
+            }}
+            icon="heart-circle-outline"
+          />
+          <SettingsRow
+            label={t('settings.notifications.newMessages.title')}
+            variant="toggle"
+            isEnabled={notificationPrefs.newMessages}
+            onToggle={(isEnabled: boolean): void => {
+              handleNotificationChildToggle('newMessages', isEnabled)
+            }}
+            icon="chatbubble-outline"
+          />
+          <SettingsRow
+            label={t('settings.notifications.likedMe.title')}
+            variant="toggle"
+            isEnabled={notificationPrefs.likedMe}
+            onToggle={(isEnabled: boolean): void => {
+              handleNotificationChildToggle('likedMe', isEnabled)
+            }}
+            icon="heart-outline"
+            isLast={true}
+          />
         </SettingsSection>
 
         <SettingsSection title={t('settings.privacy.title')}>
