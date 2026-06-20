@@ -4,6 +4,61 @@
 
 ---
 
+## [Phase 3D - Task 85] - 2026-06-20
+
+### Completed
+
+- Task 85: Strava Disconnect Cleanup Cloud Function
+- Added `onStravaDisconnected` Firestore trigger for guarded Strava disconnect cleanup
+- Added shared Strava token crypto utility used by token exchange, activity sync, and disconnect cleanup
+- Disconnect cleanup now best-effort revokes the Strava access token and always deletes stored credential fields afterward
+- `StravaConnection` credential fields are now optional in the client-facing type schema, matching the Firestore schema and `FieldValue.delete()` requirement
+
+### Files Created
+
+- functions/src/utils/crypto.ts: shared AES-256-CBC Strava token encryption, decryption, key validation, encrypted-token detection, and legacy-token fallback helpers
+- functions/src/onStravaDisconnected.ts: guarded `onDocumentUpdated` trigger for Strava access-token revocation and credential field deletion
+
+### Files Modified
+
+- functions/src/exchangeStravaToken.ts: removed local crypto import/helper and switched to shared token encryption/key validation helpers
+- functions/src/syncStravaActivity.ts: removed local crypto helpers and switched to shared encryption, decryption, encrypted-token detection, and legacy-token fallback helpers
+- functions/src/index.ts: exported `onStravaDisconnected`
+- types/subscription.ts: marked `StravaConnection.accessToken`, `refreshToken`, and `expiresAt` optional so server cleanup can safely delete them
+- CHANGELOG.md: Task 85 completion entry added
+
+### Architecture Decisions
+
+- The actual crypto implementation differed from the prompt placeholder: `exchangeStravaToken.ts` only had `encryptToken`, while `syncStravaActivity.ts` also had encrypted-token detection, `decryptToken`, and `decryptTokenOrLegacy`. The shared utility preserves the current AES-256-CBC algorithm, hex key derivation, IV/ciphertext format, and legacy-token migration behavior rather than forcing the stale prompt shape.
+- `onStravaDisconnected` uses `decryptTokenOrLegacy` before Strava deauthorization so users with legacy plaintext tokens can still be revoked before cleanup.
+- The Firestore trigger includes the `STRAVA_TOKEN_ENCRYPTION_KEY` secret binding because 2nd gen deployed functions only receive referenced secrets when they are declared on the function.
+- Credential cleanup uses the triggering document reference and Admin SDK `FieldValue.delete()`; no Firestore rules change is required because Admin SDK writes bypass client rules.
+
+### Conflict Risks Introduced
+
+- `types/subscription.ts` now reflects Strava credentials as optional. This aligns with `ARCHITECT.md` and `CONVENTIONS.md`, but any future code that tries to read client-side Strava credential fields must handle absence explicitly.
+
+### Known Issues / Deferred
+
+- No physical Strava OAuth disconnect flow was exercised in this session; revocation remains best-effort and production verification requires deployed Cloud Functions plus a real Strava connection.
+
+### Verification
+
+- `npm --prefix functions run build` passes
+- `npm --prefix functions run lint` passes
+- `npx tsc --noEmit` passes
+- `git diff --check` passes
+- Scoped scans confirm no `any`, no type assertions, no `console.*`, no `new Date()`, no `../../` imports, and no `request.auth` in `onStravaDisconnected`
+- Scoped scans confirm `FieldValue.delete()` is only used for `fitnessTracking.strava.accessToken`, `refreshToken`, and `expiresAt` in the new disconnect trigger
+- Scoped scans confirm `encryptToken` and `decryptToken` definitions now exist only in `functions/src/utils/crypto.ts`
+- Manual Cloud Functions / Strava security review completed; the repository's referenced `SECURITY_REVIEW_CHECKLIST.md` and `CODE_REVIEW_CHECKLIST.md` files are not present in the working tree
+
+### Next Up
+
+- Task 86: Admin Moderation Queue: Harden & Secure
+
+---
+
 ## [Phase 3D - Task 84] - 2026-06-20
 
 ### Completed

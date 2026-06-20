@@ -1,11 +1,12 @@
 import * as admin from "firebase-admin";
-import * as crypto from "crypto";
 import {logger} from "firebase-functions/v2";
 import {
   HttpsError,
   onCall,
   type CallableRequest,
 } from "firebase-functions/v2/https";
+
+import {encryptToken, isValidEncryptionKey} from "./utils/crypto";
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -35,7 +36,6 @@ interface StravaEnvironment {
 
 const REGION = "asia-southeast1";
 const STRAVA_TOKEN_ENDPOINT = "https://www.strava.com/oauth/token";
-const ENCRYPTION_KEY_HEX_LENGTH = 64;
 const STRAVA_SECRET_NAMES = [
   "STRAVA_CLIENT_SECRET",
   "STRAVA_TOKEN_ENCRYPTION_KEY",
@@ -51,17 +51,6 @@ const getString = (value: unknown): string | null => {
 
 const getNumber = (value: unknown): number | null => {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
-};
-
-const isHexString = (value: string): boolean => {
-  return /^[0-9a-fA-F]+$/.test(value);
-};
-
-const isValidEncryptionKey = (value: string): boolean => {
-  return (
-    value.length === ENCRYPTION_KEY_HEX_LENGTH &&
-    isHexString(value)
-  );
 };
 
 const getStravaEnvironment = (): StravaEnvironment => {
@@ -140,18 +129,6 @@ const toStravaTokenResponse = (
     refreshToken,
     accessToken,
   };
-};
-
-const encryptToken = (plaintext: string, keyHex: string): string => {
-  const key = Buffer.from(keyHex, "hex");
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, "utf8"),
-    cipher.final(),
-  ]);
-
-  return `${iv.toString("hex")}:${encrypted.toString("hex")}`;
 };
 
 const exchangeCodeForTokens = async (

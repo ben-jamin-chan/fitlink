@@ -1,11 +1,17 @@
 import * as admin from "firebase-admin";
-import * as crypto from "crypto";
 import {logger} from "firebase-functions/v2";
 import {
   HttpsError,
   onCall,
   type CallableRequest,
 } from "firebase-functions/v2/https";
+
+import {
+  decryptTokenOrLegacy,
+  encryptToken,
+  isEncryptedToken,
+  isValidEncryptionKey,
+} from "./utils/crypto";
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -58,7 +64,6 @@ const REGION = "asia-southeast1";
 const STRAVA_TOKEN_ENDPOINT = "https://www.strava.com/oauth/token";
 const STRAVA_ACTIVITIES_ENDPOINT =
   "https://www.strava.com/api/v3/athlete/activities";
-const ENCRYPTION_KEY_HEX_LENGTH = 64;
 const STRAVA_TOKEN_REFRESH_BUFFER_SECONDS = 60;
 const SEVEN_DAYS_SECONDS = 7 * 24 * 60 * 60;
 const UTC8_OFFSET_SECONDS = 8 * 60 * 60;
@@ -67,7 +72,6 @@ const STRAVA_SECRET_NAMES = [
   "STRAVA_CLIENT_SECRET",
   "STRAVA_TOKEN_ENCRYPTION_KEY",
 ];
-const ENCRYPTED_TOKEN_IV_HEX_LENGTH = 32;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -87,17 +91,6 @@ const getNullableNumber = (value: unknown): number | null => {
   }
 
   return getNumber(value);
-};
-
-const isHexString = (value: string): boolean => {
-  return /^[0-9a-fA-F]+$/.test(value);
-};
-
-const isValidEncryptionKey = (value: string): boolean => {
-  return (
-    value.length === ENCRYPTION_KEY_HEX_LENGTH &&
-    isHexString(value)
-  );
 };
 
 const getStravaEnvironment = (): StravaEnvironment => {
@@ -231,71 +224,6 @@ const toStravaActivities = (value: unknown): StravaActivity[] | null => {
   }
 
   return activities;
-};
-
-const encryptToken = (plaintext: string, keyHex: string): string => {
-  const key = Buffer.from(keyHex, "hex");
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, "utf8"),
-    cipher.final(),
-  ]);
-
-  return `${iv.toString("hex")}:${encrypted.toString("hex")}`;
-};
-
-const isEncryptedToken = (value: string): boolean => {
-  const parts = value.split(":");
-
-  if (parts.length !== 2) {
-    return false;
-  }
-
-  const [ivHex, encryptedHex] = parts;
-
-  if (ivHex === undefined || encryptedHex === undefined) {
-    return false;
-  }
-
-  return (
-    ivHex.length === ENCRYPTED_TOKEN_IV_HEX_LENGTH &&
-    encryptedHex.length > 0 &&
-    isHexString(ivHex) &&
-    isHexString(encryptedHex)
-  );
-};
-
-const decryptToken = (ciphertext: string, keyHex: string): string => {
-  const [ivHex, encryptedHex] = ciphertext.split(":");
-
-  if (
-    ivHex === undefined ||
-    encryptedHex === undefined ||
-    ivHex.length === 0 ||
-    encryptedHex.length === 0
-  ) {
-    throw new HttpsError("internal", "Encrypted Strava token is invalid.");
-  }
-
-  const key = Buffer.from(keyHex, "hex");
-  const iv = Buffer.from(ivHex, "hex");
-  const encryptedBuffer = Buffer.from(encryptedHex, "hex");
-  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-  const decrypted = Buffer.concat([
-    decipher.update(encryptedBuffer),
-    decipher.final(),
-  ]);
-
-  return decrypted.toString("utf8");
-};
-
-const decryptTokenOrLegacy = (token: string, keyHex: string): string => {
-  if (!isEncryptedToken(token)) {
-    return token;
-  }
-
-  return decryptToken(token, keyHex);
 };
 
 const getTodayStartUnix = (nowUnix: number): number => {
