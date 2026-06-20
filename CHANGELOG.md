@@ -4,6 +4,50 @@
 
 ---
 
+## [Phase 3D — Task 86] — 2026-06-20
+
+### Completed
+
+- Task 86: Admin Moderation Queue: Harden & Secure
+- Added `checkReportThreshold` Firestore trigger for report-threshold auto-ban handling and `/admin_queue` entries with `status: 'pending'`
+- Added `moderatePhoto` Storage trigger for Cloud Vision SafeSearch moderation and `/flags` entries with `status: 'pending'`
+- Added explicit deny-all Firestore rules for `/admin_queue/{docId}` and `/flags/{docId}`
+- Added composite indexes for pending admin queue and flag review queries
+
+### Files Created
+
+- functions/src/checkReportThreshold.ts: report threshold trigger, inline `AdminQueueEntry`, auto-ban write, refresh-token revocation, and pending admin queue write
+- functions/src/moderatePhoto.ts: profile photo SafeSearch trigger, inline `FlagEntry`, pending flag write, and inappropriate upload deletion
+
+### Files Modified
+
+- functions/src/index.ts: exported `moderatePhoto` and `checkReportThreshold`
+- firestore.rules: added explicit deny-all `/admin_queue/{docId}` and `/flags/{docId}` blocks before the default catch-all
+- firestore.indexes.json: added `admin_queue(status ASC, createdAt DESC)` and `flags(status ASC, createdAt DESC)` composite indexes
+- CHANGELOG.md: Task 86 completion entry added
+
+### Architecture Decisions
+
+- The Task 86 prompt assumed `functions/src/checkReportThreshold.ts` and `functions/src/moderatePhoto.ts` already existed, but the current repository had neither source file nor export. The functions were added from the project architecture and PRD moderation behavior so the queue hardening has actual writer functions to harden.
+- `checkReportThreshold` counts reports using either current `createdAt` or legacy `reportedAt` timestamps after filtering by `reportedUserId`, avoiding an unauthorized new reports index while supporting the schema drift documented across existing docs.
+- `moderatePhoto` scopes moderation to `users/{uid}/photos/{file}` uploads, matching the profile-photo storage path used by the app. No moderator role, claims, client reads, or admin UI were added.
+
+### Conflict Risks Introduced
+
+- Task 87 consolidates Firestore security rules and depends on preserving this task's `/admin_queue` and `/flags` deny blocks.
+- Task 88 depends on this task's `admin_queue` and `flags` composite indexes being present.
+- `functions/src/index.ts` now exports two previously absent Phase 1 moderation functions; future function export audits should preserve them.
+
+### Known Issues / Deferred
+
+- No deployed Firebase trigger or live Cloud Vision execution was exercised locally; verification was limited to TypeScript builds, JSON/rules validation, and static acceptance checks.
+
+### Next Up
+
+- Task 87: Phase 3 Firestore Security Rules Update
+
+---
+
 ## [Phase 3D - Task 85] - 2026-06-20
 
 ### Completed

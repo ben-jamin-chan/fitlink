@@ -444,6 +444,20 @@ service cloud.firestore {
     }
 
 
+    // ─── /admin_queue/{docId} ──────────────────────────────────────────────
+
+    match /admin_queue/{docId} {
+      allow read, write: if false;
+    }
+
+
+    // ─── /flags/{docId} ────────────────────────────────────────────────────
+
+    match /flags/{docId} {
+      allow read, write: if false;
+    }
+
+
     // ─── Default catch-all ──────────────────────────────────────────────────
 
     // Any collection not explicitly matched above is denied.

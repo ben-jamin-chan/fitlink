@@ -61,6 +61,22 @@
         { "fieldPath": "attendees", "arrayConfig": "CONTAINS" },
         { "fieldPath": "startAt",   "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "admin_queue",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "flags",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [

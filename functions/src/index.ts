@@ -18,6 +18,8 @@ export { recordSwipe } from "./recordSwipe";
 export { rewindSwipe } from "./rewindSwipe";
 export { activateBoost } from "./activateBoost";
 export { verifyProfilePhoto } from "./verifyProfilePhoto";
+export { moderatePhoto } from "./moderatePhoto";
+export { checkReportThreshold } from "./checkReportThreshold";
 export { onPrimaryPhotoChanged } from "./onPrimaryPhotoChanged";
 export { exchangeStravaToken } from "./exchangeStravaToken";
 export { syncStravaActivity } from "./syncStravaActivity";
