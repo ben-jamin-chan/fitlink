@@ -4,6 +4,48 @@
 
 ---
 
+## [Phase 3D — Task 88] — 2026-06-21
+
+### Completed
+
+- Task 88: Phase 3 Firestore Indexes
+- Added gymCheckins (userId ASC, expiresAt DESC) composite index
+- Added gymCheckins (city ASC, expiresAt DESC) composite index
+- Confirmed all prior Phase 3 indexes (events x2, admin_queue, flags) present and unduplicated
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- firestore.indexes.json: two gymCheckins composite indexes added
+
+### Architecture Decisions
+
+- Appended the two gymCheckins indexes after the existing Phase 3 admin/flags indexes without reordering or normalising prior entries, preserving all existing index definitions exactly.
+
+### Conflict Risks Introduced
+
+- None — this is the final Phase 3 index task; no further Phase 3 tasks touch firestore.indexes.json
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- node -e JSON.parse validation passes
+- gymCheckins, events, admin_queue, and flags composite index assertion passes with zero duplicates
+- npx tsc --noEmit passes
+- git diff --check passes
+
+### Next Up
+
+- Phase 3 complete — run the PHASE 3 DONE CHECKLIST in TASKS_PHASE3.md before declaring Phase 3 shipped
+
+---
+
 ## [Phase 3D — Task 87] — 2026-06-21
 
 ### Completed
