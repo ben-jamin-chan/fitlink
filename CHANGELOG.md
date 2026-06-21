@@ -4,6 +4,52 @@
 
 ---
 
+## [Phase 3D — Task 87] — 2026-06-21
+
+### Completed
+
+- Task 87: Phase 3 Firestore Security Rules Update
+- Added `boostExpiresAt` to both `/users/{uid}` create-time and update-time server-only field guards in `firestore.rules`
+- Left the existing `boost` guard in place because grep confirmed current runtime code still uses `users/{uid}.boost`
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- firestore.rules: added `boostExpiresAt` to `doesNotSetServerOnlyFieldsOnCreate()` and `doesNotModifyServerOnlyFields()`
+- CHANGELOG.md: Task 87 completion entry added
+
+### Architecture Decisions
+
+- Grep evidence: `rg -n "'boost'|\\bboost\\b|boostExpiresAt" functions/src types --glob '*.ts'` found active `boost` usage in `types/user.ts`, `functions/src/activateBoost.ts`, and `functions/src/getDiscoveryStack.ts`; no `boostExpiresAt` usage exists in `functions/src` or `types` today.
+- `boost` was retained because `activateBoost` writes a `boost` map and `getDiscoveryStack` reads it for scoring. Removing the guard would reopen the active client-write path.
+- `boostExpiresAt` was also added to `doesNotSetServerOnlyFieldsOnCreate()` because the Phase 3 docs mark it server-only and the pre-patch emulator probe confirmed owner creates could include it directly.
+
+### Conflict Risks Introduced
+
+- None expected — Task 88 (indexes) has no dependency on this field-guard change.
+
+### Known Issues / Deferred
+
+- Pre-existing docs/code drift remains: Phase 3 docs and Task 87 reference `boostExpiresAt`, while current implemented runtime code uses the `boost` map field. This task only hardens rules and does not rename boost data.
+- Pre-existing dependency audit risk remains: root `npm audit --audit-level=high` reports 33 advisories, including one critical transitive `shell-quote` advisory; dependency remediation is out of scope for this rules-only task. `npm --prefix functions audit --audit-level=high` was not completed because external audit submission was rejected by the tool policy.
+
+### Verification
+
+- Red/green Firestore emulator probes confirmed owner create/update requests with `boostExpiresAt` were allowed before the rules edit and denied with 403 after the edit.
+- `firebase emulators:exec --only firestore "node -e \"process.exit(0)\""` passes
+- `npx tsc --noEmit` passes
+- `git diff --check` passes
+- Scoped rules scan confirms `boostExpiresAt` is present in both server-only arrays and the `/gymCheckins`, `/events`, `/notificationPreferences`, `/admin_queue`, `/flags`, and default catch-all blocks remain present.
+
+### Next Up
+
+- Task 88: Phase 3 Firestore Indexes
+
+---
+
 ## [Phase 3D — Task 86] — 2026-06-20
 
 ### Completed
