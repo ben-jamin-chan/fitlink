@@ -4,6 +4,47 @@
 
 ---
 
+## [Phase 4 Pre-flight — Admin Custom Claim Setup] — 2026-06-22
+
+### Completed
+
+- Copied the Firebase service account key to a local private path outside the repository
+- Restricted the local service account key permissions to owner read/write
+- Set `admin: true` custom claim for the approved Firebase Auth admin UID
+- Verified the custom claim through Firebase Admin SDK `getUser()`
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- `CHANGELOG.md`: recorded Step C completion status
+
+### Architecture Decisions
+
+- No service account key or one-off claim script was committed to the repository.
+- The admin dashboard will rely on the `admin: true` custom claim during Task 94 auth gating.
+
+### Conflict Risks Introduced
+
+- None. This was Firebase Auth metadata setup only.
+
+### Known Issues / Deferred
+
+- The admin user must sign out and sign back in before the dashboard sees the new claim in its ID token.
+
+### Verification
+
+- Firebase Admin SDK `setCustomUserClaims()` completed successfully
+- Firebase Admin SDK `getUser()` returned `customClaims.admin === true`
+
+### Next Up
+
+- Task 94: Admin dashboard scaffold and auth
+
+---
+
 ## [Phase 4 Pre-flight — Admin Hosting Setup] — 2026-06-22
 
 ### Completed
