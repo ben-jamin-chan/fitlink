@@ -51,6 +51,7 @@ node_modules/
 .expo/
 dist/
 web-build/
+admin/build/
 expo-env.d.ts
 
 # EAS / Play Store credentials

@@ -4,6 +4,56 @@
 
 ---
 
+## [Phase 4 Pre-flight — Admin Hosting Setup] — 2026-06-22
+
+### Completed
+
+- Created the secondary Firebase Hosting site `fitlink-admin` for the admin dashboard
+- Configured Firebase Hosting deploy targets:
+  - `app` → `gym-dating-dev`
+  - `admin` → `fitlink-admin`
+- Added multi-site Hosting config to `firebase.json`, with the admin dashboard served from `admin/build`
+- Added the admin SPA rewrite so refreshed admin sub-routes resolve to `/index.html`
+- Added `admin/build/` to `.gitignore`
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- `firebase.json`: added `hosting` array with `app` and `admin` targets
+- `.firebaserc`: added Hosting target mappings for `gym-dating-dev`
+- `.gitignore`: ignored `admin/build/`
+
+### Architecture Decisions
+
+- The `app` hosting target maps to the default Firebase Hosting site `gym-dating-dev`.
+- The `admin` hosting target maps to the new user site `fitlink-admin`, available at `https://fitlink-admin.web.app`.
+- The admin Hosting target includes an SPA rewrite because Task 94 uses React Router.
+
+### Conflict Risks Introduced
+
+- Task 94 should preserve the existing `firebase.json` Hosting targets and only add the admin app files under `/admin/`.
+
+### Known Issues / Deferred
+
+- Step C admin custom claim is not set yet. It requires a local Firebase service account JSON path and the Firebase Auth UID for each admin account.
+
+### Verification
+
+- `firebase hosting:sites:list --project gym-dating-dev` shows both `gym-dating-dev` and `fitlink-admin`
+- `firebase target hosting --project gym-dating-dev` shows `app (gym-dating-dev)` and `admin (fitlink-admin)`
+- `node -e` JSON/target validation passes
+- `npx tsc --noEmit` passes
+- `git diff --check -- firebase.json .firebaserc .gitignore` passes
+
+### Next Up
+
+- Set `admin: true` custom claims for approved admin Firebase Auth UIDs
+
+---
+
 ## [Phase 3D — Task 88] — 2026-06-21
 
 ### Completed

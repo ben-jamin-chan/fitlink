@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "gym-dating-dev"
-  }
+  },
+  "targets": {
+    "gym-dating-dev": {
+      "hosting": {
+        "app": [
+          "gym-dating-dev"
+        ],
+        "admin": [
+          "fitlink-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
