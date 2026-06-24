@@ -4,6 +4,66 @@
 
 ---
 
+## [Phase 4A — Task 90] — 2026-06-24
+
+### Completed
+
+- Task 90: Onboarding & Discovery — Philippines, Indonesia, Vietnam
+- Verified constants/regions.ts has PH/ID/VN countries, timezones, city arrays,
+  currencies, and calling codes from Task 89
+- Verified app/onboarding/Step1Screen.tsx dynamically renders SUPPORTED_COUNTRIES,
+  uses SEA_CITIES[selectedCountry], reverse-scans COUNTRY_TIMEZONES for device timezone
+  detection, clears stale city values, and writes timezone on explicit country changes
+- Verified store/onboardingStore.ts keeps country default Malaysia, timezone default
+  Asia/Kuala_Lumpur, and persists both fields in the draft
+- Verified services/firebase/firestore.ts createUserProfile() writes timezone as a
+  top-level user field and country nested in location.country via input.location
+- services/stripe.ts now derives currency from COUNTRY_CURRENCIES and returns PHP,
+  IDR, and VND price IDs from country-specific EXPO_PUBLIC_STRIPE_PRICE_* env vars
+- Added onboarding.step1.country.philippines/indonesia/vietnam keys to all 4 i18n files
+- .env.example: 18 new Stripe price ID placeholder entries added for PHP/IDR/VND
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- services/stripe.ts: removed duplicated country-currency map; added COUNTRY_CURRENCIES
+  lookup and PHP/IDR/VND-specific price ID env vars
+- .env.example: PHP/IDR/VND Stripe price ID vars added
+- i18n/en.json: onboarding country keys for PH/ID/VN added
+- i18n/my.json: same keys, English placeholders
+- i18n/zh.json: same keys, English placeholders
+- i18n/ta.json: same keys, English placeholders
+- CHANGELOG.md: recorded Task 90 completion
+
+### Architecture Decisions
+
+- Step1Screen.tsx required no code changes. Its timezone auto-detection already uses a
+  dynamic reverse scan over COUNTRY_TIMEZONES, so Asia/Manila, Asia/Jakarta, and
+  Asia/Ho_Chi_Minh are covered by Task 89 constants.
+- The existing regions key split was preserved additively: runtime country labels use
+  regions.country.{CountryName}, and Task 89 aliases under regions.countries.* remain
+  available. No existing i18n keys were renamed.
+- getPricesForCountry/getStripePrices keep MYR as the fallback currency, so pricing
+  lookup never returns undefined for an unsupported country string.
+
+### Conflict Risks Introduced
+
+- Task 91 modifies createStripeCheckout.ts and PremiumScreen.tsx; verify the Cloud
+  Function country-currency mapping matches COUNTRY_CURRENCIES from constants/regions.ts.
+
+### Known Issues / Deferred
+
+- None
+
+### Next Up
+
+- Task 91: Stripe Tier 2 — PHP/IDR/VND Pricing & Local Payment Methods
+
+---
+
 ## [Phase 4A — Task 89] — 2026-06-24
 
 ### Completed

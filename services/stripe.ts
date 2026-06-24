@@ -5,6 +5,11 @@ import {
 } from 'firebase/functions'
 import { Linking } from 'react-native'
 
+import {
+  COUNTRY_CURRENCIES,
+  SUPPORTED_COUNTRIES,
+} from '@/constants/regions'
+import type { SupportedCountry } from '@/constants/regions'
 import type { PremiumTier, StripePrice } from '@/types/subscription'
 
 type BillingInterval = 'month' | '3month' | '6month'
@@ -28,16 +33,27 @@ interface CreateCustomerPortalSessionResult {
   url: string
 }
 
-const COUNTRY_CURRENCY_MAP: Record<string, CurrencyCode> = {
-  Malaysia: 'MYR',
-  Singapore: 'SGD',
-  Thailand: 'THB',
-  Philippines: 'PHP',
-  Indonesia: 'IDR',
-  Vietnam: 'VND',
-}
-
 const DEFAULT_CURRENCY: CurrencyCode = 'MYR'
+const SUPPORTED_CURRENCY_CODES: readonly CurrencyCode[] = [
+  'MYR',
+  'SGD',
+  'THB',
+  'PHP',
+  'IDR',
+  'VND',
+]
+
+const getSupportedCountry = (country: string): SupportedCountry | null =>
+  SUPPORTED_COUNTRIES.find(
+    (supportedCountry: SupportedCountry): boolean =>
+      supportedCountry === country
+  ) ?? null
+
+const isCurrencyCode = (currency: string): currency is CurrencyCode =>
+  SUPPORTED_CURRENCY_CODES.some(
+    (supportedCurrency: CurrencyCode): boolean =>
+      supportedCurrency === currency
+  )
 
 const PRICING_TABLE: Record<
   CurrencyCode,
@@ -194,21 +210,24 @@ const PRICING_TABLE: Record<
         amountDisplay: '₱499',
         currency: 'PHP',
         interval: 'month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_MONTHLY ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_PHP_PLUS_MONTHLY ?? '',
       },
       '3month': {
         amount: 134700,
         amountDisplay: '₱1,347',
         currency: 'PHP',
         interval: '3month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_3MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_PHP_PLUS_3MONTH ?? '',
       },
       '6month': {
         amount: 239500,
         amountDisplay: '₱2,395',
         currency: 'PHP',
         interval: '6month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_6MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_PHP_PLUS_6MONTH ?? '',
       },
     },
     pro: {
@@ -217,21 +236,24 @@ const PRICING_TABLE: Record<
         amountDisplay: '₱799',
         currency: 'PHP',
         interval: 'month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_PHP_PRO_MONTHLY ?? '',
       },
       '3month': {
         amount: 215700,
         amountDisplay: '₱2,157',
         currency: 'PHP',
         interval: '3month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_3MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_PHP_PRO_3MONTH ?? '',
       },
       '6month': {
         amount: 383500,
         amountDisplay: '₱3,835',
         currency: 'PHP',
         interval: '6month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_6MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_PHP_PRO_6MONTH ?? '',
       },
     },
   },
@@ -242,21 +264,24 @@ const PRICING_TABLE: Record<
         amountDisplay: 'Rp 129,000',
         currency: 'IDR',
         interval: 'month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_MONTHLY ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_IDR_PLUS_MONTHLY ?? '',
       },
       '3month': {
         amount: 34830000,
         amountDisplay: 'Rp 348,300',
         currency: 'IDR',
         interval: '3month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_3MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_IDR_PLUS_3MONTH ?? '',
       },
       '6month': {
         amount: 61920000,
         amountDisplay: 'Rp 619,200',
         currency: 'IDR',
         interval: '6month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_6MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_IDR_PLUS_6MONTH ?? '',
       },
     },
     pro: {
@@ -265,21 +290,24 @@ const PRICING_TABLE: Record<
         amountDisplay: 'Rp 199,000',
         currency: 'IDR',
         interval: 'month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_IDR_PRO_MONTHLY ?? '',
       },
       '3month': {
         amount: 53730000,
         amountDisplay: 'Rp 537,300',
         currency: 'IDR',
         interval: '3month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_3MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_IDR_PRO_3MONTH ?? '',
       },
       '6month': {
         amount: 95520000,
         amountDisplay: 'Rp 955,200',
         currency: 'IDR',
         interval: '6month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_6MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_IDR_PRO_6MONTH ?? '',
       },
     },
   },
@@ -290,21 +318,24 @@ const PRICING_TABLE: Record<
         amountDisplay: '₫249,000',
         currency: 'VND',
         interval: 'month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_MONTHLY ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PLUS_MONTHLY ?? '',
       },
       '3month': {
         amount: 67230000,
         amountDisplay: '₫672,300',
         currency: 'VND',
         interval: '3month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_3MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PLUS_3MONTH ?? '',
       },
       '6month': {
         amount: 119520000,
         amountDisplay: '₫1,195,200',
         currency: 'VND',
         interval: '6month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PLUS_6MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PLUS_6MONTH ?? '',
       },
     },
     pro: {
@@ -313,36 +344,53 @@ const PRICING_TABLE: Record<
         amountDisplay: '₫399,000',
         currency: 'VND',
         interval: 'month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PRO_MONTHLY ?? '',
       },
       '3month': {
         amount: 107730000,
         amountDisplay: '₫1,077,300',
         currency: 'VND',
         interval: '3month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_3MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PRO_3MONTH ?? '',
       },
       '6month': {
         amount: 191520000,
         amountDisplay: '₫1,915,200',
         currency: 'VND',
         interval: '6month',
-        priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_PRO_6MONTH ?? '',
+        priceId:
+          process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PRO_6MONTH ?? '',
       },
     },
   },
 }
 
-export const getCurrency = (country: string): CurrencyCode =>
-  COUNTRY_CURRENCY_MAP[country] ?? DEFAULT_CURRENCY
+export const getCurrency = (country: string): CurrencyCode => {
+  const supportedCountry = getSupportedCountry(country)
 
-export const getStripePrices = (
-  country: string
+  if (supportedCountry === null) {
+    return DEFAULT_CURRENCY
+  }
+
+  const currency = COUNTRY_CURRENCIES[supportedCountry]
+
+  return isCurrencyCode(currency) ? currency : DEFAULT_CURRENCY
+}
+
+export const getPricesForCountry = (
+  country: SupportedCountry | string
 ): Record<PremiumTier, Record<BillingInterval, PricingEntry>> => {
   const currency = getCurrency(country)
 
   return PRICING_TABLE[currency] ?? PRICING_TABLE[DEFAULT_CURRENCY]
 }
+
+export const getStripePrices = (
+  country: string
+): Record<PremiumTier, Record<BillingInterval, PricingEntry>> =>
+  getPricesForCountry(country)
 
 export const getPrice = (
   country: string,

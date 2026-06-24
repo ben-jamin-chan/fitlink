@@ -105,7 +105,10 @@
       "location": "Your city",
       "country": {
         "label": "Country",
-        "placeholder": "Select your country"
+        "placeholder": "Select your country",
+        "philippines": "Philippines",
+        "indonesia": "Indonesia",
+        "vietnam": "Vietnam"
       }
     },
     "step2": {
