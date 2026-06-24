@@ -273,7 +273,10 @@
     "country": {
       "Malaysia": "Malaysia",
       "Singapore": "Singapore",
-      "Thailand": "Thailand"
+      "Thailand": "Thailand",
+      "Philippines": "Philippines",
+      "Indonesia": "Indonesia",
+      "Vietnam": "Vietnam"
     },
     "city": {
       "Malaysia": {
@@ -301,7 +304,80 @@
         "Phuket": "Phuket",
         "Pattaya": "Pattaya",
         "Hat_Yai": "Hat Yai"
+      },
+      "Philippines": {
+        "Manila": "Manila",
+        "Cebu": "Cebu",
+        "Davao": "Davao",
+        "Quezon_City": "Quezon City",
+        "Makati": "Makati",
+        "Taguig": "Taguig",
+        "Pasig": "Pasig",
+        "Antipolo": "Antipolo",
+        "Iloilo": "Iloilo",
+        "Zamboanga": "Zamboanga"
+      },
+      "Indonesia": {
+        "Jakarta": "Jakarta",
+        "Bali": "Bali",
+        "Surabaya": "Surabaya",
+        "Bandung": "Bandung",
+        "Medan": "Medan",
+        "Semarang": "Semarang",
+        "Makassar": "Makassar",
+        "Palembang": "Palembang",
+        "Tangerang": "Tangerang",
+        "Depok": "Depok"
+      },
+      "Vietnam": {
+        "Ho_Chi_Minh_City": "Ho Chi Minh City",
+        "Hanoi": "Hanoi",
+        "Da_Nang": "Da Nang",
+        "Hai_Phong": "Hai Phong",
+        "Can_Tho": "Can Tho",
+        "Bien_Hoa": "Bien Hoa",
+        "Hue": "Hue",
+        "Nha_Trang": "Nha Trang",
+        "Vung_Tau": "Vung Tau",
+        "Quy_Nhon": "Quy Nhon"
       }
+    },
+    "countries": {
+      "philippines": "Philippines",
+      "indonesia": "Indonesia",
+      "vietnam": "Vietnam"
+    },
+    "cities": {
+      "manila": "Manila",
+      "cebu": "Cebu",
+      "davao": "Davao",
+      "quezonCity": "Quezon City",
+      "makati": "Makati",
+      "taguig": "Taguig",
+      "pasig": "Pasig",
+      "antipolo": "Antipolo",
+      "iloilo": "Iloilo",
+      "zamboanga": "Zamboanga",
+      "jakarta": "Jakarta",
+      "bali": "Bali",
+      "surabaya": "Surabaya",
+      "bandung": "Bandung",
+      "medan": "Medan",
+      "semarang": "Semarang",
+      "makassar": "Makassar",
+      "palembang": "Palembang",
+      "tangerang": "Tangerang",
+      "depok": "Depok",
+      "hoChiMinhCity": "Ho Chi Minh City",
+      "hanoi": "Hanoi",
+      "daNang": "Da Nang",
+      "haiPhong": "Hai Phong",
+      "canTho": "Can Tho",
+      "bienHoa": "Bien Hoa",
+      "hue": "Hue",
+      "nhaTrang": "Nha Trang",
+      "vungTau": "Vung Tau",
+      "quyNhon": "Quy Nhon"
     }
   },
   "discovery": {

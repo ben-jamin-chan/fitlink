@@ -4,6 +4,60 @@
 
 ---
 
+## [Phase 4A — Task 89] — 2026-06-24
+
+### Completed
+
+- Task 89: SEA Tier 2 Types, Regions & Timezone Constants
+- Extended SUPPORTED_COUNTRIES to include Philippines, Indonesia, Vietnam
+- Extended COUNTRY_TIMEZONES with Asia/Manila, Asia/Jakarta, Asia/Ho_Chi_Minh
+- Extended SEA_CITIES with 10 cities each for PH, ID, VN
+- Added COUNTRY_CURRENCIES export: MYR/SGD/THB/PHP/IDR/VND
+- Added COUNTRY_CALLING_CODES export: +60/+65/+66/+63/+62/+84
+- Added PH/ID/VN country and city keys to all 4 i18n files
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- constants/regions.ts: extended all exports; added COUNTRY_CURRENCIES, COUNTRY_CALLING_CODES
+- i18n/en.json: added regions country/city keys for PH/ID/VN
+- i18n/my.json: same keys, English placeholders
+- i18n/zh.json: same keys, English placeholders
+- i18n/ta.json: same keys, English placeholders
+- CHANGELOG.md: recorded Task 89 completion
+
+### Architecture Decisions
+
+- COUNTRY_CURRENCIES and COUNTRY_CALLING_CODES are new exports not present in Task 81.
+  They are added at the bottom of constants/regions.ts to avoid interleaving with
+  existing exports.
+- All Task 81 MY/SG/TH entries preserved exactly — no renames or reordering.
+- The existing app consumes region translations through `regions.country.*` and
+  `regions.city.*`, so PH/ID/VN keys were added to that runtime namespace.
+- Prompt-requested `regions.countries.*` and `regions.cities.*` PH/ID/VN aliases were
+  also added additively to all 4 locale files.
+- types/user.ts was verified (timezone?: string and location.country present) and
+  not modified.
+
+### Conflict Risks Introduced
+
+- Task 90 modifies Step1Screen.tsx and onboardingStore.ts which consume
+  constants/regions.ts — verify Task 89 constants are present before generating
+  Task 90 prompt.
+
+### Known Issues / Deferred
+
+- None
+
+### Next Up
+
+- Task 90: Onboarding & Discovery — Philippines, Indonesia, Vietnam
+
+---
+
 ## [Phase 4 Pre-flight — Admin Custom Claim Setup] — 2026-06-22
 
 ### Completed
