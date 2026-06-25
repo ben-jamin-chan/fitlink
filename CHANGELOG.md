@@ -4,6 +4,70 @@
 
 ---
 
+## [Phase 4A — Task 92] — 2026-06-25
+
+### Completed
+
+- Task 92: Phase 4 Firestore Security Rules Update
+- Audited firestore.rules against Phase 4A changes (Tasks 89–91)
+- No new rules required — Phase 3 ruleset covers all Phase 4A writes
+- Added the Phase 4A audit comment block at the top of firestore.rules
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- firestore.rules: Phase 4A audit comment block added; no rule blocks changed
+- CHANGELOG.md: recorded Task 92 completion
+
+### Architecture Decisions
+
+- Phase 4A introduced no new Firestore collections or server-only fields. The
+  existing Phase 3 doesNotModifyServerOnlyFields() guard and collection-level
+  rules cover all Task 89–91 writes. The audit comment block is the only
+  firestore.rules change.
+- `location.country` and `timezone` remain client-writable user fields under the
+  existing authenticated owner `/users/{uid}` update rule.
+- `premium`, `boost`, and `stripeCustomerId` remain server-only fields guarded by
+  doesNotModifyServerOnlyFields().
+
+### Conflict Risks Introduced
+
+- None — Task 93 (indexes audit) reads firestore.indexes.json only; no conflict
+  with firestore.rules.
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- Verified Task 89 constants include Philippines, Indonesia, Vietnam, their
+  timezones, currencies, calling codes, and city lists
+- Verified Task 90 createUserProfile() writes timezone top-level and country
+  inside location
+- Verified Task 91 createStripeCheckout.ts reads location.country and maps
+  PHP/IDR/VND currencies server-side
+- Verified Task 91 stripeWebhook.ts recognises PHP/IDR/VND Pro price IDs
+- Verified doesNotModifyServerOnlyFields() still guards age, banned, premium,
+  photoVerified, verifiedAt, boost, and stripeCustomerId
+- Verified /admin_queue and /flags still deny all client reads and writes
+- SECURITY_REVIEW_CHECKLIST diff scan found no hardcoded secrets, debug logging,
+  or widened Firestore allow rules in the Task 92 diff
+- `npm audit --audit-level=high` passes after dependency audit remediation
+- `npm --prefix functions audit --audit-level=high` passes after dependency
+  audit remediation
+- `firebase emulators:exec --only firestore "node -e \"process.exit(0)\""` passes
+- `npx tsc --noEmit` passes
+
+### Next Up
+
+- Task 93: Phase 4 Firestore Indexes
+
+---
+
 ## [Phase 4A — Task 91] — 2026-06-25
 
 ### Completed

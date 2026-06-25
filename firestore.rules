@@ -1,5 +1,17 @@
 rules_version = '2';
 
+// ─── Phase 4A Security Rules Audit — 2026-06-25 ───────────────────────────
+// Tasks 89–91 introduced no new Firestore collections or server-only fields.
+// Verified:
+//   • constants/regions.ts changes (Task 89) — no Firestore writes
+//   • createUserProfile() timezone + location.country writes (Task 90) — fields
+//     already client-writable under existing /users/{uid} update rule
+//   • createStripeCheckout.ts country read (Task 91) — server-side read only
+//   • stripeWebhook.ts premium write (Task 91) — server-only, already guarded
+//     by doesNotModifyServerOnlyFields()
+// No new rules required for Phase 4A. Existing Phase 3 ruleset is current.
+// ─────────────────────────────────────────────────────────────────────────────
+
 service cloud.firestore {
   match /databases/{database}/documents {
 

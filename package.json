@@ -68,5 +68,12 @@
     "babel-preset-expo": "~54.0.10",
     "typescript": "~5.9.2"
   },
+  "overrides": {
+    "@xmldom/xmldom": "0.8.13",
+    "js-yaml": "4.2.0",
+    "postcss": "8.5.10",
+    "uuid": "11.1.1",
+    "ws": "8.21.0"
+  },
   "private": true
 }
