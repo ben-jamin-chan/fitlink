@@ -1,18 +1,36 @@
 import React, { useEffect, useState } from 'react'
 
+import {
+  collection,
+  getCountFromServer,
+  query,
+  where,
+} from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
 
-import { auth } from '../firebase'
+import { auth, db } from '../firebase'
+import { FlagsPanel } from '../components/FlagsPanel'
+import { ReportsPanel } from '../components/ReportsPanel'
+import { UsersPanel } from '../components/UsersPanel'
 
 type TabName = 'Reports' | 'Flags' | 'Users'
 
 const TABS: TabName[] = ['Reports', 'Flags', 'Users']
 
+interface BadgeCounts {
+  Reports: number
+  Flags: number
+}
+
 export const DashboardPage = (): React.JSX.Element => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabName>('Reports')
   const [adminEmail, setAdminEmail] = useState('')
+  const [badgeCounts, setBadgeCounts] = useState<BadgeCounts>({
+    Reports: 0,
+    Flags: 0,
+  })
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -24,9 +42,45 @@ export const DashboardPage = (): React.JSX.Element => {
     return unsubscribe
   }, [])
 
+  useEffect(() => {
+    const fetchBadgeCounts = async (): Promise<void> => {
+      try {
+        const [reportsSnapshot, flagsSnapshot] = await Promise.all([
+          getCountFromServer(
+            query(collection(db, 'reports'), where('status', '==', 'pending'))
+          ),
+          getCountFromServer(
+            query(collection(db, 'flags'), where('status', '==', 'pending'))
+          ),
+        ])
+
+        setBadgeCounts({
+          Reports: reportsSnapshot.data().count,
+          Flags: flagsSnapshot.data().count,
+        })
+      } catch {
+        setBadgeCounts({ Reports: 0, Flags: 0 })
+      }
+    }
+
+    void fetchBadgeCounts()
+  }, [])
+
   const handleSignOut = async (): Promise<void> => {
     await signOut(auth)
     navigate('/', { replace: true })
+  }
+
+  const renderActivePanel = (): React.JSX.Element => {
+    if (activeTab === 'Reports') {
+      return <ReportsPanel />
+    }
+
+    if (activeTab === 'Flags') {
+      return <FlagsPanel />
+    }
+
+    return <UsersPanel />
   }
 
   return (
@@ -60,14 +114,15 @@ export const DashboardPage = (): React.JSX.Element => {
               type="button"
             >
               {tab}
+              {tab !== 'Users' && badgeCounts[tab] > 0 && (
+                <span style={styles.badge}>{badgeCounts[tab]}</span>
+              )}
             </button>
           )
         })}
       </nav>
 
-      <main style={styles.main}>
-        <p style={styles.panelText}>{activeTab} panel - coming in Task 95</p>
-      </main>
+      <main style={styles.main}>{renderActivePanel()}</main>
     </div>
   )
 }
@@ -137,11 +192,19 @@ const styles = {
     fontWeight: 600,
   },
   main: {
-    padding: '32px 24px',
+    minHeight: 'calc(100vh - 105px)',
   },
-  panelText: {
-    color: '#9ca3af',
-    fontSize: '14px',
-    margin: 0,
+  badge: {
+    backgroundColor: '#dc2626',
+    borderRadius: '999px',
+    color: '#ffffff',
+    display: 'inline-block',
+    fontSize: '11px',
+    fontWeight: 700,
+    lineHeight: 1,
+    marginLeft: '8px',
+    minWidth: '18px',
+    padding: '3px 6px',
+    textAlign: 'center',
   },
 } satisfies Record<string, React.CSSProperties>

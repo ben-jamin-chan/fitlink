@@ -4,6 +4,61 @@
 
 ---
 
+## [Phase 4B — Task 95] — 2026-06-25
+
+### Completed
+
+- Task 95: Admin moderation queue & actions
+- adminAction CF: ban, unban, warn, dismiss with auth + admin-claim checks
+- ReportsPanel: pending /reports queue with profile modal links and ban/warn/dismiss actions
+- FlagsPanel: pending /flags queue with photo thumbnail expand and ban/warn/dismiss actions
+- UsersPanel: 20-user paging with client-side first-name filter, email column, and direct ban
+- UserProfileModal: full profile view with photos, bio, activities, status badges, and ban/unban toggle
+- DashboardPage: wired all panels into the Task 94 tab shell with Reports/Flags badge counts
+- firestore.rules: appended /admin_audit and /users/{uid}/warnings blocks
+
+### Files Created
+
+- functions/src/adminAction.ts: callable CF with auth + admin-claim check, four action types, warnings, source actioning, and audit log
+- admin/src/components/ReportsPanel.tsx: reports moderation queue panel
+- admin/src/components/FlagsPanel.tsx: flags moderation queue panel with photo thumbnails
+- admin/src/components/UsersPanel.tsx: user paging, filtering, profile modal, and direct ban panel
+- admin/src/components/UserProfileModal.tsx: full profile modal with ban/unban
+
+### Files Modified
+
+- functions/src/index.ts: added adminAction export
+- firestore.rules: appended Task 95 admin read-only queue rules, /admin_audit deny block, and /users/{uid}/warnings owner-read block
+- admin/src/pages/DashboardPage.tsx: imported panels, fetched badge counts, preserved sign-out header, and rendered active tab content
+- CHANGELOG.md: recorded Task 95 completion
+
+### Architecture Decisions
+
+- Admin claim is verified in adminAction via request.auth.token['admin'] rather than admin.auth().getUser(), avoiding an extra Admin SDK round-trip after ID token refresh.
+- 'unban' is included in the adminAction union because UserProfileModal requires a reversible ban toggle.
+- Direct bans and unbans from UsersPanel/UserProfileModal use sourceDocId: 'direct'; adminAction skips source document updates for that sentinel and still writes /admin_audit.
+- ReportsPanel and FlagsPanel use the adminAction callable for all moderation writes; the admin client performs no destructive Firestore writes directly.
+- firestore.rules now include duplicate read-only /reports and /flags matches for request.auth.token.admin == true because the pre-existing deny blocks would otherwise block the admin dashboard's client SDK queue reads. Existing deny blocks were not modified.
+- Badge counts use Firestore getCountFromServer() aggregation queries.
+
+### Conflict Risks Introduced
+
+- firestore.rules modified — Task 106 also touches rules; review the Task 95 appended blocks before generating that prompt.
+- functions/src/index.ts modified — future Cloud Function tasks should append exports without reordering existing entries.
+- admin dashboard reads /reports and /flags with status == pending and createdAt desc, relying on existing composite indexes from Phase 3.
+
+### Known Issues / Deferred
+
+- UsersPanel first-name filter is client-side over fetched pages only; full-text search remains deferred to Phase 5.
+- Flag thumbnails depend on stored photoUrl values being browser-readable; existing moderation flags may contain gs:// paths from the storage trigger.
+- Admin dashboard Vite chunk-size warning remains non-blocking; code-splitting is deferred to Phase 5.
+
+### Next Up
+
+- Task 96: restoreStripeSubscription Cloud Function
+
+---
+
 ## [Phase 4B — Task 94] — 2026-06-25
 
 ### Completed

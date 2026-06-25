@@ -472,6 +472,33 @@ service cloud.firestore {
     }
 
 
+    // Task 95: Admin dashboard read-only queue access.
+    // Existing report/flag blocks above remain in place; this narrower
+    // duplicate match allows only authenticated admins to read queues.
+    match /reports/{reportId} {
+      allow read: if request.auth != null && request.auth.token.admin == true;
+      allow write: if false;
+    }
+
+    match /flags/{docId} {
+      allow read: if request.auth != null && request.auth.token.admin == true;
+      allow write: if false;
+    }
+
+
+    // Task 95: Admin audit log — Admin SDK write-only. No client access.
+    match /admin_audit/{docId} {
+      allow read, write: if false;
+    }
+
+
+    // Task 95: Per-user admin warnings — user can read their own; CF writes only.
+    match /users/{uid}/warnings/{warningId} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+
     // ─── Default catch-all ──────────────────────────────────────────────────
 
     // Any collection not explicitly matched above is denied.
