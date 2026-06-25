@@ -4,6 +4,63 @@
 
 ---
 
+## [Phase 4A — Task 93] — 2026-06-25
+
+### Completed
+
+- Task 93: Phase 4 Firestore Indexes Audit & Validation
+- No new composite indexes required for Phase 4A — confirmed
+- Verified existing Phase 1/2/3 composite indexes and the `likes.createdAt`
+  field override are valid and unduplicated
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- firestore.indexes.json: No changes — JSON and index schema validated clean
+- CHANGELOG.md: recorded Task 93 completion
+
+### Architecture Decisions
+
+- Phase 4A introduced no new collection-level queries requiring composite
+  indexes. `getDiscoveryStack` still uses the existing `users` discovery
+  indexes for `location.city`, `banned`, `paused`, `premium.active`, and
+  `lastActive`.
+- Task 89 constants and Task 90 onboarding changes write country/timezone data
+  only; writes do not require composite indexes.
+- Task 91 checkout reads the caller by direct user document path. The Stripe
+  webhook uses a single-field `stripeCustomerId` lookup, which is covered by
+  Firestore single-field indexing and does not require a composite index.
+
+### Conflict Risks Introduced
+
+- None — Task 94 (admin dashboard scaffold) creates new files in `/admin/` and
+  does not touch firestore.indexes.json.
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- Task 92 Phase 4A Firestore rules audit block verified at the top of
+  firestore.rules as a read-only dependency check
+- Task 89 constants verified for Philippines, Indonesia, Vietnam, currencies,
+  calling codes, and timezones
+- Task 91 `COUNTRY_TO_CURRENCY` Cloud Function map verified for PHP/IDR/VND
+- `firestore.indexes.json` parses as valid JSON
+- Existing index schema validation confirms 11 composite indexes, 1 field
+  override, and zero duplicate entries
+- Phase 4A query audit confirms no new composite indexes are required
+
+### Next Up
+
+- Task 94: Admin Dashboard — Project Scaffold & Auth
+
+---
+
 ## [Phase 4A — Task 92] — 2026-06-25
 
 ### Completed
