@@ -46,6 +46,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+admin/node_modules/
 
 # Expo
 .expo/

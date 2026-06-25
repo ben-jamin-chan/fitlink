@@ -4,6 +4,95 @@
 
 ---
 
+## [Phase 4B — Task 94] — 2026-06-25
+
+### Completed
+
+- Task 94: Admin Dashboard — Project Scaffold & Auth
+- Created a separate React + TypeScript + Vite admin web app under `/admin/`
+- Added Google-only Firebase Auth sign-in with immediate `admin` custom claim
+  verification
+- Added `AdminRoute` route guard that waits for Firebase auth restoration, checks the
+  `admin` custom claim asynchronously, and redirects unauthorised users to `/`
+- Added stub dashboard shell with Reports, Flags, and Users tab panels for Task 95
+
+### Files Created
+
+- admin/index.html
+- admin/vite.config.ts
+- admin/tsconfig.json
+- admin/tsconfig.node.json
+- admin/package.json
+- admin/package-lock.json
+- admin/.env.example
+- admin/src/main.tsx
+- admin/src/App.tsx
+- admin/src/firebase.ts
+- admin/src/vite-env.d.ts
+- admin/src/components/AdminRoute.tsx
+- admin/src/pages/LoginPage.tsx
+- admin/src/pages/DashboardPage.tsx
+
+### Files Modified
+
+- .gitignore: added `admin/node_modules/`; `admin/build/` was already present
+- tsconfig.json: excluded generated admin build and dependency folders from root
+  TypeScript compilation
+- CHANGELOG.md: recorded Task 94 completion
+
+### Architecture Decisions
+
+- `/admin/` is a standalone Vite web app and does not import Expo, React Native,
+  Zustand, React Navigation, i18next, or the mobile app `@/` alias tree.
+- Firebase initialisation uses `VITE_FIREBASE_*` environment variables and exports
+  client SDK `auth`, `db`, and `functions`; `functions` is pinned to
+  `asia-southeast1`.
+- Admin access is enforced from Firebase Auth custom claims in both the login flow and
+  the guarded dashboard route. Non-admin Google users are signed out immediately.
+- Task 94 remains scaffold/auth only. No admin moderation panels, destructive actions,
+  Firestore writes, Cloud Functions, Firestore rules, or Firebase Hosting config changes
+  were added.
+- Pre-flight Step C is manual and cannot be verified from source. At least one Firebase
+  UID still must have `{ admin: true }` set via Admin SDK before the dashboard can be
+  used by a real admin account.
+- Admin dependencies were upgraded from the prompt's older versions to current listed
+  packages (`firebase` 12.x, `vite` 8.x, `@vitejs/plugin-react` 6.x) to avoid committing
+  a new package with high-severity npm audit findings.
+
+### Conflict Risks Introduced
+
+- Task 95 depends on the `auth`, `db`, and `functions` named exports in
+  admin/src/firebase.ts and the existing dashboard tab shell.
+- The admin bundle currently emits a Vite chunk-size warning because the Firebase client
+  SDK is included in the single scaffold bundle. This is non-blocking for Task 94 but may
+  be revisited when Task 95 adds panels.
+
+### Known Issues / Deferred
+
+- Reports, Flags, and Users panel contents are intentionally empty until Task 95.
+- Admin custom claims must be set manually outside source control before real dashboard
+  access works.
+
+### Verification
+
+- Pre-flight Step B verified: `firebase.json` contains the `admin` hosting target with
+  public path `admin/build`
+- Pre-flight Step C documented: source cannot verify Firebase Auth custom claims
+- Task 89 constants verified: `SUPPORTED_COUNTRIES`, `SEA_CITIES`,
+  `COUNTRY_TIMEZONES`, `COUNTRY_CURRENCIES`, and `COUNTRY_CALLING_CODES` exist
+- Task 93 index artifact verified: `firestore.indexes.json` parses as valid JSON
+- Temporary red/green scaffold/auth contract check passes after initially failing on
+  missing `/admin/` files
+- `npm --prefix admin run build` passes
+- `npm --prefix admin audit --audit-level=high` passes with zero vulnerabilities
+- `npx tsc --noEmit` passes
+
+### Next Up
+
+- Task 95: Admin moderation queue & actions
+
+---
+
 ## [Phase 4A — Task 93] — 2026-06-25
 
 ### Completed

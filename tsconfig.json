@@ -10,5 +10,5 @@
       "@/*": ["./*"]
     }
   },
-  "exclude": ["functions"]
+  "exclude": ["functions", "admin/build", "admin/node_modules"]
 }
