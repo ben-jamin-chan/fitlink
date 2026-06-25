@@ -314,24 +314,24 @@ const PRICING_TABLE: Record<
   VND: {
     plus: {
       month: {
-        amount: 24900000,
-        amountDisplay: '₫249,000',
+        amount: 249000,
+        amountDisplay: '₫249.000',
         currency: 'VND',
         interval: 'month',
         priceId:
           process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PLUS_MONTHLY ?? '',
       },
       '3month': {
-        amount: 67230000,
-        amountDisplay: '₫672,300',
+        amount: 672300,
+        amountDisplay: '₫672.300',
         currency: 'VND',
         interval: '3month',
         priceId:
           process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PLUS_3MONTH ?? '',
       },
       '6month': {
-        amount: 119520000,
-        amountDisplay: '₫1,195,200',
+        amount: 1195200,
+        amountDisplay: '₫1.195.200',
         currency: 'VND',
         interval: '6month',
         priceId:
@@ -340,24 +340,24 @@ const PRICING_TABLE: Record<
     },
     pro: {
       month: {
-        amount: 39900000,
-        amountDisplay: '₫399,000',
+        amount: 399000,
+        amountDisplay: '₫399.000',
         currency: 'VND',
         interval: 'month',
         priceId:
           process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PRO_MONTHLY ?? '',
       },
       '3month': {
-        amount: 107730000,
-        amountDisplay: '₫1,077,300',
+        amount: 1077300,
+        amountDisplay: '₫1.077.300',
         currency: 'VND',
         interval: '3month',
         priceId:
           process.env.EXPO_PUBLIC_STRIPE_PRICE_VND_PRO_3MONTH ?? '',
       },
       '6month': {
-        amount: 191520000,
-        amountDisplay: '₫1,915,200',
+        amount: 1915200,
+        amountDisplay: '₫1.915.200',
         currency: 'VND',
         interval: '6month',
         priceId:

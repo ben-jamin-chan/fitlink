@@ -24,6 +24,22 @@ type PremiumTier = "plus" | "pro";
 
 const STRIPE_API_VERSION = "2023-10-16";
 
+// Inlined from constants/regions.ts — do not import client constants in Cloud Functions.
+const COUNTRY_TO_CURRENCY: Record<string, string> = {
+  Malaysia: "MYR",
+  Singapore: "SGD",
+  Thailand: "THB",
+  Philippines: "PHP",
+  Indonesia: "IDR",
+  Vietnam: "VND",
+};
+
+// PHP: GCash, PayMaya enabled at Stripe Dashboard level — no per-session config required.
+// IDR: OVO, GoPay, DANA enabled at Stripe Dashboard level — no per-session config required.
+// VND: MoMo, ZaloPay enabled at Stripe Dashboard level — no per-session config required.
+const DEFAULT_COUNTRY = "Malaysia";
+const DEFAULT_CURRENCY = "MYR";
+
 /**
  * Returns valid Stripe price IDs from Cloud Function environment variables.
  * Called per request so emulator and deployed env updates are picked up.
@@ -36,6 +52,24 @@ const getAllowedPriceIds = (): Set<string> => {
     process.env.STRIPE_PRICE_PRO_MONTHLY,
     process.env.STRIPE_PRICE_PRO_3MONTH,
     process.env.STRIPE_PRICE_PRO_6MONTH,
+    process.env.STRIPE_PRICE_PHP_PLUS_MONTHLY,
+    process.env.STRIPE_PRICE_PHP_PLUS_3MONTH,
+    process.env.STRIPE_PRICE_PHP_PLUS_6MONTH,
+    process.env.STRIPE_PRICE_PHP_PRO_MONTHLY,
+    process.env.STRIPE_PRICE_PHP_PRO_3MONTH,
+    process.env.STRIPE_PRICE_PHP_PRO_6MONTH,
+    process.env.STRIPE_PRICE_IDR_PLUS_MONTHLY,
+    process.env.STRIPE_PRICE_IDR_PLUS_3MONTH,
+    process.env.STRIPE_PRICE_IDR_PLUS_6MONTH,
+    process.env.STRIPE_PRICE_IDR_PRO_MONTHLY,
+    process.env.STRIPE_PRICE_IDR_PRO_3MONTH,
+    process.env.STRIPE_PRICE_IDR_PRO_6MONTH,
+    process.env.STRIPE_PRICE_VND_PLUS_MONTHLY,
+    process.env.STRIPE_PRICE_VND_PLUS_3MONTH,
+    process.env.STRIPE_PRICE_VND_PLUS_6MONTH,
+    process.env.STRIPE_PRICE_VND_PRO_MONTHLY,
+    process.env.STRIPE_PRICE_VND_PRO_3MONTH,
+    process.env.STRIPE_PRICE_VND_PRO_6MONTH,
   ].filter((id: string | undefined): id is string => {
     return typeof id === "string" && id.length > 0;
   });
@@ -48,6 +82,15 @@ const getTierFromPriceId = (priceId: string): PremiumTier => {
     process.env.STRIPE_PRICE_PRO_MONTHLY ?? "",
     process.env.STRIPE_PRICE_PRO_3MONTH ?? "",
     process.env.STRIPE_PRICE_PRO_6MONTH ?? "",
+    process.env.STRIPE_PRICE_PHP_PRO_MONTHLY ?? "",
+    process.env.STRIPE_PRICE_PHP_PRO_3MONTH ?? "",
+    process.env.STRIPE_PRICE_PHP_PRO_6MONTH ?? "",
+    process.env.STRIPE_PRICE_IDR_PRO_MONTHLY ?? "",
+    process.env.STRIPE_PRICE_IDR_PRO_3MONTH ?? "",
+    process.env.STRIPE_PRICE_IDR_PRO_6MONTH ?? "",
+    process.env.STRIPE_PRICE_VND_PRO_MONTHLY ?? "",
+    process.env.STRIPE_PRICE_VND_PRO_3MONTH ?? "",
+    process.env.STRIPE_PRICE_VND_PRO_6MONTH ?? "",
   ]);
 
   return proIds.has(priceId) ? "pro" : "plus";
@@ -67,6 +110,16 @@ const getStripeCustomerId = (
   return typeof data.stripeCustomerId === "string" ?
     data.stripeCustomerId :
     null;
+};
+
+const getCountry = (data: Record<string, unknown>): string => {
+  const location = data.location;
+
+  if (!isRecord(location) || typeof location.country !== "string") {
+    return DEFAULT_COUNTRY;
+  }
+
+  return location.country;
 };
 
 const getPaymentIntent = (
@@ -134,6 +187,9 @@ export const createStripeCheckout = onCall(
     }
 
     const userData: Record<string, unknown> = userSnap.data() ?? {};
+    const country = getCountry(userData);
+    const currency = COUNTRY_TO_CURRENCY[country] ?? DEFAULT_CURRENCY;
+    const stripeCurrency = currency.toLowerCase();
     let customerId = getStripeCustomerId(userData);
 
     if (customerId === null) {
@@ -152,6 +208,7 @@ export const createStripeCheckout = onCall(
 
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
+      currency: stripeCurrency,
       items: [{price: priceId}],
       payment_behavior: "default_incomplete",
       payment_settings: {

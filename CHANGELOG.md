@@ -4,6 +4,78 @@
 
 ---
 
+## [Phase 4A — Task 91] — 2026-06-25
+
+### Completed
+
+- Task 91: Stripe Tier 2 — PHP/IDR/VND Pricing & Local Payment Methods
+- functions/src/createStripeCheckout.ts: reads `location.country` server-side, maps it
+  through an inlined `COUNTRY_TO_CURRENCY` map, and passes the resolved currency into
+  Stripe subscription creation with MYR fallback
+- functions/src/createStripeCheckout.ts: accepts PHP/IDR/VND server-side Stripe price ID
+  env vars and classifies country-specific Pro price IDs correctly in checkout metadata
+- functions/src/stripeWebhook.ts: recognises PHP/IDR/VND Pro price IDs so Tier 2 Pro
+  purchases are not downgraded to Plus during webhook processing
+- services/stripe.ts: stores VND pricing amounts in Stripe zero-decimal minor units while
+  leaving PHP/IDR as two-decimal minor-unit values per Stripe currency rules
+- app/settings/PremiumScreen.tsx: formats PHP (`₱`, no decimal), IDR (`Rp`, Indonesian
+  thousands separator), and VND (`₫`, Vietnamese thousands separator) from existing
+  minor-unit pricing data
+
+### Files Created
+
+- None
+
+### Files Modified
+
+- functions/src/createStripeCheckout.ts: country-to-currency routing added; local
+  `COUNTRY_TO_CURRENCY` map inlined; currency passed to Stripe subscription creation;
+  PHP/IDR/VND server price IDs allowed
+- functions/src/stripeWebhook.ts: Tier 2 Pro price IDs added to Pro tier detection
+- services/stripe.ts: VND amount metadata corrected to zero-decimal units and VND display
+  strings switched to Vietnamese thousands separators
+- app/settings/PremiumScreen.tsx: PHP/IDR/VND price formatting added; Task 71 portal
+  wiring preserved
+- CHANGELOG.md: recorded Task 91 completion
+
+### Architecture Decisions
+
+- `COUNTRY_TO_CURRENCY` is inlined in the Cloud Function instead of imported from
+  `constants/regions.ts` because Cloud Functions must not import client files.
+- Country is read server-side from Firestore, not from `request.data`, so callers cannot
+  spoof their country to choose a different currency.
+- Local payment methods for PH/ID/VN remain Stripe Dashboard-level configuration; no
+  per-session `payment_method_types` override was added.
+- Stripe subscription creation uses configured Price IDs, not client amount values. Client
+  amount metadata still tracks Stripe minor units: PHP/IDR are two-decimal currencies and
+  VND is zero-decimal.
+- PHP/IDR/VND display formatting is local to `PremiumScreen.tsx` and only overrides the
+  three new currencies, preserving existing MYR/SGD/THB `amountDisplay` strings.
+- `stripeWebhook.ts` was updated alongside checkout so country-specific Pro price IDs keep
+  the correct `premium.tier` after Stripe webhook processing.
+
+### Conflict Risks Introduced
+
+- None expected — Task 92 (security rules audit) will verify no new client-writable fields
+  or collections were introduced.
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- Focused red/green source checks for checkout currency routing, PremiumScreen PHP/IDR/VND
+  formatting, and webhook Tier 2 Pro recognition pass
+- `npx tsc --noEmit` passes
+- `npm --prefix functions run build` passes
+
+### Next Up
+
+- Task 92: Phase 4 Firestore Security Rules Update
+
+---
+
 ## [Phase 4A — Task 90] — 2026-06-24
 
 ### Completed

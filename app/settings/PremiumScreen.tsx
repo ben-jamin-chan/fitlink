@@ -24,11 +24,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { Button } from '@/components/ui/Button'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 
-import {
-  getCurrency,
-  getStripePrices,
-  openCustomerPortal,
-} from '@/services/stripe'
+import { getStripePrices, openCustomerPortal } from '@/services/stripe'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
 import type { PremiumTier, StripePrice } from '@/types/subscription'
@@ -45,6 +41,7 @@ const SELECTED_CARD_SHADOW_OPACITY = 0.25
 const SUCCESS_FEATURE_ICON_SIZE = typography.sizes.lg
 const SUCCESS_ICON_SIZE = spacing.xxxl
 const TERMS_URL = 'https://fitlink.app/terms'
+const TWO_DECIMAL_MINOR_UNIT_DIVISOR = 100
 
 const BILLING_INTERVALS: StripePrice['interval'][] = [
   'month',
@@ -72,6 +69,29 @@ const PRO_FEATURES: readonly string[] = [
 
 const getTierLabelKey = (tier: PremiumTier): string =>
   tier === 'pro' ? 'subscription.tier.pro' : 'subscription.tier.plus'
+
+const getTwoDecimalMajorAmount = (amount: number): number =>
+  amount / TWO_DECIMAL_MINOR_UNIT_DIVISOR
+
+const formatPrice = (price: StripePrice): string => {
+  switch (price.currency) {
+    case 'PHP':
+      return `₱${getTwoDecimalMajorAmount(price.amount).toFixed(0)}`
+    case 'IDR':
+      return `Rp ${getTwoDecimalMajorAmount(price.amount).toLocaleString(
+        'id-ID',
+        {
+          maximumFractionDigits: 0,
+        }
+      )}`
+    case 'VND':
+      return `₫${price.amount.toLocaleString('vi-VN', {
+        maximumFractionDigits: 0,
+      })}`
+    default:
+      return price.amountDisplay
+  }
+}
 
 type PremiumNavigationProp = StackNavigationProp<RootStackParamList, 'Premium'>
 
@@ -109,16 +129,16 @@ export default function PremiumScreen(): React.JSX.Element {
 
   const country = profile?.location.country ?? DEFAULT_COUNTRY
   const prices = useMemo(() => getStripePrices(country), [country])
-  const currency = getCurrency(country)
   const selectedPriceEntry = prices[selectedTier][selectedInterval]
   const isPaymentReady = pendingClientSecret !== null
 
   const getDisplayPrice = useCallback(
     (tier: PremiumTier): string => {
       const price = prices[tier][selectedInterval]
+      const displayPrice = formatPrice(price)
 
-      return price.amountDisplay.length > 0
-        ? price.amountDisplay
+      return displayPrice.length > 0
+        ? displayPrice
         : t('subscription.priceUnavailable')
     },
     [prices, selectedInterval, t]
@@ -150,7 +170,7 @@ export default function PremiumScreen(): React.JSX.Element {
     }
 
     return t('subscription.billedEveryPeriod', {
-      amount: `${currency} ${price.amountDisplay}`,
+      amount: formatPrice(price),
       period:
         selectedInterval === '3month'
           ? t('subscription.billedEvery3Months')
@@ -538,7 +558,7 @@ export default function PremiumScreen(): React.JSX.Element {
         <View style={styles.subscribeButtonContainer}>
           <Button
             label={t('subscription.subscribeFor', {
-              price: `${currency} ${selectedPriceEntry.amountDisplay}`,
+              price: formatPrice(selectedPriceEntry),
             })}
             variant="primary"
             onPress={handleSubscribe}

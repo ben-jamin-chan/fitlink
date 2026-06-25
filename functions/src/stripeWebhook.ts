@@ -36,6 +36,15 @@ const getTierFromSubscription = (
     process.env.STRIPE_PRICE_PRO_MONTHLY ?? "",
     process.env.STRIPE_PRICE_PRO_3MONTH ?? "",
     process.env.STRIPE_PRICE_PRO_6MONTH ?? "",
+    process.env.STRIPE_PRICE_PHP_PRO_MONTHLY ?? "",
+    process.env.STRIPE_PRICE_PHP_PRO_3MONTH ?? "",
+    process.env.STRIPE_PRICE_PHP_PRO_6MONTH ?? "",
+    process.env.STRIPE_PRICE_IDR_PRO_MONTHLY ?? "",
+    process.env.STRIPE_PRICE_IDR_PRO_3MONTH ?? "",
+    process.env.STRIPE_PRICE_IDR_PRO_6MONTH ?? "",
+    process.env.STRIPE_PRICE_VND_PRO_MONTHLY ?? "",
+    process.env.STRIPE_PRICE_VND_PRO_3MONTH ?? "",
+    process.env.STRIPE_PRICE_VND_PRO_6MONTH ?? "",
   ]);
 
   return proIds.has(priceId) ? "pro" : "plus";
