@@ -4,6 +4,56 @@
 
 ---
 
+## [Phase 4C — Task 97] — 2026-06-26
+
+### Completed
+
+- Task 97: Restore Purchases UI
+- Added a free-tier "Restore Purchases" action to PremiumScreen
+- Calls the existing `restoreStripeSubscription` callable via Firebase Functions in `asia-southeast1`
+- Shows loading state during restore, success toast on restored subscription, and translated alerts for not-found/error states
+- Added local-only `profileStore.restorePremium()` to update `profile.premium` immediately after a successful restore without writing Firestore from the client
+- Added restore purchase i18n keys to EN/MY/ZH/TA
+
+### Files Modified
+
+- app/settings/PremiumScreen.tsx: added restore callable handler, restore button, loading state, and success/error UI
+- store/profileStore.ts: added local-only restorePremium action with returned timestamp normalization
+- services/firebase/config.ts: exported shared region-pinned Firebase Functions instance expected by the task prompt
+- i18n/en.json: added premium.restore keys
+- i18n/my.json: added premium.restore keys using English placeholders
+- i18n/zh.json: added premium.restore keys using English placeholders
+- i18n/ta.json: added premium.restore keys using English placeholders
+- CHANGELOG.md: recorded Task 97 completion
+
+### Architecture Decisions
+
+- Restore UI updates only local Zustand state after the CF writes server-owned `premium.*` fields; the client does not write `premium` to Firestore.
+- `restorePremium()` preserves the existing local `premium.subscriptionId` because the callable return does not include it; the Firestore profile listener will refresh it from the server write.
+- Callable `expiresAt` is accepted as `unknown` at the screen boundary and normalized in `profileStore` to a Firestore `Timestamp | null` so existing active-plan UI can safely call `toDate()`.
+- Added `functions` export in `services/firebase/config.ts` because the task prompt required importing it from config, but the existing file did not yet export it.
+
+### Conflict Risks Introduced
+
+- services/firebase/config.ts now exports `functions`; future callable code may reuse it instead of creating ad hoc `getFunctions(undefined, 'asia-southeast1')` instances.
+
+### Known Issues / Deferred
+
+- No client test harness exists in the root package; verification is TypeScript-only for this UI task.
+
+### Verification
+
+- Pre-task dependency verified: functions/src/restoreStripeSubscription.ts exists
+- Pre-task dependency verified: functions/src/index.ts exports restoreStripeSubscription
+- i18n JSON parse check passed for EN/MY/ZH/TA
+- `npx tsc --noEmit` passes
+
+### Next Up
+
+- Task 98: deleteAccount Cloud Function
+
+---
+
 ## [Phase 4C — Task 96] — 2026-06-26
 
 ### Completed

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,15 +16,18 @@ import { useNavigation } from '@react-navigation/native'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { useStripe } from '@stripe/stripe-react-native'
 import * as Linking from 'expo-linking'
+import { httpsCallable } from 'firebase/functions'
 import { useTranslation } from 'react-i18next'
 
 import { useAuthStore } from '@/store/authStore'
 import { useProfileStore } from '@/store/profileStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
+import { showToast } from '@/store/toastStore'
 
 import { Button } from '@/components/ui/Button'
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay'
 
+import { functions } from '@/services/firebase/config'
 import { getStripePrices, openCustomerPortal } from '@/services/stripe'
 
 import type { RootStackParamList } from '@/app/navigation/RootNavigator'
@@ -95,6 +99,10 @@ const formatPrice = (price: StripePrice): string => {
 
 type PremiumNavigationProp = StackNavigationProp<RootStackParamList, 'Premium'>
 
+type RestoreResult =
+  | { restored: true; tier: string; expiresAt: unknown }
+  | { restored: false; reason: 'no-customer' | 'no-active-subscription' }
+
 export default function PremiumScreen(): React.JSX.Element {
   const { i18n, t } = useTranslation()
   const navigation = useNavigation<PremiumNavigationProp>()
@@ -123,7 +131,9 @@ export default function PremiumScreen(): React.JSX.Element {
   )
   const isPremium = useSubscriptionStore((state) => state.isPremium)
   const profile = useProfileStore((state) => state.profile)
+  const restorePremium = useProfileStore((state) => state.restorePremium)
   const [isPortalLoading, setIsPortalLoading] = useState<boolean>(false)
+  const [isRestoring, setIsRestoring] = useState<boolean>(false)
   const [isSheetLoading, setIsSheetLoading] = useState<boolean>(false)
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false)
 
@@ -300,6 +310,40 @@ export default function PremiumScreen(): React.JSX.Element {
     }
   }, [t])
 
+  const handleRestorePurchases = useCallback(async (): Promise<void> => {
+    setIsRestoring(true)
+
+    try {
+      const restore = httpsCallable<Record<string, never>, RestoreResult>(
+        functions,
+        'restoreStripeSubscription'
+      )
+      const { data } = await restore({})
+
+      if (data.restored) {
+        restorePremium({
+          tier: data.tier,
+          active: true,
+          expiresAt: data.expiresAt,
+        })
+        showToast(t('premium.restore.success'), 'success')
+        return
+      }
+
+      Alert.alert(
+        t('premium.restore.notFound.title'),
+        t('premium.restore.notFound.message')
+      )
+    } catch {
+      Alert.alert(
+        t('premium.restore.error.title'),
+        t('premium.restore.error.message')
+      )
+    } finally {
+      setIsRestoring(false)
+    }
+  }, [restorePremium, t])
+
   const handleOpenTerms = useCallback((): void => {
     void Linking.openURL(TERMS_URL).catch(() => {
       Alert.alert(t('errors.generic'))
@@ -433,7 +477,10 @@ export default function PremiumScreen(): React.JSX.Element {
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
       >
-        <LoadingOverlay visible={isLoading} message={t('subscription.loading')} />
+        <LoadingOverlay
+          visible={isLoading || isRestoring}
+          message={t('subscription.loading')}
+        />
 
         <View style={styles.heroSection}>
           <View style={styles.heroIconContainer}>
@@ -544,6 +591,17 @@ export default function PremiumScreen(): React.JSX.Element {
             ))}
           </TouchableOpacity>
         </View>
+
+        <Pressable
+          style={styles.restoreButton}
+          onPress={handleRestorePurchases}
+          disabled={isRestoring}
+          accessibilityRole="button"
+        >
+          <Text style={styles.restoreButtonText}>
+            {t('premium.restore.button')}
+          </Text>
+        </Pressable>
 
         {error !== null && (
           <View style={styles.errorBanner}>
@@ -783,6 +841,18 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     marginTop: spacing.xs,
     textAlign: 'center',
+  },
+  restoreButton: {
+    alignSelf: 'center',
+    marginBottom: spacing.md,
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+  },
+  restoreButtonText: {
+    color: colors.gray[400],
+    fontSize: typography.sizes.sm,
+    textDecorationLine: 'underline',
   },
   savingsBadge: {
     backgroundColor: colors.warning,

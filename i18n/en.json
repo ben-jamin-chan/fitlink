@@ -1050,6 +1050,18 @@
       "loading": "Opening subscription management...",
       "errorTitle": "Could Not Open Portal",
       "errorMessage": "We were unable to open the subscription management portal. Please try again."
+    },
+    "restore": {
+      "button": "Restore Purchases",
+      "success": "Your subscription has been restored.",
+      "notFound": {
+        "title": "No Active Subscription Found",
+        "message": "We couldn't find an active subscription linked to this account. If you believe this is an error, please contact support."
+      },
+      "error": {
+        "title": "Restore Failed",
+        "message": "Something went wrong while restoring your subscription. Please try again."
+      }
     }
   },
   "verification": {

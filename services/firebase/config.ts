@@ -6,7 +6,7 @@
  * 2. Fill in values from Firebase Console → Project Settings → Your Apps → Web App
  * 3. Never commit .env — it is in .gitignore
  *
- * Named exports: auth, db, storage, rtdb, app
+ * Named exports: auth, db, functions, storage, rtdb, app
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { getApp, getApps, initializeApp } from 'firebase/app'
@@ -22,6 +22,8 @@ import type {
 } from 'firebase/auth'
 import { getFirestore, initializeFirestore } from 'firebase/firestore'
 import type { Firestore } from 'firebase/firestore'
+import { getFunctions } from 'firebase/functions'
+import type { Functions } from 'firebase/functions'
 import { getStorage } from 'firebase/storage'
 import type { FirebaseStorage } from 'firebase/storage'
 
@@ -85,6 +87,7 @@ export const auth: Auth = initializeFirebaseAuth(app, isNewApp)
 export const db: Firestore = isNewApp
   ? initializeFirestore(app, { experimentalForceLongPolling: true })
   : getFirestore(app)
+export const functions: Functions = getFunctions(app, 'asia-southeast1')
 export const storage: FirebaseStorage = getStorage(app)
 export const rtdb: Database = getDatabase(app)
 export { app }

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { serverTimestamp } from 'firebase/firestore'
+import { Timestamp, serverTimestamp } from 'firebase/firestore'
 import type { Unsubscribe } from 'firebase/firestore'
 
 import {
@@ -18,6 +18,7 @@ import { useAuthStore } from '@/store/authStore'
 import { compressImage } from '@/utils/imageUtils'
 
 import type { UserProfile } from '@/types/user'
+import type { PremiumTier } from '@/types/subscription'
 
 const MAX_PROFILE_PHOTOS = 6
 
@@ -45,6 +46,12 @@ interface PhotoVerificationRefresh {
 
 type ProfileUpdateInput = EditableProfileUpdate | PhotoVerificationRefresh
 
+interface RestoredPremiumInput {
+  tier: string
+  active: boolean
+  expiresAt: unknown
+}
+
 interface ProfileState {
   profile: UserProfile | null
   isLoading: boolean
@@ -60,6 +67,7 @@ interface ProfileActions {
   deletePhoto: (index: number) => Promise<void>
   updateVideoProfile: (localUri: string) => Promise<void>
   removeVideoProfile: () => Promise<void>
+  restorePremium: (premium: RestoredPremiumInput) => void
   clearError: () => void
   reset: () => void
   clearProfile: () => void
@@ -86,6 +94,33 @@ const isPhotoVerificationRefresh = (
   partial: ProfileUpdateInput
 ): partial is PhotoVerificationRefresh => {
   return 'photoVerified' in partial && partial.photoVerified === true
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null
+}
+
+const getRestoredPremiumTier = (tier: string): PremiumTier => {
+  return tier === 'pro' ? 'pro' : 'plus'
+}
+
+const getRestoredPremiumExpiresAt = (value: unknown): Timestamp | null => {
+  if (value instanceof Timestamp) {
+    return value
+  }
+
+  if (!isRecord(value)) {
+    return null
+  }
+
+  const seconds = value.seconds ?? value._seconds
+  const nanoseconds = value.nanoseconds ?? value._nanoseconds
+
+  if (typeof seconds !== 'number' || typeof nanoseconds !== 'number') {
+    return null
+  }
+
+  return new Timestamp(seconds, nanoseconds)
 }
 
 export const useProfileStore = create<ProfileStore>()((set, get) => ({
@@ -296,6 +331,23 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
     if (profileError !== null) {
       throw new Error(profileError)
     }
+  },
+
+  restorePremium: (premium: RestoredPremiumInput): void => {
+    set((state) => ({
+      profile:
+        state.profile !== null
+          ? {
+              ...state.profile,
+              premium: {
+                ...state.profile.premium,
+                active: premium.active,
+                tier: getRestoredPremiumTier(premium.tier),
+                expiresAt: getRestoredPremiumExpiresAt(premium.expiresAt),
+              },
+            }
+          : state.profile,
+    }))
   },
 
   clearError: (): void => {
