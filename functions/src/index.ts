@@ -28,3 +28,4 @@ export { createCheckin } from "./createCheckin";
 export { createEvent } from "./createEvent";
 export { rsvpEvent } from "./rsvpEvent";
 export { adminAction } from "./adminAction";
+export { restoreStripeSubscription } from "./restoreStripeSubscription";

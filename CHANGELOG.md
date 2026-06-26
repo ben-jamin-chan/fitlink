@@ -4,6 +4,48 @@
 
 ---
 
+## [Phase 4C — Task 96] — 2026-06-26
+
+### Completed
+
+- Task 96: restoreStripeSubscription Cloud Function
+- Added authenticated callable restore flow for reinstall / new-device subscription recovery
+- Reads `stripeCustomerId` from `/users/{uid}` via Admin SDK only; client payload customer IDs are ignored
+- Queries Stripe for the caller's active subscription and returns discriminated no-customer, no-active-subscription, or restored results
+- Resolves Plus/Pro tier from Stripe price IDs and falls back to Plus for unrecognised prices
+- Writes server-owned `premium.active`, `premium.tier`, `premium.subscriptionId`, and `premium.expiresAt` via Admin SDK
+
+### Files Created
+
+- functions/src/restoreStripeSubscription.ts: callable CF; reads stripeCustomerId server-side; queries Stripe for active subscription; writes premium field via Admin SDK; returns discriminated RestoreResult union
+
+### Files Modified
+
+- functions/src/index.ts: appended restoreStripeSubscription export
+- CHANGELOG.md: recorded Task 96 completion
+
+### Architecture Decisions
+
+- Stripe API version `2023-10-16` matches the existing `createStripeCheckout` and `stripeWebhook` functions rather than the newer version shown in the generic task snippet.
+- PRICE_TIER_MAP is built at module scope (cold-start) and includes the 36 country-scoped price keys plus the existing unprefixed Phase 2 price keys currently used by checkout and webhook code.
+- Unrecognised price IDs are not logged; only a generic warning is emitted before falling back to Plus.
+- Premium restore writes dotted `premium.*` fields, including `subscriptionId`, to match the existing webhook write pattern and avoid replacing the premium map.
+
+### Conflict Risks Introduced
+
+- functions/src/index.ts modified — Task 97 and all future CF tasks must append without reordering
+- None beyond the above
+
+### Known Issues / Deferred
+
+- None
+
+### Next Up
+
+- Task 97: Restore Purchases UI (depends on this CF)
+
+---
+
 ## [Phase 4B — Task 95] — 2026-06-25
 
 ### Completed
