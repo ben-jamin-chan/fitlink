@@ -4,6 +4,62 @@
 
 ---
 
+## [Phase 4D — Task 98] — 2026-06-27
+
+### Completed
+
+- Task 98: deleteAccount Cloud Function
+- Added authenticated `deleteAccount` callable in `asia-southeast1`
+- Cancels active Stripe subscriptions at period end when a `stripeCustomerId` exists
+- Deletes user subcollections before deleting the parent `/users/{uid}` document
+- Deletes swipe subcollections, match documents, gym check-ins, Cloud Storage files, and RTDB chat nodes before deleting the Firebase Auth user last
+- Ignores caller payload identity and sources the account to delete only from `request.auth.uid`
+
+### Files Created
+
+- functions/src/deleteAccount.ts: callable CF with the PDPA deletion sequence across Stripe, Firestore, Storage, RTDB, and Firebase Auth; returns `{ success: true }`
+
+### Files Modified
+
+- functions/src/index.ts: appended deleteAccount export
+- CHANGELOG.md: recorded Task 98 completion
+
+### Architecture Decisions
+
+- Stripe subscription cleanup uses `cancel_at_period_end: true` so account deletion does not trigger immediate cancellation or prorated refund handling.
+- Stripe cleanup is best-effort and swallowed on failure so a Stripe outage cannot block a user's PDPA account deletion request.
+- Firebase Auth deletion remains the final service step because deleting Auth first would risk orphaned Firestore, Storage, or RTDB data if earlier cleanup had not completed.
+- Stripe is instantiated inside the callable after reading the secret, matching the existing `createStripeCheckout` and `restoreStripeSubscription` secret-bound pattern.
+
+### Conflict Risks Introduced
+
+- functions/src/index.ts modified — Task 99 and all future CF tasks must append without reordering.
+- None beyond the above.
+
+### Known Issues / Deferred
+
+- Unit coverage for `deleteAccount` remains scheduled for Task 105 alongside `restoreStripeSubscription`.
+- Delete Account screen wiring is intentionally deferred to Task 99.
+
+### Verification
+
+- Pre-task dependency verified: functions/src/index.ts exports adminAction and restoreStripeSubscription
+- Pre-task dependency verified: functions/src/restoreStripeSubscription.ts exists
+- `npm --prefix functions run build` passes
+- `npx tsc --noEmit` passes
+- `npm --prefix functions run lint` passes
+- Confirmed `auth.deleteUser(uid)` is the last `await` in the callable body
+- Focused scan found no `any`, `as any`, `console.log`, client Firebase SDK imports, Expo/React Native imports, `request.data` UID usage, or `new Date()` in `functions/src/deleteAccount.ts`
+- SECURITY_REVIEW_CHECKLIST.md pass completed in a fresh Codex subagent: no CRITICAL, HIGH, or MEDIUM findings; UID source, Stripe secret handling, and Auth-last order all passed
+- `npm audit --audit-level=high` passes with zero vulnerabilities
+- `npm --prefix functions audit --audit-level=high` passes with zero vulnerabilities
+
+### Next Up
+
+- Task 99: Delete Account screen (depends on this CF)
+
+---
+
 ## [Phase 4C — Task 97] — 2026-06-26
 
 ### Completed
