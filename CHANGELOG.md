@@ -4,6 +4,68 @@
 
 ---
 
+## [Phase 4D — Task 100] — 2026-06-27
+
+### Completed
+
+- Task 100: Blocked Users screen
+- Added blocked-users list UI with deleted-account fallback, pull-to-refresh, and unblock confirmation
+- Opened `/blocked/{userId}/users/{blockedId}` in Firestore rules for owner read/delete only
+- Wired Settings → Privacy → Blocked Users to the new screen
+- Added `settings.blocked.*` translations to all four i18n files
+
+### Files Created
+
+- app/settings/BlockedUsersScreen.tsx: blocked list UI that reads `/blocked/{uid}/users`, resolves user display info, and deletes blocked entries after confirmation
+
+### Files Modified
+
+- firestore.rules: replaced the deny-all blocked wildcard with an outer parent deny and scoped owner read/delete on `/blocked/{userId}/users/{blockedId}`
+- app/settings/SettingsScreen.tsx: wired the existing Privacy blocked-users row to navigate to `BlockedUsers`
+- app/navigation/MainTabNavigator.tsx: appended `BlockedUsersScreen` to the Settings stack
+- i18n/en.json: added `settings.blocked.*` keys
+- i18n/my.json: mirrored `settings.blocked.*` keys (English placeholders)
+- i18n/zh.json: mirrored `settings.blocked.*` keys (English placeholders)
+- i18n/ta.json: mirrored `settings.blocked.*` keys (English placeholders)
+- CHANGELOG.md: recorded Task 100 completion
+
+### Architecture Decisions
+
+- Confirmed the implemented blocked path is `/blocked/{uid}/users/{blockedId}` from `functions/src/unmatchUser.ts` and `functions/src/getDiscoveryStack.ts`.
+- The Firestore rules change preserves a deny-all parent `/blocked/{userId}` rule and explicitly opens only the `users` subcollection for authenticated owner reads and deletes; create/update remain denied because `unmatchUser` is the only writer.
+- `BlockedUsersScreen` uses `Promise.allSettled` so one inaccessible or deleted blocked profile cannot abort the entire list.
+- Unblock uses direct client `deleteDoc` on the blocked document and filters local state after success; no Cloud Function or full re-fetch is introduced.
+
+### Conflict Risks Introduced
+
+- firestore.rules modified — Task 106 also touches rules; review this scoped blocked-users rule before generating that prompt.
+- app/settings/SettingsScreen.tsx modified — Task 101 also touches Settings for Safety Center; preserve both the Privacy blocked-users row and Task 99 Danger Zone row.
+- app/navigation/MainTabNavigator.tsx modified — Task 101 also registers a Settings stack screen; append without reordering existing entries.
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- Pre-task dependency verified: `SettingsScreen.tsx` has Task 99 Danger Zone Delete Account row
+- Pre-task dependency verified: `MainTabNavigator.tsx` includes `DeleteAccountScreen`
+- Pre-task dependency verified: blocked path is `/blocked/{uid}/users/{blockedId}` from `functions/src/unmatchUser.ts`
+- i18n JSON parse check passed for EN/MY/ZH/TA
+- `npx tsc --noEmit` passes
+- Focused scans found no inline styles, `any`, `as any`, console calls, or relative imports in touched client files
+- Firestore emulator validation passed with the actual rules file loaded on alternate port 18080 because the default 8080 port was already occupied
+- `npm audit --audit-level=high` passes with zero vulnerabilities
+- `npm --prefix functions audit --audit-level=high` passes with zero vulnerabilities
+- SECURITY_REVIEW_CHECKLIST.md direct pass completed for the `firestore.rules` diff: no CRITICAL, HIGH, or MEDIUM findings
+- Confirmed the screen uses `Promise.allSettled`, owner-only `deleteDoc`, optimistic local removal, and no Cloud Function call for unblock
+
+### Next Up
+
+- Task 101: Safety Center screen
+
+---
+
 ## [Phase 4D — Task 99] — 2026-06-27
 
 ### Completed

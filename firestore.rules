@@ -405,11 +405,17 @@ service cloud.firestore {
 
     // ─── /blocked/{userId} ──────────────────────────────────────────────────
 
-    match /blocked/{userId}/{document=**} {
-      // Entirely managed by Cloud Functions (unmatchUser, recordSwipe).
-      // No client reads or writes.
-      allow read:  if false;
-      allow write: if false;
+    match /blocked/{userId} {
+      // Parent document remains closed to all client access.
+      allow read, write: if false;
+
+      match /users/{blockedId} {
+        // Owner can read their blocked list and delete entries to unblock.
+        // Creation remains Cloud Function/Admin SDK territory.
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow delete: if isSignedIn() && request.auth.uid == userId;
+        allow create, update: if false;
+      }
     }
 
 

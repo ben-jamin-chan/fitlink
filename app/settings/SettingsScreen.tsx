@@ -575,7 +575,7 @@ export default function SettingsScreen(): React.JSX.Element {
   }
 
   const handleBlockedUsers = (): void => {
-    Alert.alert(t('settings.privacy.blockedUsers'), t('settings.privacy.noBlocked'))
+    navigation.navigate('BlockedUsers')
   }
 
   const handleVerifyProfile = (): void => {
@@ -894,8 +894,7 @@ export default function SettingsScreen(): React.JSX.Element {
           />
           <IncognitoToggleCard navigation={rootNavigation} />
           <SettingsRow
-            label={t('settings.privacy.blockedUsers')}
-            value={t('settings.privacy.blockedCount', { count: 0 })}
+            label={t('settings.blocked.title')}
             icon="ban-outline"
             onPress={handleBlockedUsers}
             isLast={true}

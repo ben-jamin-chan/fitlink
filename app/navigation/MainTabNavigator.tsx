@@ -17,6 +17,7 @@ import EventsScreen from '@/app/events/EventsScreen'
 import MatchesScreen from '@/app/matches/MatchesScreen'
 import EditProfileScreen from '@/app/profile/EditProfileScreen'
 import ProfileScreen from '@/app/profile/ProfileScreen'
+import BlockedUsersScreen from '@/app/settings/BlockedUsersScreen'
 import ConnectedAppsScreen from '@/app/settings/ConnectedAppsScreen'
 import DeleteAccountScreen from '@/app/settings/DeleteAccountScreen'
 import SettingsScreen from '@/app/settings/SettingsScreen'
@@ -45,6 +46,7 @@ export type SettingsStackParamList = {
   Settings: undefined
   DeleteAccount: undefined
   ConnectedApps: undefined
+  BlockedUsers: undefined
 }
 
 export type MainTabParamList = {
@@ -175,6 +177,15 @@ const SettingsStackNavigator = (): React.JSX.Element => {
           headerBackTitle: '',
           headerShown: true,
           title: t('settings.connectedApps.title'),
+        }}
+      />
+      <SettingsStack.Screen
+        name="BlockedUsers"
+        component={BlockedUsersScreen}
+        options={{
+          headerBackTitle: '',
+          headerShown: true,
+          title: t('settings.blocked.title'),
         }}
       />
     </SettingsStack.Navigator>

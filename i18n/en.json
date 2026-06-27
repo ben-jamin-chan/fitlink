@@ -892,6 +892,20 @@
       "blockedCount": "{{count}} blocked",
       "noBlocked": "No blocked users"
     },
+    "blocked": {
+      "title": "Blocked Users",
+      "empty": {
+        "title": "No blocked users",
+        "subtitle": "Users you block will appear here"
+      },
+      "unblock": "Unblock",
+      "deletedUser": "Deleted User",
+      "confirmUnblock": {
+        "title": "Unblock user?",
+        "message": "{{name}} will be able to see your profile and contact you again.",
+        "messageDeleted": "This user's account has been deleted. Removing them from your blocked list."
+      }
+    },
     "incognito": {
       "title": "Incognito Mode",
       "description": "Browse profiles without appearing in anyone's discovery stack. Your existing matches can still message you.",
