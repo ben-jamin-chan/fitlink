@@ -4,6 +4,68 @@
 
 ---
 
+## [Phase 4D — Task 99] — 2026-06-27
+
+### Completed
+
+- Task 99: Delete Account screen
+- Replaced the existing direct-delete confirmation screen with the required three-section PDPA deletion flow
+- Added mandatory re-authentication gates for phone OTP, Google, Apple, and email/password providers
+- Wired the screen to call the shared region-pinned `deleteAccount` callable with an empty payload
+- Added typed confirmation requiring `DELETE` before the destructive final alert can be opened
+- Clears local Zustand/auth/storage state after callable success, then resets the root stack to the unauthenticated `Auth` route
+- Added `deleteAccount.*` translations to all four i18n files
+
+### Files Created
+
+- None — `app/settings/DeleteAccountScreen.tsx` already existed before Task 99 and was replaced/upgraded in place
+
+### Files Modified
+
+- app/settings/DeleteAccountScreen.tsx: full re-authenticated delete-account flow using the Task 98 Cloud Function
+- app/settings/SettingsScreen.tsx: wired the Danger Zone row directly to the dedicated delete-account flow
+- app/navigation/MainTabNavigator.tsx: added the delete-account screen title option to the existing Settings stack route
+- i18n/en.json: added deleteAccount.* keys
+- i18n/my.json: mirrored deleteAccount.* keys (English placeholders)
+- i18n/zh.json: mirrored deleteAccount.* keys (English placeholders)
+- i18n/ta.json: mirrored deleteAccount.* keys (English placeholders)
+- CHANGELOG.md: recorded Task 99 completion
+
+### Architecture Decisions
+
+- Phone re-auth uses the existing `sendOTP()` service pattern, then builds a `PhoneAuthProvider` credential from the returned `verificationId`; no null verifier is passed.
+- Google re-auth uses the app's existing Expo AuthSession pattern from `LandingScreen.tsx` because `@react-native-google-signin/google-signin` is not installed in this project.
+- Apple re-auth was included because the app already supports Apple Sign-In; it is guarded to iOS and uses `OAuthProvider('apple.com')`.
+- Store cleanup uses the existing store APIs: `profileStore.reset()`, `discoveryStore.reset()`, `matchStore.unsubscribeFromMatches()`, and `chatStore.closeChat(uid)`. `authStore` has no `reset()`, so its public setters clear user, onboarding, biometric, and error state before Firebase sign-out.
+- Navigation reset targets the root `Auth` route, whose first screen is the unauthenticated Landing screen.
+
+### Conflict Risks Introduced
+
+- app/settings/SettingsScreen.tsx modified — Task 100 (Blocked Users) also touches this file; review before generating Task 100 prompt
+- app/navigation/MainTabNavigator.tsx modified — Task 100 also registers a Settings stack screen
+
+### Known Issues / Deferred
+
+- Unit coverage for `deleteAccount` CF remains scheduled for Task 105.
+- No client test harness exists in the root package; verification is TypeScript and static-scan only for this UI task.
+
+### Verification
+
+- Pre-task dependency verified: functions/src/deleteAccount.ts exists
+- Pre-task dependency verified: functions/src/index.ts exports deleteAccount
+- Pre-task dependency verified: services/firebase/config.ts exports region-pinned functions
+- i18n JSON parse check passed for EN/MY/ZH/TA
+- `npx tsc --noEmit` passes
+- Focused scans found no inline styles, `any`, `as any`, console calls, or relative imports in the touched screen/navigation files
+- Focused scan found no Firestore client writes in app/settings/DeleteAccountScreen.tsx
+- Confirmed delete callable is invoked as `deleteAccount({})` with no UID or user data payload
+
+### Next Up
+
+- Task 100: Blocked Users screen
+
+---
+
 ## [Phase 4D — Task 98] — 2026-06-27
 
 ### Completed

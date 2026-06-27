@@ -164,6 +164,9 @@ const SettingsStackNavigator = (): React.JSX.Element => {
       <SettingsStack.Screen
         name="DeleteAccount"
         component={DeleteAccountScreen}
+        options={{
+          title: t('deleteAccount.screenTitle'),
+        }}
       />
       <SettingsStack.Screen
         name="ConnectedApps"

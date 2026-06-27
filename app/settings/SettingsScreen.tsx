@@ -601,23 +601,7 @@ export default function SettingsScreen(): React.JSX.Element {
   }
 
   const handleDeleteAccount = (): void => {
-    Alert.alert(
-      t('settings.danger.deleteTitle'),
-      t('settings.danger.deleteMessage'),
-      [
-        {
-          text: t('common.cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('settings.danger.deleteAccount'),
-          style: 'destructive',
-          onPress: (): void => {
-            navigation.navigate('DeleteAccount')
-          },
-        },
-      ]
-    )
+    navigation.navigate('DeleteAccount')
   }
 
   const getActiveModalTitle = (): string => {

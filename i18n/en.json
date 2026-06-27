@@ -947,6 +947,64 @@
         "confirmButton": "Permanently Delete Account",
         "placeholder": "Type DELETE here"
       }
+    },
+    "dangerZone": {
+      "title": "DANGER ZONE",
+      "deleteAccount": "Delete Account"
+    }
+  },
+  "deleteAccount": {
+    "screenTitle": "Delete Account",
+    "loading": {
+      "verifying": "Verifying your identity...",
+      "deleting": "Deleting your account..."
+    },
+    "whatWillBeDeleted": {
+      "title": "What will be deleted",
+      "profile": "Your profile and photos",
+      "matches": "All your matches and conversations",
+      "subscription": "Your subscription (cancels at end of current billing period if active)",
+      "activityData": "All your activity data",
+      "cannotRecover": "Your account cannot be recovered"
+    },
+    "reAuth": {
+      "title": "Verify your identity",
+      "description": "For your security, please verify your identity before deleting your account.",
+      "verified": "Identity verified",
+      "phoneLabel": "We will send a verification code to your phone number.",
+      "sendOtp": "Send verification code",
+      "otpPlaceholder": "6-digit code",
+      "verifyOtp": "Verify code",
+      "invalidOtp": "The code you entered is incorrect. Please try again.",
+      "googleLabel": "Re-authenticate with your Google account to continue.",
+      "googleButton": "Continue with Google",
+      "googleUnavailable": "Google authentication is not configured on this device.",
+      "googleError": "Google authentication failed. Please try again.",
+      "appleLabel": "Re-authenticate with Apple to continue.",
+      "appleButton": "Continue with Apple",
+      "appleError": "Apple authentication failed. Please try again.",
+      "emailLabel": "Enter your password to continue.",
+      "passwordPlaceholder": "Your password",
+      "confirmPassword": "Confirm",
+      "wrongPassword": "Incorrect password. Please try again.",
+      "unknownProvider": "Unable to verify identity. Please contact support.",
+      "errorTitle": "Verification failed",
+      "sendOtpError": "Could not send verification code. Please try again."
+    },
+    "confirm": {
+      "title": "Final confirmation",
+      "typeInstruction": "Type DELETE in the field below to confirm you want to permanently delete your account.",
+      "placeholder": "DELETE",
+      "deleteButton": "Delete My Account"
+    },
+    "finalConfirm": {
+      "title": "Are you absolutely sure?",
+      "message": "This action is permanent and cannot be undone. All your data will be deleted.",
+      "deleteButton": "Yes, Delete Account"
+    },
+    "error": {
+      "title": "Deletion failed",
+      "message": "Something went wrong. Please try again. If the problem persists, contact support."
     }
   },
   "subscription": {
