@@ -4,6 +4,50 @@
 
 ---
 
+## [Phase 4E — Task 102] — 2026-06-28
+
+### Completed
+
+- Task 102: Jest harness for Cloud Functions
+- Installed jest, ts-jest, @types/jest, firebase-functions-test, and ts-node in functions/devDependencies
+- Created jest.config.ts with node environment, ts-jest preset, no-tests pass-through, and Watchman disabled for CI/sandbox stability
+- Created firebaseAdminMock.ts: Firestore, Auth, Storage, RTDB, FieldValue, Timestamp, and GeoPoint mocks + resetAllMocks() helper
+- Created stripeMock.ts: Stripe subscriptions, customers, billingPortal, checkout.sessions mocks + resetStripeMocks() helper
+
+### Files Created
+
+- functions/jest.config.ts: Jest configuration for functions package
+- functions/src/__tests__/helpers/firebaseAdminMock.ts: shared Admin SDK mock with reset helper
+- functions/src/__tests__/helpers/stripeMock.ts: shared Stripe mock with reset helper
+
+### Files Modified
+
+- functions/package.json: added Jest-related devDependencies and test script
+- functions/package-lock.json: locked functions test harness dev dependencies
+- functions/.gitignore: ignored .jest-cache/
+
+### Architecture Decisions
+
+- Used Jest's documented `setupFilesAfterEnv` key instead of the prompt typo `setupFilesAfterFramework`.
+- Added `ts-node` because Jest 29 requires it to load `jest.config.ts`.
+- Added `watchman: false` so `npm --prefix functions test` does not depend on a local Watchman socket.
+- `--passWithNoTests` added to test script so the harness validates before any .test.ts files exist.
+- Admin mock covers `admin.database()` and `admin.firestore.Timestamp/FieldValue/GeoPoint` because current Phase 4 Cloud Functions use those namespace APIs.
+
+### Conflict Risks Introduced
+
+- None — no Cloud Function source files touched; index.ts unchanged
+
+### Known Issues / Deferred
+
+- None — test suites to be written in Tasks 103–105
+
+### Next Up
+
+- Task 103: Unit tests — recordSwipe
+
+---
+
 ## [Phase 4D — Task 101] — 2026-06-28
 
 ### Completed
