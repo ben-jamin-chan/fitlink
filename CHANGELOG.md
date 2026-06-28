@@ -4,6 +4,62 @@
 
 ---
 
+## [Phase 4D — Task 101] — 2026-06-28
+
+### Completed
+
+- Task 101: Safety Center screen
+- Added SafetyCenterScreen with 5 expandable safety tips, community guidelines link, report/support quick actions, and localised emergency numbers for all 6 supported countries
+- Added one-time first-match safety prompt to MatchesScreen, gated by AsyncStorage key `fitlink-safety-prompt-shown`
+- Wired Settings → Support → Safety Center navigation row
+- Added `safety.*` translations to all four i18n files
+
+### Files Created
+
+- constants/safetyResources.ts: EMERGENCY_NUMBERS map and FALLBACK_COUNTRY for all 6 SEA countries
+- app/settings/SafetyCenterScreen.tsx: scrollable safety center with expandable tip cards, guidelines, quick actions, and tel:-linked emergency numbers
+
+### Files Modified
+
+- app/settings/SettingsScreen.tsx: added Safety Center row to Support section above Help Center
+- app/navigation/MainTabNavigator.tsx: appended SafetyCenterScreen to Settings stack as `SafetyCenter`
+- app/matches/MatchesScreen.tsx: added first-match safety prompt modal with AsyncStorage one-time gate
+- i18n/en.json: appended safety.* keys
+- i18n/my.json: appended safety.* keys (English placeholders)
+- i18n/zh.json: appended safety.* keys (English placeholders)
+- i18n/ta.json: appended safety.* keys (English placeholders)
+
+### Architecture Decisions
+
+- `safetyPromptVisible` is `useState` local state in MatchesScreen — not a Zustand store field.
+- AsyncStorage key `fitlink-safety-prompt-shown` is checked on first non-empty match snapshot per session, guarded by `useRef` to prevent double-check within the same session.
+- EMERGENCY_NUMBERS keyed by plain string to allow future country additions without a type change in safetyResources.ts.
+- Country fallback to Malaysia handles null profile and countries not yet in the map.
+
+### Conflict Risks Introduced
+
+- app/settings/SettingsScreen.tsx modified — any future task touching this file must preserve the Safety Center row in the Support section
+- app/navigation/MainTabNavigator.tsx modified — any future task touching this file must preserve the SafetyCenter stack entry
+- app/matches/MatchesScreen.tsx modified — future client tests should account for the AsyncStorage dependency in the match update flow
+
+### Known Issues / Deferred
+
+- None
+
+### Verification
+
+- Pre-task dependency verified: Task 89 country/timezone/currency/calling-code exports include all six countries
+- Pre-task dependency verified: `BlockedUsersScreen`, `DeleteAccountScreen`, and the existing Settings rows are present
+- i18n JSON parse check passed for EN/MY/ZH/TA
+- `npx tsc --noEmit` passes
+- Focused scans found no inline styles, new `any`, `as any`, console calls, or relative imports in touched client files
+- Confirmed `store/matchStore.ts` and `firestore.rules` are unmodified
+
+### Next Up
+
+- Task 102: Jest Harness for Cloud Functions
+
+---
 ## [Phase 4D — Task 100] — 2026-06-27
 
 ### Completed

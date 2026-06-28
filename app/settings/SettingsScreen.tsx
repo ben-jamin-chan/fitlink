@@ -604,6 +604,10 @@ export default function SettingsScreen(): React.JSX.Element {
     navigation.navigate('DeleteAccount')
   }
 
+  const handleSafetyCenter = (): void => {
+    navigation.navigate('SafetyCenter')
+  }
+
   const getActiveModalTitle = (): string => {
     if (activeModal === 'ageRange') {
       return t('settings.discovery.ageRange')
@@ -979,6 +983,11 @@ export default function SettingsScreen(): React.JSX.Element {
         )}
 
         <SettingsSection title={t('settings.support.title')}>
+          <SettingsRow
+            label={t('safety.settingsRow')}
+            icon="shield-outline"
+            onPress={handleSafetyCenter}
+          />
           <SettingsRow
             label={t('settings.support.helpCentre')}
             icon="help-circle-outline"

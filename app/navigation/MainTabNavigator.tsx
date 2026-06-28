@@ -20,6 +20,7 @@ import ProfileScreen from '@/app/profile/ProfileScreen'
 import BlockedUsersScreen from '@/app/settings/BlockedUsersScreen'
 import ConnectedAppsScreen from '@/app/settings/ConnectedAppsScreen'
 import DeleteAccountScreen from '@/app/settings/DeleteAccountScreen'
+import SafetyCenterScreen from '@/app/settings/SafetyCenterScreen'
 import SettingsScreen from '@/app/settings/SettingsScreen'
 
 import { colors, spacing, typography } from '@/constants/theme'
@@ -47,6 +48,7 @@ export type SettingsStackParamList = {
   DeleteAccount: undefined
   ConnectedApps: undefined
   BlockedUsers: undefined
+  SafetyCenter: undefined
 }
 
 export type MainTabParamList = {
@@ -186,6 +188,15 @@ const SettingsStackNavigator = (): React.JSX.Element => {
           headerBackTitle: '',
           headerShown: true,
           title: t('settings.blocked.title'),
+        }}
+      />
+      <SettingsStack.Screen
+        name="SafetyCenter"
+        component={SafetyCenterScreen}
+        options={{
+          headerBackTitle: '',
+          headerShown: true,
+          title: t('safety.screenTitle'),
         }}
       />
     </SettingsStack.Navigator>

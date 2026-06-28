@@ -1410,6 +1410,60 @@
     },
     "shareMessage": "Join me at \"{{title}}\" on Fitlink! {{link}}"
   },
+  "safety": {
+    "screenTitle": "Safety Center",
+    "settingsRow": "Safety Center",
+    "sections": {
+      "tips": "Safety Tips",
+      "guidelines": "Community Guidelines",
+      "quickActions": "Quick Actions",
+      "emergency": "Emergency Resources"
+    },
+    "tips": {
+      "publicPlaces": {
+        "title": "Meet in Public Places",
+        "body": "Always meet someone new in a busy, public location. Let a friend or family member know where you're going and who you're meeting."
+      },
+      "personalInfo": {
+        "title": "Protect Your Personal Information",
+        "body": "Never share your home address, workplace, or financial information with someone you've just met online."
+      },
+      "instincts": {
+        "title": "Trust Your Instincts",
+        "body": "If something feels off, it probably is. It's okay to end a conversation or date if you feel uncomfortable - your safety comes first."
+      },
+      "redFlags": {
+        "title": "Watch for Red Flags",
+        "body": "Be cautious of anyone who asks for money, avoids video calls, or pressures you to move quickly. Report suspicious behaviour to us."
+      },
+      "stayAlert": {
+        "title": "Stay Sober and Alert",
+        "body": "Stay in control of your own drinks and transportation. Have a plan for getting home safely before you go out."
+      }
+    },
+    "guidelines": {
+      "body": "Our community is built on respect, honesty, and kindness. All members are expected to treat others with dignity and follow our community standards.",
+      "readFull": "Read Full Community Guidelines"
+    },
+    "actions": {
+      "report": {
+        "title": "Report a User",
+        "subtitle": "Report inappropriate behaviour from your matches"
+      },
+      "support": {
+        "title": "Contact Support",
+        "subtitle": "Reach our safety team at support@fitlink.app"
+      }
+    },
+    "emergency": {
+      "police": "Police / Emergency"
+    },
+    "prompt": {
+      "title": "Your Safety Matters",
+      "body": "Before you connect with your new match, take a moment to review our safety tips. Always meet in public, trust your instincts, and report anything that makes you uncomfortable.",
+      "cta": "I Understand"
+    }
+  },
   "navigation": {
     "tabs": {
       "discover": "Discover",

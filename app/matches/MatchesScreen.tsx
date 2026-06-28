@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
   FlatList,
+  Modal,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -13,6 +15,7 @@ import {
 } from 'react-native'
 import type { Insets, TextStyle, ViewStyle } from 'react-native'
 
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Ionicons } from '@expo/vector-icons'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { useNavigation } from '@react-navigation/native'
@@ -60,6 +63,7 @@ const CARD_WIDTH = (SCREEN_WIDTH - GRID_PADDING - GRID_GAP * 2) / 3
 const AVATAR_SEPARATOR_OFFSET = spacing.xxxl - spacing.xs + spacing.md
 const SEARCH_ICON_SIZE = spacing.lg - spacing.xs
 const SEARCH_CONTROL_SIZE = spacing.xl + spacing.sm
+const SAFETY_PROMPT_STORAGE_KEY = 'fitlink-safety-prompt-shown'
 const FILTER_HIT_SLOP: Insets = {
   bottom: spacing.sm,
   left: spacing.sm,
@@ -83,6 +87,8 @@ const MatchesScreen = (): React.JSX.Element | null => {
   const getIsPremium = useSubscriptionStore((state) => state.isPremium)
   const [activeTab, setActiveTab] = useState<ActiveTab>('matches')
   const [filterSheetVisible, setFilterSheetVisible] = useState(false)
+  const [safetyPromptVisible, setSafetyPromptVisible] = useState(false)
+  const safetyPromptChecked = useRef(false)
   const {
     filter,
     setQuery,
@@ -132,6 +138,34 @@ const MatchesScreen = (): React.JSX.Element | null => {
     }
   }, [subscribeToMatches, unsubscribeFromMatches, userId])
 
+  useEffect((): (() => void) | undefined => {
+    if (matches.length === 0 || safetyPromptChecked.current) {
+      return undefined
+    }
+
+    let isMounted = true
+
+    const checkSafetyPrompt = async (): Promise<void> => {
+      safetyPromptChecked.current = true
+
+      try {
+        const shown = await AsyncStorage.getItem(SAFETY_PROMPT_STORAGE_KEY)
+
+        if (shown === null && isMounted) {
+          setSafetyPromptVisible(true)
+        }
+      } catch {
+        return
+      }
+    }
+
+    void checkSafetyPrompt()
+
+    return (): void => {
+      isMounted = false
+    }
+  }, [matches.length])
+
   const handleRefresh = useCallback((): void => {
     if (userId === undefined) {
       return
@@ -168,6 +202,14 @@ const MatchesScreen = (): React.JSX.Element | null => {
     },
     [t, unmatch]
   )
+
+  const handleSafetyPromptDismiss = useCallback(async (): Promise<void> => {
+    try {
+      await AsyncStorage.setItem(SAFETY_PROMPT_STORAGE_KEY, 'true')
+    } finally {
+      setSafetyPromptVisible(false)
+    }
+  }, [])
 
   const renderMatch = useCallback(
     ({ item }: { item: MatchWithProfile }): React.JSX.Element => (
@@ -427,6 +469,41 @@ const MatchesScreen = (): React.JSX.Element | null => {
         onReset={resetFilter}
         onClose={() => setFilterSheetVisible(false)}
       />
+      <Modal
+        visible={safetyPromptVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={(): void => {
+          void handleSafetyPromptDismiss()
+        }}
+      >
+        <View style={styles.promptOverlay}>
+          <View style={styles.promptCard}>
+            <View style={styles.promptIconWrap}>
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={spacing.xxl}
+                color={colors.primary}
+              />
+            </View>
+            <Text style={styles.promptTitle}>
+              {t('safety.prompt.title')}
+            </Text>
+            <Text style={styles.promptBody}>{t('safety.prompt.body')}</Text>
+            <Pressable
+              style={styles.promptButton}
+              onPress={(): void => {
+                void handleSafetyPromptDismiss()
+              }}
+              accessibilityRole="button"
+            >
+              <Text style={styles.promptButtonText}>
+                {t('safety.prompt.cta')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -510,6 +587,48 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[200],
     height: StyleSheet.hairlineWidth,
     marginLeft: AVATAR_SEPARATOR_OFFSET,
+  },
+  promptBody: {
+    color: colors.gray[600],
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.sizes.sm * typography.lineHeights.normal,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  promptButton: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+  },
+  promptButtonText: {
+    color: colors.white,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+  },
+  promptCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    width: '100%',
+  },
+  promptIconWrap: {
+    alignSelf: 'center',
+    marginBottom: spacing.md,
+  },
+  promptOverlay: {
+    alignItems: 'center',
+    backgroundColor: colors.overlay,
+    flex: 1,
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  promptTitle: {
+    color: colors.gray[900],
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   searchIcon: {
     marginRight: spacing.xs,
