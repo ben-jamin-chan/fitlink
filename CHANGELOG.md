@@ -4,6 +4,41 @@
 
 ---
 
+## [Phase 4E — Task 103] — 2026-06-29
+
+### Completed
+
+- Task 103: Unit tests — recordSwipe
+- All 9 required recordSwipe test cases implemented and passing
+
+### Files Created
+
+- functions/src/__tests__/recordSwipe.test.ts: full Jest suite for recordSwipe CF covering auth, invalid direction, pass, like limits, premium bypass, superlike gating, and timezone reset behavior
+
+### Files Modified
+
+- None
+
+### Architecture Decisions
+
+- Premium check is performed from `/users/{uid}.premium.active`, not auth token claims; tests seed the user document accordingly.
+- `recordSwipe` uses `runTransaction` for daily like counter and swipe writes; tests mock the transaction callback with path-aware document refs local to the test file.
+- `recordSwipe` still reads and writes the dailyLikes doc for premium likes, but bypasses the free-user limit and returns `Number.MAX_SAFE_INTEGER`.
+
+### Conflict Risks Introduced
+
+- None — test file only; no CF source or shared mocks modified
+
+### Known Issues / Deferred
+
+- None
+
+### Next Up
+
+- Task 104: Unit tests — activateBoost & createCheckin
+
+---
+
 ## [Phase 4E — Task 102] — 2026-06-28
 
 ### Completed
