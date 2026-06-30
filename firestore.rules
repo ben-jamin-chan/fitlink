@@ -492,6 +492,7 @@ service cloud.firestore {
     }
 
 
+    // Task 106: verified — admin_audit, warnings, blocked, admin_queue/flags rules confirmed intact (no changes needed)
     // Task 95: Admin audit log — Admin SDK write-only. No client access.
     match /admin_audit/{docId} {
       allow read, write: if false;
