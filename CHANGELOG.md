@@ -41,6 +41,14 @@ Full history in CHANGELOG_ARCHIVE.md.
 
 ---
 
+## [Chore — ts-jest config] — 2026-06-30
+
+- Migrated `functions/jest.config.ts` from deprecated `globals['ts-jest']` options to the `transform` tuple configuration.
+- Verification: `npm --prefix functions test` passes with all 27 tests and no `ts-jest[ts-jest-transformer] (WARN)` deprecation warning.
+- Verification: `npm --prefix functions run build` passes.
+
+---
+
 ## [Phase 4E — Task 106] — 2026-06-30
 
 ### Completed

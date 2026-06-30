@@ -5,10 +5,13 @@ const config: Config = {
   testEnvironment: "node",
   testMatch: ["**/__tests__/**/*.test.ts"],
   setupFilesAfterEnv: [],
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.json",
-    },
+  transform: {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.json",
+      },
+    ],
   },
   watchman: false,
   cacheDirectory: ".jest-cache",
