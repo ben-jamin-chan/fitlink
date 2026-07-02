@@ -1,5 +1,8 @@
 // One-off operational script. This is not a Cloud Function and is not deployed.
-// Run locally with: npx ts-node scripts/seedBetaProfiles.ts <path-to-avatar-directory>
+//
+// ts-node is installed under functions/, not the repo root. Run from there:
+//   cd functions
+//   npx ts-node ../scripts/seedBetaProfiles.ts <path-to-avatar-directory>
 
 import type * as FirebaseAdmin from '../functions/node_modules/firebase-admin'
 import type { SeedProfileDefinition } from './seedBetaProfiles.config'
@@ -51,7 +54,7 @@ const storage = admin.storage()
 const KL_COORDINATES = { lat: 3.139, lng: 101.6869 }
 const SEED_EMAIL_DOMAIN = 'fitlink-seed.internal'
 const DEFAULT_TIMEZONE = 'Asia/Kuala_Lumpur'
-const PROFILE_PHOTO_INDEX = 0
+const PROFILE_PHOTO_FILE = '0.jpg'
 
 function computeAge(dateOfBirthISO: string): number {
   const dateOfBirth = new Date(dateOfBirthISO)
@@ -135,7 +138,7 @@ async function uploadAvatar(
   avatarLocalPath: string
 ): Promise<string> {
   const bucket = storage.bucket()
-  const destination = `users/${uid}/photos/${PROFILE_PHOTO_INDEX}.svg`
+  const destination = `users/${uid}/photos/${PROFILE_PHOTO_FILE}`
 
   await bucket.upload(avatarLocalPath, {
     destination,
@@ -263,7 +266,9 @@ async function main(): Promise<void> {
 
   if (avatarDir === undefined || avatarDir === '') {
     console.error(
-      'Usage: npx ts-node scripts/seedBetaProfiles.ts <path-to-avatar-directory>'
+      'Usage (run from functions/, not repo root):\n' +
+        '  cd functions\n' +
+        '  npx ts-node ../scripts/seedBetaProfiles.ts <path-to-avatar-directory>'
     )
     process.exit(1)
   }

@@ -47,7 +47,8 @@ Full history in CHANGELOG_ARCHIVE.md.
 - Added `scripts/seedBetaProfiles.config.ts` with the 12 synthetic profile definitions, all using `location.country: 'Malaysia'` and cities from `SEA_CITIES.Malaysia`.
 - Added optional `isSeedAccount?: boolean` to `types/user.ts` for script-level query and cleanup support; no client UI reads or branches on the flag.
 - The script writes `isSeedAccount: true` on every created `/users/{uid}` document and computes `age` in-script to mirror `onUserCreated`, because this operational path bypasses the normal onboarding trigger.
-- Execution status: not run in this session because no avatar directory or Firebase credentials were supplied; 0 profiles were created here.
+- v2 follow-up: run instructions now use the repo's actual tooling location: `cd functions && npx ts-node ../scripts/seedBetaProfiles.ts <avatar-dir>`.
+- Execution status: not run against Firebase in this session because no `seed-avatar-*.svg` directory or Firebase credentials were supplied; 0 profiles were created here.
 - Cleanup note: these seed profiles should be bulk-deleted after beta concludes via a separate cleanup script keyed by `isSeedAccount: true`.
 
 ---
