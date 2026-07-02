@@ -48,7 +48,9 @@ Full history in CHANGELOG_ARCHIVE.md.
 - Added optional `isSeedAccount?: boolean` to `types/user.ts` for script-level query and cleanup support; no client UI reads or branches on the flag.
 - The script writes `isSeedAccount: true` on every created `/users/{uid}` document and computes `age` in-script to mirror `onUserCreated`, because this operational path bypasses the normal onboarding trigger.
 - v2 follow-up: run instructions now use the repo's actual tooling location: `cd functions && npx ts-node ../scripts/seedBetaProfiles.ts <avatar-dir>`.
-- Execution status: not run against Firebase in this session because no `seed-avatar-*.svg` directory or Firebase credentials were supplied; 0 profiles were created here.
+- v3 follow-up: added 12 synthetic photorealistic adult JPEG seed portraits under `assets/seed-profiles/` and updated the script to upload JPEG/PNG/SVG avatars with the correct content type.
+- v3 follow-up: script now validates all local avatar files before Firebase access and fails once with explicit Admin SDK credential instructions if project/ADC context is missing.
+- Execution status: attempted against `../assets/seed-profiles`; 0 profiles were created because this shell does not have Firebase Admin credentials. With explicit `FIREBASE_PROJECT_ID=gym-dating-dev` and `FIREBASE_STORAGE_BUCKET=gym-dating-dev.firebasestorage.app`, the remaining blocker is `GOOGLE_APPLICATION_CREDENTIALS` or equivalent ADC credentials.
 - Cleanup note: these seed profiles should be bulk-deleted after beta concludes via a separate cleanup script keyed by `isSeedAccount: true`.
 
 ---

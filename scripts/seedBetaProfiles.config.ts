@@ -18,7 +18,7 @@ export interface SeedProfileDefinition {
 
 export const SEED_PROFILES: SeedProfileDefinition[] = [
   {
-    avatarFile: 'seed-avatar-01.svg',
+    avatarFile: 'seed-avatar-01.jpg',
     firstName: 'Aiman',
     dateOfBirth: '1997-05-12',
     gender: 'male',
@@ -35,7 +35,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Kuala Lumpur',
   },
   {
-    avatarFile: 'seed-avatar-02.svg',
+    avatarFile: 'seed-avatar-02.jpg',
     firstName: 'Farid',
     dateOfBirth: '1994-11-03',
     gender: 'male',
@@ -52,7 +52,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Selangor',
   },
   {
-    avatarFile: 'seed-avatar-03.svg',
+    avatarFile: 'seed-avatar-03.jpg',
     firstName: 'Mei Ling',
     dateOfBirth: '1998-02-20',
     gender: 'female',
@@ -69,7 +69,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Kuala Lumpur',
   },
   {
-    avatarFile: 'seed-avatar-04.svg',
+    avatarFile: 'seed-avatar-04.jpg',
     firstName: 'Ravi',
     dateOfBirth: '1995-08-17',
     gender: 'male',
@@ -86,7 +86,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Selangor',
   },
   {
-    avatarFile: 'seed-avatar-05.svg',
+    avatarFile: 'seed-avatar-05.jpg',
     firstName: 'Danish',
     dateOfBirth: '1993-01-29',
     gender: 'male',
@@ -103,7 +103,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Kuala Lumpur',
   },
   {
-    avatarFile: 'seed-avatar-06.svg',
+    avatarFile: 'seed-avatar-06.jpg',
     firstName: 'Siti',
     dateOfBirth: '1999-06-08',
     gender: 'female',
@@ -120,7 +120,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Selangor',
   },
   {
-    avatarFile: 'seed-avatar-07.svg',
+    avatarFile: 'seed-avatar-07.jpg',
     firstName: 'Hafiz',
     dateOfBirth: '1996-09-22',
     gender: 'male',
@@ -137,7 +137,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Kuala Lumpur',
   },
   {
-    avatarFile: 'seed-avatar-08.svg',
+    avatarFile: 'seed-avatar-08.jpg',
     firstName: 'Nadia',
     dateOfBirth: '1997-12-05',
     gender: 'female',
@@ -154,7 +154,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Selangor',
   },
   {
-    avatarFile: 'seed-avatar-09.svg',
+    avatarFile: 'seed-avatar-09.jpg',
     firstName: 'Kevin',
     dateOfBirth: '1992-04-14',
     gender: 'male',
@@ -171,7 +171,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Kuala Lumpur',
   },
   {
-    avatarFile: 'seed-avatar-10.svg',
+    avatarFile: 'seed-avatar-10.jpg',
     firstName: 'Aisyah',
     dateOfBirth: '2000-07-19',
     gender: 'female',
@@ -188,7 +188,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Selangor',
   },
   {
-    avatarFile: 'seed-avatar-11.svg',
+    avatarFile: 'seed-avatar-11.jpg',
     firstName: 'Zack',
     dateOfBirth: '1995-03-27',
     gender: 'male',
@@ -205,7 +205,7 @@ export const SEED_PROFILES: SeedProfileDefinition[] = [
     city: 'Kuala Lumpur',
   },
   {
-    avatarFile: 'seed-avatar-12.svg',
+    avatarFile: 'seed-avatar-12.jpg',
     firstName: 'Iman',
     dateOfBirth: '1994-10-11',
     gender: 'female',

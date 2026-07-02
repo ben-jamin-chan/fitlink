@@ -3,6 +3,12 @@
 // ts-node is installed under functions/, not the repo root. Run from there:
 //   cd functions
 //   npx ts-node ../scripts/seedBetaProfiles.ts <path-to-avatar-directory>
+//
+// For live Firebase writes, provide Admin credentials/project context, for example:
+//   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json \
+//   FIREBASE_PROJECT_ID=gym-dating-dev \
+//   FIREBASE_STORAGE_BUCKET=gym-dating-dev.firebasestorage.app \
+//   npx ts-node ../scripts/seedBetaProfiles.ts ../assets/seed-profiles
 
 import type * as FirebaseAdmin from '../functions/node_modules/firebase-admin'
 import type { SeedProfileDefinition } from './seedBetaProfiles.config'
@@ -10,6 +16,7 @@ import type { SeedProfileDefinition } from './seedBetaProfiles.config'
 declare const require: <Module>(id: string) => Module
 declare const process: {
   argv: string[]
+  env: Record<string, string | undefined>
   exit: (code?: number) => never
 }
 
@@ -18,6 +25,7 @@ interface FileSystemModule {
 }
 
 interface PathModule {
+  extname: (filePath: string) => string
   join: (...paths: string[]) => string
 }
 
@@ -43,8 +51,25 @@ const { SEED_PROFILES } = require<SeedProfileConfigModule>(
   './seedBetaProfiles.config'
 )
 
+function getAdminOptions(): FirebaseAdmin.AppOptions | undefined {
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID ??
+    process.env.GOOGLE_CLOUD_PROJECT ??
+    process.env.GCLOUD_PROJECT
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET
+
+  if (projectId === undefined && storageBucket === undefined) {
+    return undefined
+  }
+
+  return {
+    ...(projectId !== undefined ? { projectId } : {}),
+    ...(storageBucket !== undefined ? { storageBucket } : {}),
+  }
+}
+
 if (admin.apps.length === 0) {
-  admin.initializeApp()
+  admin.initializeApp(getAdminOptions())
 }
 
 const db = admin.firestore()
@@ -55,6 +80,38 @@ const KL_COORDINATES = { lat: 3.139, lng: 101.6869 }
 const SEED_EMAIL_DOMAIN = 'fitlink-seed.internal'
 const DEFAULT_TIMEZONE = 'Asia/Kuala_Lumpur'
 const PROFILE_PHOTO_FILE = '0.jpg'
+
+function getContentType(avatarLocalPath: string): string {
+  const extension = path.extname(avatarLocalPath).toLowerCase()
+
+  if (extension === '.jpg' || extension === '.jpeg') {
+    return 'image/jpeg'
+  }
+
+  if (extension === '.png') {
+    return 'image/png'
+  }
+
+  if (extension === '.svg') {
+    return 'image/svg+xml'
+  }
+
+  throw new Error(`Unsupported avatar file type: ${extension}`)
+}
+
+function validateAvatarFiles(avatarDir: string): void {
+  for (const def of SEED_PROFILES) {
+    const avatarLocalPath = path.join(avatarDir, def.avatarFile)
+
+    if (!fs.existsSync(avatarLocalPath)) {
+      throw new Error(
+        `Avatar file not found: ${avatarLocalPath}. Ensure all seed-avatar-* image files are present in the supplied directory.`
+      )
+    }
+
+    getContentType(avatarLocalPath)
+  }
+}
 
 function computeAge(dateOfBirthISO: string): number {
   const dateOfBirth = new Date(dateOfBirthISO)
@@ -143,7 +200,7 @@ async function uploadAvatar(
   await bucket.upload(avatarLocalPath, {
     destination,
     metadata: {
-      contentType: 'image/svg+xml',
+      contentType: getContentType(avatarLocalPath),
       cacheControl: 'public, max-age=31536000',
     },
   })
@@ -169,13 +226,6 @@ async function createSeedProfile(
   }
 
   const avatarLocalPath = path.join(avatarDir, def.avatarFile)
-
-  if (!fs.existsSync(avatarLocalPath)) {
-    throw new Error(
-      `Avatar file not found: ${avatarLocalPath}. Ensure all seed-avatar-*.svg files are present in the supplied directory.`
-    )
-  }
-
   const userRecord = await getOrCreateSeedAuthUser(def)
   const photoUrl = await uploadAvatar(userRecord.uid, avatarLocalPath)
   const age = computeAge(def.dateOfBirth)
@@ -261,6 +311,22 @@ function printSummary(results: SeedRunResult[]): void {
   }
 }
 
+async function verifyFirebaseAdminContext(): Promise<void> {
+  try {
+    await db.collection('users').limit(1).get()
+  } catch (error: unknown) {
+    throw new Error(
+      'Firebase Admin SDK is not configured for this shell. Provide Admin credentials and project context, for example:\n' +
+        '  cd functions\n' +
+        '  GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json \\\n' +
+        '  FIREBASE_PROJECT_ID=gym-dating-dev \\\n' +
+        '  FIREBASE_STORAGE_BUCKET=gym-dating-dev.firebasestorage.app \\\n' +
+        '  npx ts-node ../scripts/seedBetaProfiles.ts ../assets/seed-profiles\n\n' +
+        `Original error: ${getErrorMessage(error)}`
+    )
+  }
+}
+
 async function main(): Promise<void> {
   const avatarDir = process.argv[2]
 
@@ -277,6 +343,9 @@ async function main(): Promise<void> {
     console.error(`Avatar directory not found: ${avatarDir}`)
     process.exit(1)
   }
+
+  validateAvatarFiles(avatarDir)
+  await verifyFirebaseAdminContext()
 
   const results: SeedRunResult[] = []
 
