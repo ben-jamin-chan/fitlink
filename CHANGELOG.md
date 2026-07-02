@@ -41,6 +41,17 @@ Full history in CHANGELOG_ARCHIVE.md.
 
 ---
 
+## [Chore — Beta seed profiles] — 2026-07-02
+
+- Added `scripts/seedBetaProfiles.ts`, a one-off Firebase Admin SDK seed script for 12 tagged Malaysia beta profiles.
+- Added `scripts/seedBetaProfiles.config.ts` with the 12 synthetic profile definitions, all using `location.country: 'Malaysia'` and cities from `SEA_CITIES.Malaysia`.
+- Added optional `isSeedAccount?: boolean` to `types/user.ts` for script-level query and cleanup support; no client UI reads or branches on the flag.
+- The script writes `isSeedAccount: true` on every created `/users/{uid}` document and computes `age` in-script to mirror `onUserCreated`, because this operational path bypasses the normal onboarding trigger.
+- Execution status: not run in this session because no avatar directory or Firebase credentials were supplied; 0 profiles were created here.
+- Cleanup note: these seed profiles should be bulk-deleted after beta concludes via a separate cleanup script keyed by `isSeedAccount: true`.
+
+---
+
 ## [Chore — ts-jest config] — 2026-06-30
 
 - Migrated `functions/jest.config.ts` from deprecated `globals['ts-jest']` options to the `transform` tuple configuration.

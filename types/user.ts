@@ -87,6 +87,8 @@ export interface UserProfile {
   // Denormalised snapshot written by the createCheckin Cloud Function (Task 79)
   // alongside the /gymCheckins/{id} document. Allows SwipeCard to show the
   // "At gym" badge without an extra collection query. Cleared on check-out.
+  isSeedAccount?: boolean
+  // Internal operational flag for beta seed profiles. Client UI must not branch on it.
   createdAt: Timestamp
   lastActive: Timestamp
 }
