@@ -51,3 +51,18 @@ Task 08 (navigation shell) does not require Firebase to be live yet — you can 
 
 2. *APPLE & ANDROID ID* After Codex completes, the manual step you'll need before first production submission: fill in ascAppId and appleTeamId in eas.json, and download google-play-key.json from Google Play Console.
 
+# 22 JUNE 2026
+- ON TASK 94:
+  That note is for the future admin dashboard web app, not the mobile Expo app. Right now, since the admin dashboard has not been built yet, you do not need to do anything.
+  After Task 94 creates the /admin web dashboard, you will either:
+  npm --prefix admin run dev
+  then open the local admin URL, or open the deployed site:
+  https://fitlink-admin.web.app
+  Then:
+  Sign in with the Google account whose Firebase UID is M1QbV82r0BOJyI9jz4nJhSQzHpC2.
+  If it was already signed in before we set the claim, click sign out.
+  Sign back in with the same Google account.
+  That fresh sign-in gets a new Firebase ID token containing:
+  { "admin": true }
+  So for now: nothing else needed. The claim is already set and verified.
+
