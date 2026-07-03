@@ -50,7 +50,7 @@ Full history in CHANGELOG_ARCHIVE.md.
 - v2 follow-up: run instructions now use the repo's actual tooling location: `cd functions && npx ts-node ../scripts/seedBetaProfiles.ts <avatar-dir>`.
 - v3 follow-up: added 12 synthetic photorealistic adult JPEG seed portraits under `assets/seed-profiles/` and updated the script to upload JPEG/PNG/SVG avatars with the correct content type.
 - v3 follow-up: script now validates all local avatar files before Firebase access and fails once with explicit Admin SDK credential instructions if project/ADC context is missing.
-- Execution status: attempted against `../assets/seed-profiles`; 0 profiles were created because this shell does not have Firebase Admin credentials. With explicit `FIREBASE_PROJECT_ID=gym-dating-dev` and `FIREBASE_STORAGE_BUCKET=gym-dating-dev.firebasestorage.app`, the remaining blocker is `GOOGLE_APPLICATION_CREDENTIALS` or equivalent ADC credentials.
+- Execution status: successful manual run against `../assets/seed-profiles` with Firebase Admin credentials; 12 profiles created, 0 skipped, 0 failed.
 - Cleanup note: these seed profiles should be bulk-deleted after beta concludes via a separate cleanup script keyed by `isSeedAccount: true`.
 
 ---
